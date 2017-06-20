@@ -4,8 +4,8 @@ session_start();
 
 set_time_limit(120);
 
-$link1 = mysql_connect($_SESSION['servidor'], $_SESSION['usuario'], $_SESSION['password']);
-mysql_select_db($_SESSION['base'], $link1);
+$link1 = mysql_connect($_SESSION['conexion']->servidor, $_SESSION['conexion']->usuario, $_SESSION['conexion']->password);
+mysql_select_db($_SESSION['conexion']->database, $link1);
 mysql_query("SET NAMES 'utf8'", $link1);
 
 

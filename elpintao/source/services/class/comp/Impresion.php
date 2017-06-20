@@ -3,8 +3,8 @@ session_start();
 
 set_time_limit(0);
 
-$link1 = mysql_connect($_SESSION['servidor'], $_SESSION['usuario'], $_SESSION['password']);
-mysql_select_db($_SESSION['base'], $link1);
+$link1 = mysql_connect($_SESSION['conexion']->servidor, $_SESSION['conexion']->usuario, $_SESSION['conexion']->password);
+mysql_select_db($_SESSION['conexion']->database, $link1);
 mysql_query("SET NAMES 'utf8'", $link1);
 
 
@@ -100,6 +100,11 @@ case 'imprimir_pi_gral': {
 	
 ksort($_SESSION["pi_gral"]);
 
+$sql="SELECT descrip FROM sucursal WHERE id_sucursal=" . $_REQUEST['id_sucursal'];
+$rsS = mysql_query($sql);
+$rowS = mysql_fetch_object($rsS);
+
+
 ?>
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
@@ -111,7 +116,7 @@ ksort($_SESSION["pi_gral"]);
 <tr><td align="center" colspan="6" style="font-family:arial; font-size:16px; font-weight:bold;"><big>Pedidos Internos agrupados <?php echo $rowS->descrip; ?></big></td></tr>
 <tr><td align="center" colspan="6">Fecha: <?php echo date("Y-m-d H:i:s"); ?></td></tr>
 <tr><td>&nbsp;</td></tr>
-<tr><th>Fábrica</th><th>Producto</th><th>Capacidad</th><th>U.</th><th>Color</th><th>Cantidad</th></tr>
+<tr><th>Fábrica</th><th>Producto</th><th>Capacidad</th><th>U.</th><th>Color</th><th>Stock suc.</th><th>Cantidad</th></tr>
 <tr><td colspan="10"><hr></td></tr>
 
 <?php
@@ -123,7 +128,7 @@ ksort($_SESSION["pi_gral"]);
 			$rowD->capacidad = number_format($rowD->capacidad, '2', ',', '.');
 		}
 ?>
-		<tr><td><?php echo $rowD->fabrica ?></td><td><?php echo $rowD->producto ?></td><td align="right"><?php echo $rowD->capacidad ?></td><td><?php echo $rowD->unidad ?></td><td><?php echo $rowD->color ?></td><td align="right"><?php echo $rowD->cantidad ?></td></tr>
+		<tr><td><?php echo $rowD->fabrica ?></td><td><?php echo $rowD->producto ?></td><td align="right"><?php echo $rowD->capacidad ?></td><td><?php echo $rowD->unidad ?></td><td><?php echo $rowD->color ?></td><td align="right"><?php echo $rowD->stock_suc ?></td><td align="right"><?php echo $rowD->cantidad ?></td></tr>
 		<tr><td colspan="10"><hr></td></tr>
 <?php
 	}

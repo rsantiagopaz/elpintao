@@ -51,9 +51,10 @@ qx.Class.define("elpintao.comp.pedidos.pagePedidosInt",
 		var win = new elpintao.comp.pedidos.windowPedInt();
 		win.addListener("aceptado", function(e){
 			var p = {};
+			p.id_sucursal = win.slbSucursal.getModelSelection().getItem(0);
 			p.id_fabrica = win.slbFabrica.getModelSelection().getItem(0).get("id_fabrica");
 			p.detalle = win.tableModelDetalle.getDataAsMapArray();
-
+			
 			var rpc = new qx.io.remote.Rpc("services/", "comp.PedidosInt");
 			try {
 				var resultado = rpc.callSync("alta_pedido", p);
@@ -92,7 +93,7 @@ qx.Class.define("elpintao.comp.pedidos.pagePedidosInt",
 	//Tabla
 
 	var tableModelPedido = new qx.ui.table.model.Simple();
-	tableModelPedido.setColumns(["Fecha", "Fábrica", "Estado"], ["fecha", "fabrica", "estado"]);
+	tableModelPedido.setColumns(["Fecha", "Sucursal", "Fábrica", "Estado"], ["fecha", "sucursal", "fabrica", "estado"]);
 	//tableModelPedido.setColumns(["Fecha", "Fábrica"], ["fecha", "id_fabrica"]);
 	//tableModelPedido.setEditable(true);
 
@@ -112,9 +113,10 @@ qx.Class.define("elpintao.comp.pedidos.pagePedidosInt",
 	//tableColumnModelPedido.setColumnWidth(1, 65);
 	
 	var resizeBehavior = tableColumnModelPedido.getBehavior();
-	resizeBehavior.set(0, {width:"40%", minWidth:100});
-	resizeBehavior.set(1, {width:"40%", minWidth:100});
-	resizeBehavior.set(2, {width:"20%", minWidth:100});
+	resizeBehavior.set(0, {width:"25%", minWidth:100});
+	resizeBehavior.set(1, {width:"20%", minWidth:100});
+	resizeBehavior.set(2, {width:"40%", minWidth:100});
+	resizeBehavior.set(3, {width:"15%", minWidth:100});
 	
 	var cellrendererReplace = new qx.ui.table.cellrenderer.Replace();
 	cellrendererReplace.setReplaceMap({
@@ -122,7 +124,7 @@ qx.Class.define("elpintao.comp.pedidos.pagePedidosInt",
 		"R" : "Respondido",
 		"A" : "Anulado"
 	});
-	tableColumnModelPedido.setDataCellRenderer(2, cellrendererReplace);
+	tableColumnModelPedido.setDataCellRenderer(3, cellrendererReplace);
 
 
 	var selectionModelPedido = tblPedido.getSelectionModel();
@@ -152,7 +154,7 @@ qx.Class.define("elpintao.comp.pedidos.pagePedidosInt",
 	tblPedido.setContextMenu(menutblPedido);
 	
 
-	this.add(tblPedido, {left:0 , top: 20, right: "77%", bottom: "30%"});
+	this.add(tblPedido, {left:0 , top: 20, right: "70%", bottom: 0});
 	
 	this.add(new qx.ui.basic.Label("Pedidos:"), {left:0 , top: 0});
 	
@@ -211,7 +213,7 @@ qx.Class.define("elpintao.comp.pedidos.pagePedidosInt",
 
 	
 	
-	this.add(tblDetalle, {left:"23.5%", top: 20, right: 0, bottom: "30%"});
+	this.add(tblDetalle, {left:"30.5%", top: 20, right: 0, bottom: "30%"});
 	
 	//this.add(tblPedido, {left:0 , top: 20, right: 0, height: "40%"});
 	
@@ -234,7 +236,7 @@ qx.Class.define("elpintao.comp.pedidos.pagePedidosInt",
 	tblTotales.toggleColumnVisibilityButtonVisible();
 	tblTotales.toggleStatusBarVisible();
 	
-	this.add(tblTotales, {left: 0, top: "71%", right: "77%", bottom: 0});
+	this.add(tblTotales, {left: "30.5%", top: "71%", right: "50%", bottom: 0});
 	
 	
 	
@@ -255,7 +257,7 @@ qx.Class.define("elpintao.comp.pedidos.pagePedidosInt",
 	tblInforma.toggleColumnVisibilityButtonVisible();
 	tblInforma.toggleStatusBarVisible();
 	
-	this.add(tblInforma, {left: "23.5%", top: "71%", right: "30%", bottom: 0});
+	this.add(tblInforma, {left: "50.5%", top: "71%", right: 0, bottom: 0});
 	
 
 	

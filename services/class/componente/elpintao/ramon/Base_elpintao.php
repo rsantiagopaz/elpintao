@@ -9,15 +9,17 @@ class class_Base_elpintao extends class_Base_general
 	protected $link1;
 	protected $rowParamet;
 	protected $arraySucursal;
+	protected $arrayDeposito;
 	
 	function __construct() {
-		if (! is_null($_SESSION['servidor'])) {
-			$this->link1 = mysql_connect($_SESSION['servidor'], $_SESSION['usuario'], $_SESSION['password']);
-			mysql_select_db($_SESSION['base'], $this->link1);
+		if (! is_null($_SESSION['conexion']->servidor)) {
+			$this->link1 = mysql_connect($_SESSION['conexion']->servidor, $_SESSION['conexion']->usuario, $_SESSION['conexion']->password);
+			mysql_select_db($_SESSION['conexion']->database, $this->link1);
 			mysql_query("SET NAMES 'utf8'", $this->link1);
 		
 			$this->method_leer_paramet(null, null);
 			$this->method_leer_sucursales(null, null);
+			$this->method_leer_depositos(null, null);
 		}
 	}
 	
@@ -38,10 +40,25 @@ class class_Base_elpintao extends class_Base_general
 	$sql = "SELECT * FROM sucursal WHERE activo ORDER BY descrip";
 	$rs = mysql_query($sql, $this->link1);
 	while ($row = mysql_fetch_object($rs)) {
+		$row->deposito = (bool) $row->deposito;
+		
 		$this->arraySucursal[$row->id_sucursal] = $row;
 	}
 
 	return $this->arraySucursal;
+  }
+  
+  public function method_leer_depositos($params, $error) {
+  	$this->arrayDeposito = array();
+	$sql = "SELECT * FROM sucursal WHERE activo AND deposito ORDER BY descrip";
+	$rs = mysql_query($sql, $this->link1);
+	while ($row = mysql_fetch_object($rs)) {
+		$row->deposito = (bool) $row->deposito;
+		
+		$this->arrayDeposito[$row->id_sucursal] = $row;
+	}
+
+	return $this->arrayDeposito;
   }
   
   

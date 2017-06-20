@@ -8,7 +8,7 @@ class class_PedidosInt extends class_Base
 
   public function method_leer_pedido($params, $error) {
 	
-	$sql = "SELECT pedido_int.*, fabrica.descrip AS fabrica FROM pedido_int INNER JOIN fabrica USING(id_fabrica) ORDER BY fecha DESC";
+	$sql = "SELECT pedido_int.*, sucursal.descrip AS sucursal, fabrica.descrip AS fabrica FROM (pedido_int INNER JOIN sucursal USING(id_sucursal)) INNER JOIN fabrica USING(id_fabrica) ORDER BY fecha DESC";
 	return $this->toJson($sql);
 	
 	
@@ -91,26 +91,24 @@ class class_PedidosInt extends class_Base
   public function method_alta_pedido($params, $error) {
   	$p = $params[0];
   	
-  	$id_sucursal_deposito = $this->rowParamet->id_sucursal_deposito;
-  	
 	$this->sql_query("START TRANSACTION");
 	
 	$fecha = date("Y-m-d H:i:s");
-	$sql = "INSERT pedido_int SET id_fabrica='" . $p->id_fabrica . "', fecha='" . $fecha . "', estado='E'";
+	$sql = "INSERT pedido_int SET id_sucursal='" . $p->id_sucursal . "', id_fabrica='" . $p->id_fabrica . "', fecha='" . $fecha . "', estado='E'";
 	$this->sql_query($sql);
 	$insert_id = mysql_insert_id();
 	
 	$sql = "INSERT pedido_suc SET id_sucursal='" . $this->rowParamet->id_sucursal . "', id_pedido_int='" . $insert_id . "', id_fabrica = '" . $p->id_fabrica . "', fecha = '" . $fecha . "', estado='C'";
-	$this->transmitir($sql, $id_sucursal_deposito);
+	$this->transmitir($sql, $p->id_sucursal);
 	$sql = "SET @id_pedido_suc = LAST_INSERT_ID()";
-	$this->transmitir($sql, $id_sucursal_deposito);
+	$this->transmitir($sql, $p->id_sucursal);
 
 	foreach ($p->detalle as $item) {
 		$sql = "INSERT pedido_int_detalle SET id_pedido_int='" . $insert_id . "', id_producto_item='" . $item->id_producto_item . "', cantidad = '" . $item->cantidad . "'";
 		$this->sql_query($sql);
 		
 		$sql = "INSERT pedido_suc_detalle SET id_pedido_suc=@id_pedido_suc, id_pedido_ext=0, id_producto_item='" . $item->id_producto_item . "', cantidad='" . $item->cantidad . "'";
-		$this->transmitir($sql, $id_sucursal_deposito);
+		$this->transmitir($sql, $p->id_sucursal);
 	}
 	
 	if (mysql_errno()) {

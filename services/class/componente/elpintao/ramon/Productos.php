@@ -662,10 +662,14 @@ class class_Productos extends class_Base_elpintao
 			$this->transmitir($sql);
 			
 			foreach ($this->arraySucursal as $sucursal) {
-				$sql = "INSERT stock SET id_producto_item='" . $id_producto_item . "', id_sucursal='" . $sucursal->id_sucursal . "', stock=0";
+				$sql = "INSERT stock SET id_producto_item=" . $id_producto_item . ", id_sucursal=" . $sucursal->id_sucursal . ", stock=0, transmitir=FALSE";
 				mysql_query($sql);
+
+				if ($sucursal->id_sucursal != $this->rowParamet->id_sucursal && ! $sucursal->deposito) $this->transmitir($sql, $sucursal->id_sucursal);
 				
-				if ($sucursal->id_sucursal != $this->rowParamet->id_sucursal) $this->transmitir($sql, $sucursal->id_sucursal);
+				foreach ($this->arrayDeposito as $deposito) {
+					if ($deposito->id_sucursal != $this->rowParamet->id_sucursal) $this->transmitir($sql, $deposito->id_sucursal);
+				}
 			}
 		}
 	
@@ -693,6 +697,8 @@ class class_Productos extends class_Base_elpintao
 	
 	return $resultado;
   }
+
+
 
   public function method_eliminar_nodo($params, $error) {
   	$p = $params[0];

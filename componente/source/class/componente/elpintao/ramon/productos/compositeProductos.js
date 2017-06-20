@@ -707,7 +707,7 @@ qx.Class.define("componente.elpintao.ramon.productos.compositeProductos",
 	//menutblPaciente.add(btnNuevoProducto);
 	//menutblPaciente.addSeparator();
 	menutblPaciente.add(btnModificarProducto);
-	menutblPaciente.add(btnEditarStock);
+	//menutblPaciente.add(btnEditarStock);
 	menutblPaciente.add(btnEditarPrecios);
 	menutblPaciente.addSeparator();
 	menutblPaciente.add(btnCortarProducto);

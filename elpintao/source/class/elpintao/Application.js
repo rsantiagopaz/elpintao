@@ -75,6 +75,7 @@ qx.Class.define("elpintao.Application",
 	var objPunteoPedidoExt = {};
 	var objTransmision = {};
 	var arraySucursales;
+	var arrayDeposito;
 	var contexto = this;
 	
 	
@@ -317,8 +318,28 @@ qx.Class.define("elpintao.Application",
 	} catch (ex) {
 		alert("Sync exception: " + ex);
 	}
-
 	this.rowParamet = resultado;
+	
+	
+	
+	var rpc = new qx.io.remote.Rpc(conexion.rpc_elpintao_services, "componente.elpintao.ramon.Base_elpintao");
+	try {
+		var resultado = rpc.callSync("leer_sucursales");
+	} catch (ex) {
+		alert("Sync exception: " + ex);
+	}
+	this.arraySucursales = resultado;
+	
+	
+	var rpc = new qx.io.remote.Rpc(conexion.rpc_elpintao_services, "componente.elpintao.ramon.Base_elpintao");
+	try {
+		var resultado = rpc.callSync("leer_depositos");
+	} catch (ex) {
+		alert("Sync exception: " + ex);
+	}
+	this.arrayDeposito = resultado;
+	
+	
 	
 	
 	/*
@@ -504,6 +525,20 @@ qx.Class.define("elpintao.Application",
 		}, this));
 	}, this);
 	mnuCentral.add(btnAplicarAjuste);
+	mnuCentral.addSeparator();
+	
+	
+	var btnCargaStock2 = new qx.ui.menu.Button("Asignar stock");
+	btnCargaStock2.addListener("execute", function(e){
+		functionChequearPassword(this.rowParamet.password_asignar_stock, function(e) {
+			var win = new elpintao.comp.productos.windowStock();
+			win.setModal(true);
+			this.getRoot().add(win);
+			win.center();
+			win.open();
+		});
+	}, this);
+	mnuCentral.add(btnCargaStock2);
 	mnuCentral.addSeparator();
 
 	
@@ -777,8 +812,10 @@ qx.Class.define("elpintao.Application",
 	toolbarMain.add(mnubtnArchivo);
 	toolbarMain.add(mnubtnEdicion);
 	toolbarMain.add(mnubtnVer);
+
 	toolbarMain.add(mnubtnCentral);
-	toolbarMain.add(mnubtnSucursal);
+	//toolbarMain.add(mnubtnSucursal);
+	
 	toolbarMain.addSpacer();
 	
 	
@@ -798,23 +835,14 @@ qx.Class.define("elpintao.Application",
 
 	
 	
-	var rpc = new qx.io.remote.Rpc(conexion.rpc_elpintao_services, "componente.elpintao.ramon.Base_elpintao");
-	try {
-		var resultado = rpc.callSync("leer_sucursales");
-	} catch (ex) {
-		alert("Sync exception: " + ex);
-	}
-	
-	this.arraySucursales = resultado;
-	
-	for (var x in resultado) {
-		var id_sucursal = resultado[x].id_sucursal;
+	for (var x in this.arraySucursales) {
+		var id_sucursal = this.arraySucursales[x].id_sucursal;
 		objTransmision[id_sucursal] = {};
 		objTransmision[id_sucursal].resultado = [];
-		var button = new qx.ui.toolbar.Button(resultado[x].descrip, 'elpintao/boton_verde.png');
+		var button = new qx.ui.toolbar.Button(this.arraySucursales[x].descrip, 'elpintao/boton_verde.png');
 		objTransmision[id_sucursal].button = button;
 		button.setShow("icon");
-		button.setToolTipText(resultado[x].descrip);
+		button.setToolTipText(this.arraySucursales[x].descrip);
 		button.setPadding(0);
 		button.setUserData("id_sucursal", id_sucursal);
 		button.addListener("mouseover", function(e){

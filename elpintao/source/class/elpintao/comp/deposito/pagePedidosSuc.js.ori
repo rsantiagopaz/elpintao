@@ -51,7 +51,7 @@ qx.Class.define("elpintao.comp.deposito.pagePedidosSuc",
 			} else {
 				menutblPedido.memorizarEnabled([commandSeleccionar, btnImprimir, btnAnular], false);
 			}
-		}, "leer_pedido", {id_sucursal: e.getData()[0].getModel()});
+		}, "leer_pedido", e.getData()[0].getModel());
 	});
 	this.add(slbSucursal, {left:0 , top: 20, right: "75%"});
 	
@@ -100,7 +100,7 @@ qx.Class.define("elpintao.comp.deposito.pagePedidosSuc",
 			var deposito = 0;
 			var sucursales = 0;
 			for (var y in stock) {
-				if (stock[y].id_sucursal == application.rowParamet.id_sucursal_deposito) {
+				if (stock[y].id_sucursal == application.rowParamet.id_sucursal) {
 					indiceStock = y;
 					deposito+= stock[y].enviar;
 				} else {
@@ -292,7 +292,7 @@ qx.Class.define("elpintao.comp.deposito.pagePedidosSuc",
 		resizeBehavior.set(2, {width:"9%", minWidth:100});
 		resizeBehavior.set(3, {width:"4%", minWidth:100});
 		resizeBehavior.set(4, {width:"15%", minWidth:100});
-		resizeBehavior.set(5, {width:"7%", minWidth:100});
+		resizeBehavior.set(5, {width:"8%", minWidth:100});
 
 		
 	
@@ -371,7 +371,7 @@ qx.Class.define("elpintao.comp.deposito.pagePedidosSuc",
 			}
 		}
 		
-		window.open("services/class/comp/Impresion.php?rutina=imprimir_pi_gral" + "&id_sucursal=" + slbSucursal.getModelSelection().getItem(0));
+		window.open("services/class/comp/Impresion.php?rutina=imprimir_pi_gral");
 	});
 	var btnGenerarRemitos = new qx.ui.menu.Button("Generar remitos");
 	btnGenerarRemitos.setEnabled(false);
@@ -436,7 +436,7 @@ qx.Class.define("elpintao.comp.deposito.pagePedidosSuc",
 	//Tabla
 
 	var tableModelAcumulado = new qx.ui.table.model.Simple();
-	tableModelAcumulado.setColumns(["Fábrica", "Producto", "Capacidad", "U", "Color", "Stock suc.", "Cantidad", "Enviar"], ["fabrica", "producto", "capacidad", "unidad", "color", "stock_suc", "cantidad", "enviar"]);
+	tableModelAcumulado.setColumns(["Fábrica", "Producto", "Capacidad", "U", "Color", "Cantidad", "Enviar"], ["fabrica", "producto", "capacidad", "unidad", "color", "cantidad", "enviar"]);
 	tableModelAcumulado.addListener("dataChanged", function(e){
 		var rowCount = tableModelAcumulado.getRowCount();
 		if (rowCount > 0) tblAcumulado.setAdditionalStatusBarText(rowCount + " item/s - Envios asignados: " + enviosAsignados); else tblAcumulado.setAdditionalStatusBarText(" ");
@@ -479,9 +479,8 @@ qx.Class.define("elpintao.comp.deposito.pagePedidosSuc",
 		resizeBehavior.set(2, {width:"9%", minWidth:100});
 		resizeBehavior.set(3, {width:"4%", minWidth:100});
 		resizeBehavior.set(4, {width:"15%", minWidth:100});
-		resizeBehavior.set(5, {width:"7%", minWidth:100});
-		resizeBehavior.set(6, {width:"7%", minWidth:100});
-		resizeBehavior.set(7, {width:"7%", minWidth:100});
+		resizeBehavior.set(5, {width:"8%", minWidth:100});
+		resizeBehavior.set(6, {width:"8%", minWidth:100});
 
 		
 	
@@ -565,7 +564,7 @@ qx.Class.define("elpintao.comp.deposito.pagePedidosSuc",
 	
 	
 	
-	var windowProducto = new elpintao.comp.pedidos.windowProducto("Agregar ítems detalle", true);
+	var windowProducto = new elpintao.comp.pedidos.windowProducto("Agregar items detalle", true);
 	windowProducto.id_fabrica = "1";
 	windowProducto.addListener("aceptado", function(e){
 		var tableModel = e.getData();
@@ -588,12 +587,11 @@ qx.Class.define("elpintao.comp.deposito.pagePedidosSuc",
 					}
 					
 					rowData.producto = '<font color="#339900">' + rowData.producto + '</font>';
-					rowData.stock = resultado.stock;
-					rowData.stock_suc = resultado.stock_suc;
+					rowData.stock = resultado;
 					rowData.adicional = true;
 					
 					for (var y in rowData.stock) {
-						if (rowData.stock[y].id_sucursal == application.rowParamet.id_sucursal_deposito) {
+						if (rowData.stock[y].id_sucursal == application.rowParamet.id_sucursal) {
 							if (rowData.stock[y].stock >= rowData.cantidad) rowData.stock[y].enviar = rowData.cantidad; else rowData.stock[y].enviar = rowData.stock[y].stock;
 							if (rowData.stock[y].enviar < 0) rowData.stock[y].enviar = 0;
 							rowData.enviar = rowData.stock[y].enviar;

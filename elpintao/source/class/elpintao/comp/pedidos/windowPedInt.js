@@ -17,11 +17,15 @@ qx.Class.define("elpintao.comp.pedidos.windowPedInt",
 	this.setResizable(false, false, false, false);
 	
 	this.addListenerOnce("appear", function(e){
-		slbFabrica.focus();
+		slbSucursal.focus();
 	});
 	
 	var application = qx.core.Init.getApplication();
 	var contexto = this;
+	
+	var sharedErrorTooltip = qx.ui.tooltip.Manager.getInstance().getSharedErrorTooltip();
+	
+	
 
 	var functionCalcularTotales = function() {
 		var rowDataAsMapDetalle, rowDataDetalle;
@@ -55,6 +59,17 @@ qx.Class.define("elpintao.comp.pedidos.windowPedInt",
 	}
 	
 
+	var slbSucursal = this.slbSucursal = new qx.ui.form.SelectBox();
+	
+	slbSucursal.add(new qx.ui.form.ListItem("-", null, "0"));
+	for (var x in application.arrayDeposito) {
+		slbSucursal.add(new qx.ui.form.ListItem(application.arrayDeposito[x].descrip, null, application.arrayDeposito[x].id_sucursal));
+	}
+	
+	this.add(slbSucursal, {left: 50, top: 0});
+	this.add(new qx.ui.basic.Label("Sucursal:"), {left: 0, top: 3});
+	
+	
 	var menuFabrica = new componente.general.ramon.ui.menu.Menu();
 	var btnABMFabrica = new qx.ui.menu.Button("ABM fábricas...");
 	btnABMFabrica.addListener("execute", function(e){
@@ -72,11 +87,11 @@ qx.Class.define("elpintao.comp.pedidos.windowPedInt",
 	slbFabrica.setContextMenu(menuFabrica);
 	var controllerFabrica = new qx.data.controller.List(null, slbFabrica, "descrip");
 	application.objFabrica.store.bind("model", controllerFabrica, "model");
-	this.add(slbFabrica, {left: 50, top: 0});
+	this.add(slbFabrica, {left: 250, top: 0});
 	slbFabrica.addListener("changeSelection", function(e){
 		
 	});
-	this.add(new qx.ui.basic.Label("Fábrica:"), {left: 0, top: 3});
+	this.add(new qx.ui.basic.Label("Fábrica:"), {left: 200, top: 3});
 	
 	var aux = slbFabrica.getChildren();
 	for (var i in aux) {
@@ -241,8 +256,30 @@ qx.Class.define("elpintao.comp.pedidos.windowPedInt",
 	
 	var btnAceptar = new qx.ui.form.Button("Aceptar");
 	btnAceptar.addListener("execute", function(e){
-		this.fireDataEvent("aceptado");
-		btnCancelar.fireEvent("execute");
+		slbSucursal.setValid(true);
+		tblDetalle.setValid(true);
+		
+		if (slbSucursal.getModelSelection().getItem(0) == "0") {
+			slbSucursal.setValid(false);
+			
+			sharedErrorTooltip.setLabel("Debe seleccionar sucursal de destino");
+			sharedErrorTooltip.placeToWidget(slbSucursal);
+			sharedErrorTooltip.show();
+			
+			slbSucursal.focus();
+		} else if (tableModelDetalle.getRowCount() == 0) {
+			tblDetalle.setValid(false);
+			
+			sharedErrorTooltip.setLabel("Debe agregar algún item");
+			sharedErrorTooltip.placeToWidget(tblDetalle);
+			sharedErrorTooltip.show();
+			
+			tblDetalle.focus();
+		} else {
+			this.fireDataEvent("aceptado");
+			
+			btnCancelar.fireEvent("execute");
+		}
 	}, this);
 	this.add(btnAceptar, {left: 170, bottom: 0})
 	

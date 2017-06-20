@@ -252,7 +252,7 @@ qx.Class.define("elpintao.comp.productos.windowStock",
 		}
 	});
 	
-	this.add(btnNuevoProducto, {left: 700, top: 0});
+	//this.add(btnNuevoProducto, {left: 700, top: 0});
 		
 	slbFabrica.setTabIndex(1);
 	txtBuscar.setTabIndex(2);
