@@ -120,21 +120,20 @@ qx.Class.define("elpintao.comp.remitos.pageRemitos",
 		var rowDataAsMapDetalle, rowDataAsMapTotales;
 		var bandera;
 		
-		tableModelT.setDataAsMapArray([{descrip: "Costo", total: 0}, {descrip: "P.lis.+IVA", total: 0}], true);
+		//tableModelT.setDataAsMapArray([{descrip: "Costo", total: 0}, {descrip: "P.lis.+IVA", total: 0}], true);
+		tableModelT.setDataAsMapArray([], true);
 		
 		for (var i = 0; i < tableModelD.getRowCount(); i++) {
 			rowDataAsMapDetalle = tableModelD.getRowDataAsMap(i);
 			
-			//alert(qx.lang.Json.stringify(rowDataAsMapDetalle, null, 2));
-			
 			if (rowDataAsMapDetalle.cantidad > 0) {
-				rowDataAsMapTotales = tableModelT.getRowDataAsMap(0);
+				//rowDataAsMapTotales = tableModelT.getRowDataAsMap(0);
 				
-				tableModelT.setValueById("total", 0, rowDataAsMapTotales.total + (rowDataAsMapDetalle.cantidad * rowDataAsMapDetalle.costo));
-				rowDataAsMapTotales = tableModelT.getRowDataAsMap(1);
-				tableModelT.setValueById("total", 1, rowDataAsMapTotales.total + (rowDataAsMapDetalle.cantidad * rowDataAsMapDetalle.plmasiva));
+				//tableModelT.setValueById("total", 0, rowDataAsMapTotales.total + (rowDataAsMapDetalle.cantidad * rowDataAsMapDetalle.costo));
+				//rowDataAsMapTotales = tableModelT.getRowDataAsMap(1);
+				//tableModelT.setValueById("total", 1, rowDataAsMapTotales.total + (rowDataAsMapDetalle.cantidad * rowDataAsMapDetalle.plmasiva));
 				bandera = true;
-				for (var x = 2; x < tableModelT.getRowCount(); x++) {
+				for (var x = 0; x < tableModelT.getRowCount(); x++) {
 					rowDataAsMapTotales = tableModelT.getRowDataAsMap(x);
 					if (rowDataAsMapDetalle.id_unidad == rowDataAsMapTotales.id_unidad) {
 						tableModelT.setValueById("total", x, tableModelT.getValueById("total", x) + (rowDataAsMapDetalle.cantidad * rowDataAsMapDetalle.capacidad));
@@ -447,7 +446,7 @@ qx.Class.define("elpintao.comp.remitos.pageRemitos",
 							menutblRemito.memorizar([btnAutorizar, btnImprimir, btnModificar]);
 						}
 						
-						//functionCalcularTotales(tableModelDetalle, tableModelTotales);
+						functionCalcularTotales(tableModelDetalle, tableModelTotales);
 						
 						imageLoadingDetalle.setVisibility("hidden");
 					}, this), "leer_remitos_detalle", p);
@@ -512,7 +511,7 @@ qx.Class.define("elpintao.comp.remitos.pageRemitos",
 	
 	var selectionModelDetalle = tblDetalle.getSelectionModel();
 	
-	this.add(tblDetalle, {left: 0, top: "56%", right: 0, bottom: 0});
+	this.add(tblDetalle, {left: 0, top: "56%", right: "15%", bottom: 0});
 	
 	
 	
@@ -566,7 +565,7 @@ qx.Class.define("elpintao.comp.remitos.pageRemitos",
 	renderer.setNumberFormat(numberformatMonto);
 	tableColumnModelTotales.setDataCellRenderer(1, renderer);
 	
-	//this.add(tblTotales, {left: "85.3%", top: "56%", right: 0, bottom: 0});
+	this.add(tblTotales, {left: "85.3%", top: "56%", right: 0, bottom: 0});
 	
 	
 	
