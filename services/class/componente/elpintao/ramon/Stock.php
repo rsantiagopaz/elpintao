@@ -9,14 +9,13 @@ class class_Stock
 	$resultado->id_sucursal = $p->id_sucursal;
 	$resultado->producto_item = array();
 
-	$link = mysql_connect($p->url, $p->username, $p->password);
-	mysql_select_db($p->base, $link);
-	mysql_query("SET NAMES 'utf8'", $link);
+	$mysqli = new mysqli($p->url, $p->username, $p->password, $p->base);
+	$mysqli->query("SET NAMES 'utf8'");
 	
 	$sql = "SELECT producto.id_producto, producto_item.id_producto_item, stock.stock FROM (producto INNER JOIN producto_item USING(id_producto)) INNER JOIN stock USING(id_producto_item) WHERE producto_item.id_producto=" . $p->id_producto . " AND stock.id_sucursal=" . $p->id_sucursal;
-	$rs = mysql_query($sql);
-	if (mysql_num_rows($rs) > 0) {
-		while ($row = mysql_fetch_object($rs)) {
+	$rs = $mysqli->query($sql);
+	if ($rs->num_rows > 0) {
+		while ($row = $rs->fetch_object()) {
 			$row->stock = (int) $row->stock;
 			
 			$resultado->producto_item[] = $row;
@@ -34,12 +33,11 @@ class class_Stock
   public function method_escribir_stock($params, $error) {
 	$p = $params[0];
 	
-	$link = mysql_connect($p->url, $p->username, $p->password);
-	mysql_select_db($p->base, $link);
-	mysql_query("SET NAMES 'utf8'", $link);
+	$mysqli = new mysqli($p->url, $p->username, $p->password, $p->base);
+	$mysqli->query("SET NAMES 'utf8'");
 	
 	$sql = "UPDATE stock SET stock=" . $p->stock . ", transmitir=TRUE WHERE id_producto_item=" . $p->id_producto_item . " AND id_sucursal=" . $p->id_sucursal;
-	mysql_query($sql);
+	$mysqli->query($sql);
   }
   
   
@@ -49,16 +47,15 @@ class class_Stock
 	$resultado = new stdClass;
 	$resultado->producto_item = array();
 	
-	$link = mysql_connect($p->url, $p->username, $p->password);
-	mysql_select_db($p->base, $link);
-	mysql_query("SET NAMES 'utf8'", $link);
+	$mysqli = new mysqli($p->url, $p->username, $p->password, $p->base);
+	$mysqli->query("SET NAMES 'utf8'");
 	
 	$sql = "SELECT";
 	$sql.= " producto.*, fabrica.descrip AS fabrica, fabrica.desc_fabrica";
 	$sql.= " FROM producto INNER JOIN fabrica USING (id_fabrica)";
 	$sql.= " WHERE producto.activo AND id_producto=" . $p->id_producto;
-	$rs = mysql_query($sql);
-	$producto = mysql_fetch_object($rs);
+	$rs = $mysqli->query($sql);
+	$producto = $rs->fetch_object();
 	$producto->desc_producto = (float) $producto->desc_producto;
 	$producto->desc_fabrica = (float) $producto->desc_fabrica;
 	$producto->iva = (float) $producto->iva;
@@ -72,8 +69,8 @@ class class_Stock
 	$sql.= " WHERE producto_item.activo AND id_producto=" . $p->id_producto;
 	$sql.= " ORDER BY color, unidad, producto_item.capacidad";
 	
-	$rs = mysql_query($sql);
-	while ($row = mysql_fetch_object($rs)) {
+	$rs = $mysqli->query($sql);
+	while ($row = $rs->fetch_object()) {
 		$row->capacidad = (float) $row->capacidad;
 		$row->duracion = (float) $row->duracion;
 		$row->stock = 0;

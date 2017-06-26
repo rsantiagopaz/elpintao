@@ -19,20 +19,20 @@ class class_PedidosExt extends class_Base
   	$p = $params[0];
   	
 	$sql = "UPDATE pedido_ext SET recibido = TRUE, fecha_recibido= NOW() WHERE id_pedido_ext='" . $p->id_pedido_ext . "'";
-	mysql_query($sql);
+	$this->mysqli->query($sql);
 	
-	$sql = "INSERT stock_log SET descrip='PedidosExt.method_recibir_pedido', sql_texto='" . mysql_real_escape_string($sql) . "', fecha=NOW()";
-	mysql_query($sql);
+	$sql = "INSERT stock_log SET descrip='PedidosExt.method_recibir_pedido', sql_texto='" . $this->mysqli->real_escape_string($sql) . "', fecha=NOW()";
+	$this->mysqli->query($sql);
   	
 	foreach ($p->detalle as $item) {
 		$sql = "UPDATE stock SET stock = stock + " . $item->total . " WHERE id_sucursal=" . $this->rowParamet->id_sucursal . " AND id_producto_item=" . $item->id_producto_item . "";
-		mysql_query($sql);
+		$this->mysqli->query($sql);
 		
-		$sql = "INSERT stock_log SET descrip='PedidosExt.method_recibir_pedido', sql_texto='" . mysql_real_escape_string($sql) . "', fecha=NOW()";
-		mysql_query($sql);
+		$sql = "INSERT stock_log SET descrip='PedidosExt.method_recibir_pedido', sql_texto='" . $this->mysqli->real_escape_string($sql) . "', fecha=NOW()";
+		$this->mysqli->query($sql);
 		
 		$sql = "INSERT pedido_ext_recibido SET id_pedido_ext = '" . $item->id_pedido_ext . "', id_producto_item = '" . $item->id_producto_item . "', sumado='" . $item->sumado . "', restado='" . $item->restado . "', cantidad = '" . $item->total . "'";
-		mysql_query($sql);
+		$this->mysqli->query($sql);
 	}
   }
 
@@ -42,25 +42,25 @@ class class_PedidosExt extends class_Base
 
   	$set = $this->prepararCampos($p->model);
   	
-  	mysql_query("START TRANSACTION");
+  	$this->mysqli->query("START TRANSACTION");
   	
 	$sql = "INSERT pedido_ext SET " . $set . ", id_fabrica='" . $p->id_fabrica . "', fecha = NOW(), recibido = FALSE";
-	mysql_query($sql);
-	$insert_id = mysql_insert_id();
+	$this->mysqli->query($sql);
+	$insert_id = $this->mysqli->insert_id;
 	
 	foreach ($p->detalle as $item) {
 		if ($item->cantidad > 0) {
 			$sql = "INSERT pedido_ext_detalle SET id_pedido_ext = '" . $insert_id . "', id_producto_item = '" . $item->id_producto_item . "', cantidad = '" . $item->cantidad . "'";
-			mysql_query($sql);
+			$this->mysqli->query($sql);
 			
 			foreach ($item->detallePedInt as $item2) {
 				$sql = "UPDATE pedido_suc_detalle SET id_pedido_ext='" . $insert_id . "' WHERE id_pedido_suc_detalle='" . $item2->id_pedido_suc_detalle . "'";
-				mysql_query($sql);
+				$this->mysqli->query($sql);
 			}
 		}
 	}
 	
-	mysql_query("COMMIT");
+	$this->mysqli->query("COMMIT");
 	
 	return $insert_id;
   }
@@ -105,8 +105,8 @@ class class_PedidosExt extends class_Base
 	$sql.=" ORDER BY fabrica, producto, color, unidad, capacidad"
 	;
 	
-	$rsPedidoSuc = mysql_query($sql);
-	while ($rowPedidoSuc = mysql_fetch_object($rsPedidoSuc)) {
+	$rsPedidoSuc = $this->mysqli->query($sql);
+	while ($rowPedidoSuc = $rsPedidoSuc->fetch_object()) {
 		$rowPedidoSuc->desc_fabrica = (float) $rowPedidoSuc->desc_fabrica;
 		$rowPedidoSuc->desc_producto = (float) $rowPedidoSuc->desc_producto;
 		
@@ -136,8 +136,8 @@ class class_PedidosExt extends class_Base
 
 		
 		$sql="SELECT id_sucursal, descrip, stock FROM stock INNER JOIN sucursal USING(id_sucursal) WHERE sucursal.activo AND id_producto_item = '" . $rowPedidoSuc->id_producto_item . "' ORDER BY descrip";
-		$rsStock = mysql_query($sql);
-		while ($rowStock = mysql_fetch_object($rsStock)) {
+		$rsStock = $this->mysqli->query($sql);
+		while ($rowStock = $rsStock->fetch_object()) {
 			$rowStock->stock = (float) $rowStock->stock;
 			$rowPedidoSuc->detalleStock[] = $rowStock;
 			if ($rowStock->id_sucursal == $this->rowParamet->id_sucursal) {
@@ -161,7 +161,7 @@ class class_PedidosExt extends class_Base
   	
 	$opciones = array("recibido"=>"bool");
 	$sql="SELECT pedido_ext.*, fabrica.descrip AS fabrica, transporte.descrip AS transporte FROM (pedido_ext INNER JOIN fabrica USING(id_fabrica)) INNER JOIN transporte USING(id_transporte) WHERE pedido_ext.recibido=" . (($p->recibido) ? "TRUE" : "FALSE") . " ORDER BY fecha DESC";
-	return $this->toJson(mysql_query($sql), $opciones);
+	return $this->toJson($this->mysqli->query($sql), $opciones);
   }
   
   
@@ -171,8 +171,8 @@ class class_PedidosExt extends class_Base
 	$resultado = new stdClass;
 	
 	$sql = "SELECT pedido_ext.*, fabrica.desc_fabrica FROM pedido_ext INNER JOIN fabrica USING(id_fabrica) WHERE pedido_ext.id_pedido_ext=" . $p->id_pedido_ext;
-	$rsPedido = mysql_query($sql);
-	$regPedido = mysql_fetch_object($rsPedido);
+	$rsPedido = $this->mysqli->query($sql);
+	$regPedido = $rsPedido->fetch_object();
 	$regPedido->recibido = (bool) $regPedido->recibido;
 	$regPedido->desc_fabrica = (float) $regPedido->desc_fabrica;
 	
@@ -181,8 +181,8 @@ class class_PedidosExt extends class_Base
 	$sql.= " FROM ((((pedido_ext_detalle INNER JOIN producto_item USING (id_producto_item)) INNER JOIN producto USING(id_producto)) INNER JOIN color USING (id_color)) INNER JOIN unidad USING (id_unidad))";
 	$sql.= " WHERE pedido_ext_detalle.id_pedido_ext=" . $p->id_pedido_ext;
 	$sql.= " ORDER BY producto, color, unidad, capacidad";
-	$rs = mysql_query($sql);
-	while ($row = mysql_fetch_object($rs)) {
+	$rs = $this->mysqli->query($sql);
+	while ($row = $rs->fetch_object()) {
 		$row->cantidad = (float) $row->cantidad;
 		$row->capacidad = (float) $row->capacidad;
 		$row->precio_lista = (float) $row->precio_lista;
@@ -208,8 +208,8 @@ class class_PedidosExt extends class_Base
 	$sql.= " FROM ((((pedido_ext_recibido INNER JOIN producto_item USING (id_producto_item)) INNER JOIN producto USING(id_producto)) INNER JOIN color USING (id_color)) INNER JOIN unidad USING (id_unidad))";
 	$sql.= " WHERE pedido_ext_recibido.id_pedido_ext=" . $p->id_pedido_ext;
 	$sql.= " ORDER BY producto, color, unidad, capacidad";
-	$rs = mysql_query($sql);
-	while ($row = mysql_fetch_object($rs)) {
+	$rs = $this->mysqli->query($sql);
+	while ($row = $rs->fetch_object()) {
 		$row->capacidad = (float) $row->capacidad;
 		$row->sumado = (float) $row->sumado;
 		$row->restado = (float) $row->restado;

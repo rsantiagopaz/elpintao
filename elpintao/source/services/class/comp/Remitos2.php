@@ -59,8 +59,8 @@ class class_Remitos2 extends class_Base
 	$sql.= " ORDER BY id_remito_emi DESC";
 
 
-	$rsRemito = mysql_query($sql);
-	while ($rowRemito = mysql_fetch_object($rsRemito)) {
+	$rsRemito = $this->mysqli->query($sql);
+	while ($rowRemito = $rsRemito->fetch_object()) {
 		$sql = "SELECT remito_emi_detalle.cantidad, fabrica.descrip AS fabrica, fabrica.desc_fabrica, producto.descrip AS producto, producto.iva, producto.desc_producto, producto_item.*, color.descrip AS color, unidad.descrip AS unidad FROM ((((remito_emi_detalle INNER JOIN producto_item USING(id_producto_item)) INNER JOIN producto USING(id_producto)) INNER JOIN fabrica USING(id_fabrica)) INNER JOIN color USING (id_color)) INNER JOIN unidad USING (id_unidad) WHERE id_remito_emi='" . $rowRemito->id_remito_emi . "'";
 		
 		if ($p->id_fabrica > "0") {
@@ -82,8 +82,8 @@ class class_Remitos2 extends class_Base
 			}
 		}
 		
-		$rsRD = mysql_query($sql);
-		while ($row = mysql_fetch_object($rsRD)) {
+		$rsRD = $this->mysqli->query($sql);
+		while ($row = $rsRD->fetch_object()) {
 			$row->capacidad = (float) $row->capacidad;
 			$row->cantidad = (float) $row->cantidad;
 			

@@ -11,25 +11,25 @@ class class_Remitos extends class_Base
   	
   	$resultado = $p->id_remito;
   	
-  	mysql_query("START TRANSACTION");
+  	$this->mysqli->query("START TRANSACTION");
   	
 	if ($p->id_remito == "0") {
 		$sql="INSERT remito_rec SET nro_remito='" . $p->nro_remito . "', tipo=0, id_sucursal_de=" . $p->id_sucursal . ", destino='" . $p->destino . "', fecha=NOW(), id_usuario_transporta=0, estado='R'";
-		mysql_query($sql);
-		$resultado = mysql_insert_id();
+		$this->mysqli->query($sql);
+		$resultado = $this->mysqli->insert_id;
 	} else {
 		$sql="UPDATE remito_rec SET nro_remito='" . $p->nro_remito . "', id_sucursal_de=" . $p->id_sucursal . ", destino='" . $p->destino . "' WHERE id_remito_rec=" . $resultado;
-		mysql_query($sql);
+		$this->mysqli->query($sql);
 		
 		$sql="DELETE FROM remito_rec_detalle WHERE id_remito_rec=" . $resultado;
-		mysql_query($sql);
+		$this->mysqli->query($sql);
 	}
 	foreach ($p->detalle as $item) {
 		$sql="INSERT remito_rec_detalle SET id_remito_rec=" . $resultado . ", id_producto_item=" . $item->id_producto_item . ", cantidad=" . $item->cantidad;
-		mysql_query($sql);
+		$this->mysqli->query($sql);
 	}
 	
-	mysql_query("COMMIT");
+	$this->mysqli->query("COMMIT");
 	
 	return $resultado;
   }
@@ -41,25 +41,25 @@ class class_Remitos extends class_Base
   	
   	$resultado = $p->id_remito;
   	
-  	mysql_query("START TRANSACTION");
+  	$this->mysqli->query("START TRANSACTION");
   	
 	if ($p->id_remito == "0") {
 		$sql="INSERT remito_emi SET nro_remito='', tipo=2, id_sucursal_para=" . $p->id_sucursal . ", destino='" . $p->destino . "', fecha=NOW(), json='{}', estado='R'";
-		mysql_query($sql);
-		$resultado = mysql_insert_id();
+		$this->mysqli->query($sql);
+		$resultado = $this->mysqli->insert_id;
 	} else {
 		$sql="UPDATE remito_emi SET id_sucursal_para=" . $p->id_sucursal . ", destino='" . $p->destino . "' WHERE id_remito_emi=" . $resultado;
-		mysql_query($sql);
+		$this->mysqli->query($sql);
 		
 		$sql="DELETE FROM remito_emi_detalle WHERE id_remito_emi=" . $resultado;
-		mysql_query($sql);
+		$this->mysqli->query($sql);
 	}
 	foreach ($p->detalle as $item) {
 		$sql="INSERT remito_emi_detalle SET id_remito_emi=" . $resultado . ", id_producto_item=" . $item->id_producto_item . ", cantidad=" . $item->cantidad;
-		mysql_query($sql);
+		$this->mysqli->query($sql);
 	}
 	
-	mysql_query("COMMIT");
+	$this->mysqli->query("COMMIT");
 	
 	return $resultado;
   }
@@ -75,12 +75,12 @@ class class_Remitos extends class_Base
   	
   	
 	$sql="SELECT estado FROM remito_rec WHERE id_remito_rec=" . $p->id_remito;
-	$rs = mysql_query($sql);
-  	$row = mysql_fetch_object($rs);
+	$rs = $this->mysqli->query($sql);
+  	$row = $rs->fetch_object();
   	if ($row->estado == "R") {
 		$sql="SELECT * FROM usuario WHERE nick='" . $p->model->autoriza . "' AND password=MD5('" . $p->model->autoriza_pass . "')";
-		$rsAutoriza = mysql_query($sql);
-		if (mysql_num_rows($rsAutoriza) != 1) {
+		$rsAutoriza = $this->mysqli->query($sql);
+		if ($rsAutoriza->num_rows != 1) {
 			$item = new stdClass();
 			$item->descrip = "autoriza";
 			$item->message = " Usuario y/o contraseña incorrecta ";
@@ -96,36 +96,36 @@ class class_Remitos extends class_Base
 			} else {
 				$sql="SELECT usuario.* FROM usuario INNER JOIN remito_rec ON usuario.id_usuario=remito_rec.id_usuario_transporta WHERE remito_rec.id_remito_rec='" . $p->id_remito . "' AND usuario.nick='" . $p->model->transporta . "' AND usuario.password=MD5('" . $p->model->transporta_pass . "')";
 			}
-			$rsTransporta = mysql_query($sql);
-			if (mysql_num_rows($rsTransporta) != 1) {
+			$rsTransporta = $this->mysqli->query($sql);
+			if ($rsTransporta->num_rows != 1) {
 				$item = new stdClass();
 				$item->descrip = "transporta";
 				$item->message = " Usuario y/o contraseña incorrecta ";
 				$resultado->error[] = $item;
-			}  else $rowTransporta = mysql_fetch_object($rsTransporta);
+			}  else $rowTransporta = $rsTransporta->fetch_object();
 		}
 		
 		if (empty($resultado->error)) {
-			$rowAutoriza = mysql_fetch_object($rsAutoriza);
+			$rowAutoriza = $rsAutoriza->fetch_object();
 			
-			mysql_query("START TRANSACTION");
+			$this->mysqli->query("START TRANSACTION");
 			
 			$sql="UPDATE remito_rec SET fecha=NOW(), id_usuario_autoriza_rec='" . $rowAutoriza->id_usuario . "', id_usuario_transporta='" . $rowTransporta->id_usuario . "', estado='A' WHERE id_remito_rec=" . $p->id_remito;
-			mysql_query($sql);
+			$this->mysqli->query($sql);
 			
-			$sql = "INSERT stock_log SET descrip='Remitos.method_autorizar_remito_rec', sql_texto='" . mysql_real_escape_string($sql) . "', fecha=NOW()";
-			mysql_query($sql);
+			$sql = "INSERT stock_log SET descrip='Remitos.method_autorizar_remito_rec', sql_texto='" . $this->mysqli->real_escape_string($sql) . "', fecha=NOW()";
+			$this->mysqli->query($sql);
 			
 			$detalle = $this->toJson("SELECT id_producto_item, cantidad FROM remito_rec_detalle WHERE id_remito_rec='" . $p->id_remito . "'");
 			foreach ($detalle as $item) {
 				$sql="UPDATE stock SET stock = stock + " . $item->cantidad . ", transmitir = TRUE WHERE id_sucursal=" . $this->rowParamet->id_sucursal . " AND id_producto_item=" . $item->id_producto_item . "";
-				mysql_query($sql);
+				$this->mysqli->query($sql);
 				
-				$sql = "INSERT stock_log SET descrip='Remitos.method_autorizar_remito_rec', sql_texto='" . mysql_real_escape_string($sql) . "', fecha=NOW()";
-				mysql_query($sql);
+				$sql = "INSERT stock_log SET descrip='Remitos.method_autorizar_remito_rec', sql_texto='" . $this->mysqli->real_escape_string($sql) . "', fecha=NOW()";
+				$this->mysqli->query($sql);
 			}
 			
-			mysql_query("COMMIT");
+			$this->mysqli->query("COMMIT");
 		}
   	} else {
 		$item = new stdClass();
@@ -147,12 +147,12 @@ class class_Remitos extends class_Base
   	$resultado->error = array();
   	
 	$sql="SELECT estado FROM remito_emi WHERE id_remito_emi=" . $p->id_remito;
-	$rs = mysql_query($sql);
-  	$row = mysql_fetch_object($rs);
+	$rs = $this->mysqli->query($sql);
+  	$row = $rs->fetch_object();
   	if ($row->estado == "R") {
 		$sql="SELECT id_usuario FROM usuario WHERE nick='" . $p->model->autoriza . "' AND password=MD5('" . $p->model->autoriza_pass . "')";
-		$rsAutoriza = mysql_query($sql);
-		if (mysql_num_rows($rsAutoriza) != 1) {
+		$rsAutoriza = $this->mysqli->query($sql);
+		if ($rsAutoriza->num_rows != 1) {
 			$item = new stdClass();
 			$item->descrip = "autoriza";
 			$item->message = " Usuario y/o contraseña incorrecta ";
@@ -164,33 +164,33 @@ class class_Remitos extends class_Base
 			$rowTransporta->id_usuario = "0";
 		} else {
 			$sql="SELECT id_usuario FROM usuario WHERE nick='" . $p->model->transporta . "' AND password=MD5('" . $p->model->transporta_pass . "')";
-			$rsTransporta = mysql_query($sql);
-			if (mysql_num_rows($rsTransporta) != 1) {
+			$rsTransporta = $this->mysqli->query($sql);
+			if ($rsTransporta->num_rows != 1) {
 				$item = new stdClass();
 				$item->descrip = "transporta";
 				$item->message = " Usuario y/o contraseña incorrecta ";
 				$resultado->error[] = $item;
-			} else $rowTransporta = mysql_fetch_object($rsTransporta);
+			} else $rowTransporta = $rsTransporta->fetch_object();
 		}
 		
-		//if (mysql_num_rows($rsAutoriza) == 1 && (is_null($p->model->transporta) || mysql_num_rows($rsTransporta) == 1)) {
+		//if ($rsAutoriza->num_rows == 1 && (is_null($p->model->transporta) || $rsTransporta->num_rows == 1)) {
 		if (empty($resultado->error)) {
-			$rowAutoriza = mysql_fetch_object($rsAutoriza);
+			$rowAutoriza = $rsAutoriza->fetch_object();
 			
 			$sql="SELECT * FROM remito_emi WHERE id_remito_emi=" . $p->id_remito;
-			$rsRemito_emi = mysql_query($sql);
-			$rowRemito_emi = mysql_fetch_object($rsRemito_emi);
+			$rsRemito_emi = $this->mysqli->query($sql);
+			$rowRemito_emi = $rsRemito_emi->fetch_object();
 			
 			$nro_remito = str_pad((string) $this->rowParamet->nro_sucursal, 4, "0", STR_PAD_LEFT) . "-" . str_pad((string) $this->rowParamet->nro_remito + 1, 8, "0", STR_PAD_LEFT);
 			$fecha = date("Y-m-d H:i:s");
 			
-			mysql_query("START TRANSACTION");
+			$this->mysqli->query("START TRANSACTION");
 			
 			$sql="UPDATE remito_emi SET nro_remito='" . $nro_remito . "', fecha='" . $fecha . "', id_usuario_autoriza_emi='" . $rowAutoriza->id_usuario . "', id_usuario_transporta='" . $rowTransporta->id_usuario . "', estado='A' WHERE id_remito_emi='" . $p->id_remito . "'";
-			mysql_query($sql);
+			$this->mysqli->query($sql);
 			
-			$sql = "INSERT stock_log SET descrip='Remitos.method_autorizar_remito_emi', sql_texto='" . mysql_real_escape_string($sql) . "', fecha=NOW()";
-			mysql_query($sql);
+			$sql = "INSERT stock_log SET descrip='Remitos.method_autorizar_remito_emi', sql_texto='" . $this->mysqli->real_escape_string($sql) . "', fecha=NOW()";
+			$this->mysqli->query($sql);
 			
 			if ($rowRemito_emi->id_sucursal_para != "0") {
 				$sql = "INSERT remito_rec SET nro_remito='" . $nro_remito . "', tipo='" . $rowRemito_emi->tipo . "', id_sucursal_de='" . $this->rowParamet->id_sucursal . "', fecha='" . $fecha . "', id_usuario_autoriza_emi='" . $rowAutoriza->id_usuario . "', id_usuario_transporta='" . $rowTransporta->id_usuario . "', estado='R'";
@@ -211,10 +211,10 @@ class class_Remitos extends class_Base
 			$detalle = $this->toJson("SELECT id_producto_item, cantidad FROM remito_emi_detalle WHERE id_remito_emi='" . $p->id_remito . "'");
 			foreach ($detalle as $item) {
 				$sql="UPDATE stock SET stock = stock - " . $item->cantidad . ", transmitir = TRUE WHERE id_sucursal=" . $this->rowParamet->id_sucursal . " AND id_producto_item=" . $item->id_producto_item . "";
-				mysql_query($sql);
+				$this->mysqli->query($sql);
 				
-				$sql = "INSERT stock_log SET descrip='Remitos.method_autorizar_remito_emi', sql_texto='" . mysql_real_escape_string($sql) . "', fecha=NOW()";
-				mysql_query($sql);
+				$sql = "INSERT stock_log SET descrip='Remitos.method_autorizar_remito_emi', sql_texto='" . $this->mysqli->real_escape_string($sql) . "', fecha=NOW()";
+				$this->mysqli->query($sql);
 				
 				if ($rowRemito_emi->id_sucursal_para != "0") {
 					$sql = "INSERT remito_rec_detalle SET id_remito_rec=@id_remito_rec, id_producto_item=" . $item->id_producto_item . ", cantidad=" . $item->cantidad . "";
@@ -223,9 +223,9 @@ class class_Remitos extends class_Base
 			}
 			
 			$sql="UPDATE paramet SET nro_remito=nro_remito + 1 WHERE id_paramet=1";
-			mysql_query($sql);
+			$this->mysqli->query($sql);
 			
-			mysql_query("COMMIT");
+			$this->mysqli->query("COMMIT");
 		}
   	} else {
 		$item = new stdClass();
@@ -272,24 +272,24 @@ class class_Remitos extends class_Base
 	
 	$sql.= " ORDER BY id_remito_rec DESC";
 	
-	$rsRemito = mysql_query($sql);
-	while ($rowRemito = mysql_fetch_object($rsRemito)) {
+	$rsRemito = $this->mysqli->query($sql);
+	while ($rowRemito = $rsRemito->fetch_object()) {
 		$rowRemito->destino_descrip = ($rowRemito->id_sucursal_de != "0") ? $rowRemito->descrip : $rowRemito->destino;
 		
 		if (empty($rowRemito->id_usuario_autoriza_rec)) {
 			$rowRemito->autoriza = "";
 		} else {
 			$sql= "SELECT nick FROM usuario WHERE id_usuario=" . $rowRemito->id_usuario_autoriza_rec;
-			$rs = mysql_query($sql);
-			$row = mysql_fetch_object($rs);
+			$rs = $this->mysqli->query($sql);
+			$row = $rs->fetch_object();
 			$rowRemito->autoriza = $row->nick;
 		}
 		if (empty($rowRemito->id_usuario_transporta)) {
 			$rowRemito->transporta = "";
 		} else {
 			$sql= "SELECT nick FROM usuario WHERE id_usuario=" . $rowRemito->id_usuario_transporta;
-			$rs = mysql_query($sql);
-			$row = mysql_fetch_object($rs);
+			$rs = $this->mysqli->query($sql);
+			$row = $rs->fetch_object();
 			$rowRemito->transporta = $row->nick;
 		}
 		
@@ -365,28 +365,28 @@ class class_Remitos extends class_Base
 	$sql.= " ORDER BY id_remito_emi DESC";
 
 
-	$rsRemito = mysql_query($sql);
-	while ($rowRemito = mysql_fetch_object($rsRemito)) {
+	$rsRemito = $this->mysqli->query($sql);
+	while ($rowRemito = $rsRemito->fetch_object()) {
 		if (empty($rowRemito->id_usuario_autoriza_emi)) {
 			$rowRemito->autoriza = "";
 		} else {
 			$sql= "SELECT nick FROM usuario WHERE id_usuario=" . $rowRemito->id_usuario_autoriza_emi;
-			$rs = mysql_query($sql);
-			$row = mysql_fetch_object($rs);
+			$rs = $this->mysqli->query($sql);
+			$row = $rs->fetch_object();
 			$rowRemito->autoriza = $row->nick;
 		}
 		if (empty($rowRemito->id_usuario_transporta)) {
 			$rowRemito->transporta = "";
 		} else {
 			$sql= "SELECT nick FROM usuario WHERE id_usuario=" . $rowRemito->id_usuario_transporta;
-			$rs = mysql_query($sql);
-			$row = mysql_fetch_object($rs);
+			$rs = $this->mysqli->query($sql);
+			$row = $rs->fetch_object();
 			$rowRemito->transporta = $row->nick;
 		}
 		
 		//$opciones = array("cantidad"=>"float", "capacidad"=>"float");
 		//$sql="SELECT remito_emi_detalle.*, fabrica.descrip AS fabrica, producto.descrip AS producto, producto_item.capacidad, color.descrip AS color, unidad.descrip AS unidad FROM ((((remito_emi_detalle INNER JOIN producto_item USING(id_producto_item)) INNER JOIN producto USING(id_producto)) INNER JOIN fabrica USING(id_fabrica)) INNER JOIN color USING (id_color)) INNER JOIN unidad USING (id_unidad) WHERE id_remito_emi='" . $rowRemito->id_remito_emi . "'";
-		//$rowRemito->detalle = $this->toJson(mysql_query($sql), $opciones);
+		//$rowRemito->detalle = $this->toJson($this->mysqli->query($sql), $opciones);
 		
 		$resultado->remito[] = $rowRemito;
 		
@@ -413,8 +413,8 @@ class class_Remitos extends class_Base
 			}
 		}
 		
-		$rsRD = mysql_query($sql);
-		while ($row = mysql_fetch_object($rsRD)) {
+		$rsRD = $this->mysqli->query($sql);
+		while ($row = $rsRD->fetch_object()) {
 			$row->capacidad = (float) $row->capacidad;
 			$row->cantidad = (float) $row->cantidad;
 			
@@ -469,8 +469,8 @@ class class_Remitos extends class_Base
 	
 	
 	
-	$rs = mysql_query($sql);
-	while ($row = mysql_fetch_object($rs)) {
+	$rs = $this->mysqli->query($sql);
+	while ($row = $rs->fetch_object()) {
 		$row->capacidad = (float) $row->capacidad;
 		$row->cantidad = (float) $row->cantidad;
 		

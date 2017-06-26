@@ -4,9 +4,8 @@ session_start();
 
 set_time_limit(120);
 
-$link1 = mysql_connect($_SESSION['conexion']->servidor, $_SESSION['conexion']->usuario, $_SESSION['conexion']->password);
-mysql_select_db($_SESSION['conexion']->database, $link1);
-mysql_query("SET NAMES 'utf8'", $link1);
+$mysqli = new mysqli($_SESSION['conexion']->servidor, $_SESSION['conexion']->usuario, $_SESSION['conexion']->password, $_SESSION['conexion']->database);
+$mysqli->query("SET NAMES 'utf8'");
 
 
 switch ($_REQUEST['rutina']) {
@@ -15,9 +14,9 @@ case 'leer_mensaje': {
 $resultado=array();
 
 $sql = "SELECT * FROM mensaje ORDER BY id_mensaje DESC";
-$rs = mysql_query($sql);
+$rs = $mysqli->query($sql);
 
-while ($row = mysql_fetch_object($rs)) {
+while ($row = $rs->fetch_object()) {
 	$row->mostrar = (bool) $row->mostrar;
 	$row->json = json_decode($row->json);
 	$row->json->mensaje = html_entity_decode($row->json->mensaje);
@@ -26,7 +25,7 @@ while ($row = mysql_fetch_object($rs)) {
 
 if (count($resultado) > 0) {
 	$sql = "UPDATE mensaje SET mostrar=FALSE WHERE id_mensaje=" . $resultado[0]->id_mensaje;
-	mysql_query($sql);
+	$mysqli->query($sql);
 }
 
 header('Content-Type: application/json');
@@ -50,8 +49,8 @@ if ($_REQUEST['descrip']=="") {
 	$sql.=" ORDER BY id_arbol";	
 }
 
-$rs = mysql_query($sql);
-while ($reg = mysql_fetch_object($rs)) {
+$rs = $mysqli->query($sql);
+while ($reg = $rs->fetch_object()) {
 	$reg->cant_hijos = (int)$reg->cant_hijos;
 	$reg->cant_productos = (int)$reg->cant_productos;
 	posicionarNodo($reg);
@@ -70,8 +69,8 @@ case 'leer_transporte': {
 $resultado=array();
 
 $sql = "SELECT * FROM transporte";
-$rs = mysql_query($sql);
-while ($reg = mysql_fetch_object($rs)) {
+$rs = $mysqli->query($sql);
+while ($reg = $rs->fetch_object()) {
 	$reg->repone = (bool) $reg->repone;
 	$resultado[] = $reg;
 }
@@ -89,8 +88,8 @@ case 'leer_unidad': {
 $resultado=array();
 
 $sql = "SELECT id_unidad, descrip FROM unidad";
-$rs = mysql_query($sql);
-while ($reg = mysql_fetch_object($rs)) {
+$rs = $mysqli->query($sql);
+while ($reg = $rs->fetch_object()) {
 	$resultado[] = $reg;
 }
 
@@ -107,8 +106,8 @@ case 'leer_moneda': {
 $resultado=array();
 
 $sql = "SELECT * FROM moneda";
-$rs = mysql_query($sql);
-while ($reg = mysql_fetch_object($rs)) {
+$rs = $mysqli->query($sql);
+while ($reg = $rs->fetch_object()) {
 	$reg->cotizacion = (float) $reg->cotizacion;
 	$resultado[] = $reg;
 }
@@ -126,8 +125,8 @@ case 'leer_usuario': {
 $resultado=array();
 
 $sql = "SELECT * FROM usuario ORDER BY nick";
-$rs = mysql_query($sql);
-while ($reg = mysql_fetch_object($rs)) {
+$rs = $mysqli->query($sql);
+while ($reg = $rs->fetch_object()) {
 	$reg->nro_vendedor = (int) $reg->nro_vendedor;
 	$reg->password = "";
 	$resultado[] = $reg;
@@ -146,8 +145,8 @@ case 'leer_fabrica': {
 $resultado=array();
 
 $sql = "SELECT * FROM fabrica ORDER BY descrip";
-$rs = mysql_query($sql);
-while ($reg = mysql_fetch_object($rs)) {
+$rs = $mysqli->query($sql);
+while ($reg = $rs->fetch_object()) {
 	$reg->desc_fabrica = (float) $reg->desc_fabrica;
 	$resultado[] = $reg;
 }
@@ -165,8 +164,8 @@ case 'leer_color': {
 $resultado=array();
 
 $sql = "SELECT id_color, descrip FROM color ORDER BY descrip";
-$rs = mysql_query($sql);
-while ($reg = mysql_fetch_object($rs)) {
+$rs = $mysqli->query($sql);
+while ($reg = $rs->fetch_object()) {
 	$resultado[] = $reg;
 }
 
@@ -192,8 +191,8 @@ function posicionarNodo(&$hijo) {
 		$padre = $agregados[$hijo->id_padre];
 		if (is_null($padre)) {
 			$sql = "SELECT * FROM arbol WHERE id_arbol=" . $hijo->id_padre;
-			$rs = mysql_query($sql);
-			$reg = mysql_fetch_object($rs);
+			$rs = $mysqli->query($sql);
+			$reg = $rs->fetch_object();
 			$padre = posicionarNodo($reg);
 		}
 		$padre->hijos[] = $hijo;

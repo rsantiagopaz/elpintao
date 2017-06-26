@@ -6,16 +6,17 @@ require_once($_SESSION['conexion']->require_general_services . "class/componente
 
 class class_Base_elpintao extends class_Base_general
 {
-	protected $link1;
+	protected $mysqli;
 	protected $rowParamet;
 	protected $arraySucursal;
 	protected $arrayDeposito;
 	
 	function __construct() {
+		mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+		
 		if (! is_null($_SESSION['conexion']->servidor)) {
-			$this->link1 = mysql_connect($_SESSION['conexion']->servidor, $_SESSION['conexion']->usuario, $_SESSION['conexion']->password);
-			mysql_select_db($_SESSION['conexion']->database, $this->link1);
-			mysql_query("SET NAMES 'utf8'", $this->link1);
+			$this->mysqli = new mysqli($_SESSION['conexion']->servidor, $_SESSION['conexion']->usuario, $_SESSION['conexion']->password, $_SESSION['conexion']->database);
+			$this->mysqli->query("SET NAMES 'utf8'");
 		
 			$this->method_leer_paramet(null, null);
 			$this->method_leer_sucursales(null, null);
@@ -26,8 +27,8 @@ class class_Base_elpintao extends class_Base_general
 	
   public function method_leer_paramet($params, $error) {
 	$sql="SELECT * FROM paramet";
-	$rsParamet = mysql_query($sql, $this->link1);
-	$this->rowParamet = mysql_fetch_object($rsParamet);
+	$rsParamet = $this->mysqli->query($sql);
+	$this->rowParamet = $rsParamet->fetch_object();
 	$this->rowParamet->nro_sucursal = (int) $this->rowParamet->nro_sucursal;
 	$this->rowParamet->nro_remito = (int) $this->rowParamet->nro_remito;
 
@@ -38,8 +39,8 @@ class class_Base_elpintao extends class_Base_general
   public function method_leer_sucursales($params, $error) {
   	$this->arraySucursal = array();
 	$sql = "SELECT * FROM sucursal WHERE activo ORDER BY descrip";
-	$rs = mysql_query($sql, $this->link1);
-	while ($row = mysql_fetch_object($rs)) {
+	$rs = $this->mysqli->query($sql);
+	while ($row = $rs->fetch_object()) {
 		$row->deposito = (bool) $row->deposito;
 		
 		$this->arraySucursal[$row->id_sucursal] = $row;
@@ -51,8 +52,8 @@ class class_Base_elpintao extends class_Base_general
   public function method_leer_depositos($params, $error) {
   	$this->arrayDeposito = array();
 	$sql = "SELECT * FROM sucursal WHERE activo AND deposito ORDER BY descrip";
-	$rs = mysql_query($sql, $this->link1);
-	while ($row = mysql_fetch_object($rs)) {
+	$rs = $this->mysqli->query($sql);
+	while ($row = $rs->fetch_object()) {
 		$row->deposito = (bool) $row->deposito;
 		
 		$this->arrayDeposito[$row->id_sucursal] = $row;
@@ -91,13 +92,13 @@ class class_Base_elpintao extends class_Base_general
   	if (is_null($id_sucursal)) {
   		foreach ($this->arraySucursal as $sucursal) {
   			if ($sucursal->id_sucursal != $this->rowParamet->id_sucursal) {
-  				$sql = "INSERT transmision SET id_sucursal='" . $sucursal->id_sucursal . "', descrip='" . $descrip . "', sql_texto='" . mysql_real_escape_string($sql_texto, $this->link1) . "'";
-  				$this->sql_query($sql, $this->link1);
+  				$sql = "INSERT transmision SET id_sucursal='" . $sucursal->id_sucursal . "', descrip='" . $descrip . "', sql_texto='" . $this->mysqli->real_escape_string($sql_texto) . "'";
+  				$this->mysqli->query($sql);
   			}
   		}
   	} else {
-		$sql = "INSERT transmision SET id_sucursal='" . $id_sucursal . "', descrip='" . $descrip . "', sql_texto='" . mysql_real_escape_string($sql_texto, $this->link1) . "'";
-  		$this->sql_query($sql, $this->link1);
+		$sql = "INSERT transmision SET id_sucursal='" . $id_sucursal . "', descrip='" . $descrip . "', sql_texto='" . $this->mysqli->real_escape_string($sql_texto) . "'";
+  		$this->mysqli->query($sql);
   	}
   }
 }

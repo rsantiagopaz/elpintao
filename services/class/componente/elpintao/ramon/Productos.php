@@ -12,8 +12,8 @@ class class_Productos extends class_Base_elpintao
   	$resultado = "";
   	
 	$sql = "SELECT id_padre, descrip FROM arbol WHERE id_arbol=" . $p->id_arbol;
-	$rs = mysql_query($sql);
-	$row = mysql_fetch_object($rs);
+	$rs = $this->mysqli->query($sql);
+	$row = $rs->fetch_object();
 		
 	if ($row->id_padre >= 1) {
 		$p->id_arbol = $row->id_padre;
@@ -28,8 +28,8 @@ class class_Productos extends class_Base_elpintao
   	$p = $params[0];
   	
 	$sql = "SELECT * FROM arbol WHERE id_arbol=" . $p->id_arbol;
-	$rs = mysql_query($sql);
-	$rowArbol = mysql_fetch_object($rs);
+	$rs = $this->mysqli->query($sql);
+	$rowArbol = $rs->fetch_object();
 	$rowArbol->cant_hijos = (int) $rowArbol->cant_hijos;
 	$rowArbol->cant_productos = (int) $rowArbol->cant_productos;
 	$rowArbol->clasificacion = "";
@@ -37,8 +37,8 @@ class class_Productos extends class_Base_elpintao
 	$rowArbol->hijos = array();
 	
 	$sql = "SELECT id_arbol FROM arbol WHERE id_padre=" . $rowArbol->id_arbol . " ORDER BY descrip";
-	$rs = mysql_query($sql);
-	while ($row = mysql_fetch_object($rs)) {
+	$rs = $this->mysqli->query($sql);
+	while ($row = $rs->fetch_object()) {
 		$p->id_arbol = $row->id_arbol;
 		$rowArbol->hijos[] = $this->method_leer_arbol($params, $error);
 	}
@@ -53,8 +53,8 @@ class class_Productos extends class_Base_elpintao
   	$resultado = array();
   	
 	$sql = "SELECT * FROM arbol WHERE id_padre=" . $p->id_padre . " ORDER BY descrip";
-	$rs = mysql_query($sql);
-	while ($row = mysql_fetch_object($rs)) {
+	$rs = $this->mysqli->query($sql);
+	while ($row = $rs->fetch_object()) {
 		$row->cant_hijos = (int) $row->cant_hijos;
 		$row->cant_productos = (int) $row->cant_productos;
 		$row->clasificacion = "";
@@ -72,7 +72,7 @@ class class_Productos extends class_Base_elpintao
 	$p = $params[0];
 	
 	$sql = "DELETE FROM mensaje WHERE id_mensaje=" . $p->id_mensaje;
-	mysql_query($sql);
+	$this->mysqli->query($sql);
   }
   
   
@@ -108,23 +108,23 @@ class class_Productos extends class_Base_elpintao
   public function method_asignar_stock($params, $error) {
 	$p = $params[0];
 	
-	mysql_query("START TRANSACTION");
+	$this->mysqli->query("START TRANSACTION");
 
   	if (!is_null($p->stock) && $p->adicionar != 0) {
 		$sql = "UPDATE stock SET stock=" . ($p->stock + $p->adicionar) . ", transmitir=TRUE WHERE id_sucursal=" . $this->rowParamet->id_sucursal . " AND id_producto_item=" . $p->id_producto_item;
-		mysql_query($sql);
+		$this->mysqli->query($sql);
 		
-		$sql = "INSERT stock_log SET descrip='Productos.method_asignar_stock', sql_texto='" . mysql_real_escape_string($sql) . "', fecha=NOW()";
-		mysql_query($sql);
+		$sql = "INSERT stock_log SET descrip='Productos.method_asignar_stock', sql_texto='" . $this->mysqli->real_escape_string($sql) . "', fecha=NOW()";
+		$this->mysqli->query($sql);
   	}
   	if (!is_null($p->cod_barra)) {
   		$sql = "UPDATE producto_item SET cod_barra='" . $p->cod_barra . "' WHERE id_producto_item=" . $p->id_producto_item;
-  		mysql_query($sql);
+  		$this->mysqli->query($sql);
   		
   		$this->transmitir($sql);
   	}
   	
-  	mysql_query("COMMIT");
+  	$this->mysqli->query("COMMIT");
   }
   
   
@@ -135,11 +135,11 @@ class class_Productos extends class_Base_elpintao
   	
   	$p->fecha = date("Y-m-d H:i:s");
   	
-  	mysql_query("START TRANSACTION");
+  	$this->mysqli->query("START TRANSACTION");
   	
   	$this->method_aplicar_porcentaje_recursivo($params, $error);
   	
-  	mysql_query("COMMIT");
+  	$this->mysqli->query("COMMIT");
   }
   
   
@@ -148,8 +148,8 @@ class class_Productos extends class_Base_elpintao
 
 	if ($p->aplicar == "pcfcd") {
 		$sql = "SELECT producto.iva, producto.desc_producto, producto_item.*, fabrica.desc_fabrica FROM (producto INNER JOIN producto_item USING(id_producto)) INNER JOIN fabrica USING(id_fabrica) WHERE producto.activo AND producto.id_arbol=" . $p->id_arbol . (is_null($p->id_fabrica) ? "" : " AND producto.id_fabrica=" . $p->id_fabrica);
-		$rs = mysql_query($sql);
-		while ($row = mysql_fetch_object($rs)) {
+		$rs = $this->mysqli->query($sql);
+		while ($row = $rs->fetch_object()) {
 			$row->iva = (float) $row->iva;
 			$row->desc_producto = (float) $row->desc_producto;
 			$row->precio_lista = (float) $row->precio_lista;
@@ -173,30 +173,30 @@ class class_Productos extends class_Base_elpintao
 			$row->remarc_final = (1000000 * $row->pcfcd - ((100 * $row->bonif_final - 10000) * $row->desc_final - 10000 * $row->bonif_final + 1000000) * $row->costo) / ((($row->bonif_final - 100) * $row->desc_final - 100 * $row->bonif_final + 10000) * $row->costo);
 			
 			$sql = "UPDATE producto_item SET remarc_final = " . $row->remarc_final . " WHERE id_producto_item=" . $row->id_producto_item;
-			mysql_query($sql);
+			$this->mysqli->query($sql);
 			$this->transmitir($sql);
 		}
 	} else {
 		$sql = "UPDATE producto INNER JOIN producto_item USING(id_producto) SET producto_item." . $p->aplicar . " = producto_item." . $p->aplicar . (($p->porcentaje > 0) ? " + " : " - ") . "(producto_item." . $p->aplicar . " * " . abs($p->porcentaje) . " / 100) WHERE producto.activo AND producto.id_arbol=" . $p->id_arbol . (is_null($p->id_fabrica) ? "" : " AND producto.id_fabrica=" . $p->id_fabrica);
-		mysql_query($sql);
+		$this->mysqli->query($sql);
 		$this->transmitir($sql);
 	}
 
 	
 	$sql = "SELECT producto.iva, producto.desc_producto, producto_item.*, fabrica.desc_fabrica FROM (producto INNER JOIN producto_item USING(id_producto)) INNER JOIN fabrica USING(id_fabrica) WHERE producto.activo AND producto.id_arbol=" . $p->id_arbol . (is_null($p->id_fabrica) ? "" : " AND producto.id_fabrica=" . $p->id_fabrica);
-	$rs = mysql_query($sql);
-	while ($row = mysql_fetch_object($rs)) {
+	$rs = $this->mysqli->query($sql);
+	while ($row = $rs->fetch_object()) {
 		$row->fecha = $p->fecha;
 		$set = $this->prepararCampos($row, "historico_precio");
 		$sql = "INSERT historico_precio SET " . $set;
-		mysql_query($sql);
+		$this->mysqli->query($sql);
 		$this->transmitir($sql);
 	}
 	
 	
 	$sql = "SELECT id_arbol FROM arbol WHERE id_padre=" . $p->id_arbol;
-	$rs = mysql_query($sql);
-	while ($row = mysql_fetch_object($rs)) {
+	$rs = $this->mysqli->query($sql);
+	while ($row = $rs->fetch_object()) {
 		$p->id_arbol = $row->id_arbol;
 		$this->method_aplicar_porcentaje_recursivo($params, $error);
 	}
@@ -207,66 +207,66 @@ class class_Productos extends class_Base_elpintao
   public function method_mover_nodo($params, $error) {
   	$p = $params[0];
   	
-  	mysql_query("START TRANSACTION");
+  	$this->mysqli->query("START TRANSACTION");
   	
 	$sql = "UPDATE arbol SET cant_hijos = cant_hijos - 1 WHERE id_arbol='" . $p->id_padre_original . "'";
-	mysql_query($sql);
+	$this->mysqli->query($sql);
 	$this->transmitir($sql);
 	
 	$sql = "UPDATE arbol SET cant_hijos = cant_hijos + 1 WHERE id_arbol='" . $p->id_padre . "'";
-	mysql_query($sql);
+	$this->mysqli->query($sql);
 	$this->transmitir($sql);
 	
 	$sql = "UPDATE arbol SET id_padre = '" . $p->id_padre . "' WHERE id_arbol='" . $p->id_arbol . "'";
-	mysql_query($sql);
+	$this->mysqli->query($sql);
 	$this->transmitir($sql);
 	
 	foreach ($p->clasificacion as $item) {
 		$sql = "SELECT id_producto_item, busqueda FROM producto INNER JOIN producto_item USING(id_producto) WHERE id_arbol=" . $item->id_arbol;
-		$rs = mysql_query($sql);
-		while ($row = mysql_fetch_object($rs)) {
+		$rs = $this->mysqli->query($sql);
+		while ($row = $rs->fetch_object()) {
 			$busqueda = json_decode($row->busqueda);
 			$busqueda[0] = $item->clasificacion;
 			$busqueda = json_encode($busqueda);
 			$sql = "UPDATE producto_item SET busqueda = '" . $busqueda . "' WHERE id_producto_item=" . $row->id_producto_item;
-			mysql_query($sql);
+			$this->mysqli->query($sql);
 			$this->transmitir($sql);
 		}
 	}
 
-	mysql_query("COMMIT");
+	$this->mysqli->query("COMMIT");
   }
   
   
   public function method_mover_productos($params, $error) {
   	$p = $params[0];
   	
-  	mysql_query("START TRANSACTION");
+  	$this->mysqli->query("START TRANSACTION");
   	
 	$sql = "UPDATE arbol SET cant_productos = cant_productos - 1 WHERE id_arbol='" . $p->id_arbol_actual . "'";
-	mysql_query($sql);
+	$this->mysqli->query($sql);
 	$this->transmitir($sql);
 
 	$sql = "UPDATE arbol SET cant_productos = cant_productos + 1 WHERE id_arbol='" . $p->id_arbol . "'";
-	mysql_query($sql);
+	$this->mysqli->query($sql);
 	$this->transmitir($sql);
 
 	$sql = "UPDATE producto SET id_arbol='" . $p->id_arbol . "' WHERE id_producto='" . $p->id_producto . "'";
-	mysql_query($sql);
+	$this->mysqli->query($sql);
 	$this->transmitir($sql);
 
 	$sql = "SELECT id_producto_item, busqueda FROM producto_item WHERE id_producto=" . $p->id_producto;
-	$rs = mysql_query($sql);
-	while ($row = mysql_fetch_object($rs)) {
+	$rs = $this->mysqli->query($sql);
+	while ($row = $rs->fetch_object()) {
 		$busqueda = json_decode($row->busqueda);
 		$busqueda[0] = $p->clasificacion;
 		$busqueda = json_encode($busqueda);
 		$sql = "UPDATE producto_item SET busqueda = '" . $busqueda . "' WHERE id_producto_item=" . $row->id_producto_item;
-		mysql_query($sql);
+		$this->mysqli->query($sql);
 		$this->transmitir($sql);
 	}
 	
-	mysql_query("COMMIT");
+	$this->mysqli->query("COMMIT");
   }
   
 
@@ -277,28 +277,28 @@ class class_Productos extends class_Base_elpintao
   	
   	$fecha = date("Y-m-d H:i:s");
   	
-    mysql_query("START TRANSACTION");
+    $this->mysqli->query("START TRANSACTION");
     
 	$sql = "UPDATE producto SET desc_producto='" . $p->desc_producto . "', iva='" . $p->iva . "', serializer='" . $p->serializer . "' WHERE id_producto='" . $p->id_producto . "'";
-	mysql_query($sql);
+	$this->mysqli->query($sql);
 	$this->transmitir($sql);
 	
 	if (! is_null($p->desc_fabrica)) {
 		$sql = "UPDATE fabrica SET desc_fabrica='" . $p->desc_fabrica . "' WHERE id_fabrica='" . $p->id_fabrica . "'";
-		mysql_query($sql);
+		$this->mysqli->query($sql);
 		$this->transmitir($sql);
 		
 		$sql = "SELECT producto.iva, producto.desc_producto, fabrica.desc_fabrica, producto_item.*";
 		$sql.= " FROM (producto INNER JOIN fabrica USING(id_fabrica)) INNER JOIN producto_item USING(id_producto)";
 		$sql.= " WHERE producto.activo AND producto.id_fabrica=" . $p->id_fabrica . " AND producto.id_producto<>" . $p->id_producto;
 		
-		$rs = mysql_query($sql);
-		while ($item = mysql_fetch_object($rs)) {
+		$rs = $this->mysqli->query($sql);
+		while ($item = $rs->fetch_object()) {
 			$item->fecha = $fecha;
 			$item->desc_fabrica = $p->desc_fabrica;
 			$set = $this->prepararCampos($item, "historico_precio");
 			$sql = "INSERT historico_precio SET " . $set;
-			mysql_query($sql);
+			$this->mysqli->query($sql);
 			$this->transmitir($sql);
 		}
 	}
@@ -306,17 +306,17 @@ class class_Productos extends class_Base_elpintao
     foreach ($p->producto_item as $item) {
 		$set = $this->prepararCampos($item, "producto_item");
 		$sql = "UPDATE producto_item SET " . $set . " WHERE id_producto_item='" . $item->id_producto_item . "'";
-		mysql_query($sql);
+		$this->mysqli->query($sql);
 		$this->transmitir($sql);
 		
 		$item->fecha = $fecha;
 		$set = $this->prepararCampos($item, "historico_precio");
 		$sql = "INSERT historico_precio SET " . $set;
-		mysql_query($sql);
+		$this->mysqli->query($sql);
 		$this->transmitir($sql);
     }
     
-    mysql_query("COMMIT");
+    $this->mysqli->query("COMMIT");
   }
 
 
@@ -330,8 +330,8 @@ class class_Productos extends class_Base_elpintao
 	$sql.=" producto.*, fabrica.descrip AS fabrica, fabrica.desc_fabrica";
 	$sql.=" FROM producto INNER JOIN fabrica USING (id_fabrica)";
 	$sql.=" WHERE producto.activo AND id_producto=" . $p->id_producto;
-	$rs = mysql_query($sql);
-	$producto = mysql_fetch_object($rs);
+	$rs = $this->mysqli->query($sql);
+	$producto = $rs->fetch_object();
 	$producto->desc_producto = (float) $producto->desc_producto;
 	$producto->desc_fabrica = (float) $producto->desc_fabrica;
 	$producto->iva = (float) $producto->iva;
@@ -344,8 +344,8 @@ class class_Productos extends class_Base_elpintao
 	$sql.=" FROM (producto_item INNER JOIN unidad USING (id_unidad)) INNER JOIN color USING (id_color)";
 	$sql.=" WHERE producto_item.activo AND id_producto=" . $p->id_producto;
 	$sql.=" ORDER BY color, unidad, producto_item.capacidad";
-	$rs = mysql_query($sql);
-	while ($reg = mysql_fetch_object($rs)) {
+	$rs = $this->mysqli->query($sql);
+	while ($reg = $rs->fetch_object()) {
 		$reg->iva = $producto->iva;
 		$reg->desc_producto = $producto->desc_producto;
 		$reg->desc_fabrica = $producto->desc_fabrica;
@@ -396,19 +396,19 @@ class class_Productos extends class_Base_elpintao
   public function method_agregar_nodo($params, $error) {
   	$p = $params[0];
   	
-  	mysql_query("START TRANSACTION");
+  	$this->mysqli->query("START TRANSACTION");
   	
 	$sql="UPDATE arbol SET cant_hijos = cant_hijos + 1 WHERE id_arbol='" . $p->id_padre . "'";
-	mysql_query($sql);
+	$this->mysqli->query($sql);
 	$this->transmitir($sql);
 	$insert_id = "0";
 	$sql = "INSERT arbol SET id_arbol='" . $insert_id . "', id_padre='" . $p->id_padre . "', descrip='Nuevo nodo', cant_hijos=0, cant_productos=0";
-	mysql_query($sql);
-	$insert_id = mysql_insert_id();
+	$this->mysqli->query($sql);
+	$insert_id = $this->mysqli->insert_id;
 	$sql = "INSERT arbol SET id_arbol='" . $insert_id . "', id_padre='" . $p->id_padre . "', descrip='Nuevo nodo', cant_hijos=0, cant_productos=0";
 	$this->transmitir($sql);
 
-	mysql_query("COMMIT");
+	$this->mysqli->query("COMMIT");
 
 	return $insert_id;
   }
@@ -479,8 +479,8 @@ class class_Productos extends class_Base_elpintao
 			
 			if (!is_null($p->usuario)) {
 				$arbol = array();
-				$rs = mysql_query("SELECT id_arbol, id_padre FROM arbol");
-				while ($row = mysql_fetch_object($rs)) {
+				$rs = $this->mysqli->query("SELECT id_arbol, id_padre FROM arbol");
+				while ($row = $rs->fetch_object()) {
 					$arbol[$row->id_arbol] = $row;
 				}
 			}
@@ -490,15 +490,15 @@ class class_Productos extends class_Base_elpintao
 		
 
 		
-		$rs = mysql_query($sql);
-		while ($row = mysql_fetch_object($rs)) {
+		$rs = $this->mysqli->query($sql);
+		while ($row = $rs->fetch_object()) {
 			$bandera = true;
 			if (is_null($p->id_arbol) || !is_null($p->usuario)) {
 				$bandera = $this->verifica_arbol_usuario($arbol, $p->usuario, $row->id_arbol);
 			}
 			if ($bandera) {
-				$rsUsuario_fabrica = mysql_query("SELECT id_fabrica FROM usuario_fabrica WHERE id_usuario=" . $p->id_usuario . " AND id_fabrica=" . $row->id_fabrica);
-				if (mysql_num_rows($rsUsuario_fabrica) > 0) {
+				$rsUsuario_fabrica = $this->mysqli->query("SELECT id_fabrica FROM usuario_fabrica WHERE id_usuario=" . $p->id_usuario . " AND id_fabrica=" . $row->id_fabrica);
+				if ($rsUsuario_fabrica->num_rows > 0) {
 					$row->capacidad = (float) $row->capacidad;
 					$row->iva = (float) $row->iva;
 					$row->desc_producto = (float) $row->desc_producto;
@@ -515,8 +515,8 @@ class class_Productos extends class_Base_elpintao
 					$row->comision_vendedor = (float) $row->comision_vendedor;
 					
 					$sql = "SELECT stock FROM stock WHERE id_sucursal='" . $this->rowParamet->id_sucursal . "' AND id_producto_item='" . $row->id_producto_item . "'";
-					$rsStock = mysql_query($sql);
-					$rowStock = mysql_fetch_object($rsStock);
+					$rsStock = $this->mysqli->query($sql);
+					$rowStock = $rsStock->fetch_object();
 					$row->stock = (float) $rowStock->stock;
 					
 					$resultado->producto_item[] = $row;
@@ -546,8 +546,8 @@ class class_Productos extends class_Base_elpintao
 			
 			if (!is_null($p->usuario)) {
 				$arbol = array();
-				$rs = mysql_query("SELECT id_arbol, id_padre FROM arbol");
-				while ($row = mysql_fetch_object($rs)) {
+				$rs = $this->mysqli->query("SELECT id_arbol, id_padre FROM arbol");
+				while ($row = $rs->fetch_object()) {
 					$arbol[$row->id_arbol] = $row;
 				}
 			}
@@ -557,15 +557,15 @@ class class_Productos extends class_Base_elpintao
 		
 		$sql.=" ORDER BY fabrica, descrip";
 		
-		$rs = mysql_query($sql);
-		while ($row = mysql_fetch_object($rs)) {
+		$rs = $this->mysqli->query($sql);
+		while ($row = $rs->fetch_object()) {
 			$bandera = true;
 			if (is_null($p->id_arbol) || !is_null($p->usuario)) {
 				$bandera = $this->verifica_arbol_usuario($arbol, $p->usuario, $row->id_arbol);
 			}
 			if ($bandera) {
-				$rsUsuario_fabrica = mysql_query("SELECT id_fabrica FROM usuario_fabrica WHERE id_usuario=" . $p->id_usuario . " AND id_fabrica=" . $row->id_fabrica);
-				if (mysql_num_rows($rsUsuario_fabrica) > 0) {
+				$rsUsuario_fabrica = $this->mysqli->query("SELECT id_fabrica FROM usuario_fabrica WHERE id_usuario=" . $p->id_usuario . " AND id_fabrica=" . $row->id_fabrica);
+				if ($rsUsuario_fabrica->num_rows > 0) {
 					$row->iva = (float) $row->iva;
 					$row->desc_producto = (float) $row->desc_producto;
 					$row->desc_fabrica = (float) $row->desc_fabrica;
@@ -582,8 +582,8 @@ class class_Productos extends class_Base_elpintao
 		$sql.=" *";
 		$sql.=" FROM producto";
 		$sql.=" WHERE producto.activo AND id_producto=" . $p->id_producto;
-		$rs = mysql_query($sql);
-		$row = mysql_fetch_object($rs);
+		$rs = $this->mysqli->query($sql);
+		$row = $rs->fetch_object();
 		$row->desc_producto = (float) $row->desc_producto;
 		$row->iva = (float) $row->iva;
 	
@@ -594,8 +594,8 @@ class class_Productos extends class_Base_elpintao
 		$sql.=" *";
 		$sql.=" FROM producto_item";
 		$sql.=" WHERE producto_item.activo AND id_producto=" . $p->id_producto;
-		$rs = mysql_query($sql);
-		while ($row = mysql_fetch_object($rs)) {
+		$rs = $this->mysqli->query($sql);
+		while ($row = $rs->fetch_object()) {
 			$row->capacidad = (float) $row->capacidad;
 			$row->duracion = (float) $row->duracion;
 			
@@ -627,18 +627,18 @@ class class_Productos extends class_Base_elpintao
 	
 	$set = $this->prepararCampos($model);
 	
-	mysql_query("START TRANSACTION");
+	$this->mysqli->query("START TRANSACTION");
 	
 	try {
 	
 		if ($model->id_producto == "0") {
 			$sql="UPDATE arbol SET cant_productos = cant_productos + 1 WHERE id_arbol='" . $model->id_arbol . "'";
-			mysql_query($sql);
+			$this->mysqli->query($sql);
 			$this->transmitir($sql);
 			
 			$sql = "INSERT producto SET " . $set . ", serializer='{\"agrupar\":false,\"colores\":{}}', activo=TRUE";
-			mysql_query($sql);
-			$id_producto = mysql_insert_id();
+			$this->mysqli->query($sql);
+			$id_producto = $this->mysqli->insert_id;
 			$model->id_producto = $id_producto;
 			$set = $this->prepararCampos($model);
 			$sql = "INSERT producto SET " . $set . ", serializer='{\"agrupar\":false,\"colores\":{}}', activo=TRUE";
@@ -646,7 +646,7 @@ class class_Productos extends class_Base_elpintao
 		} else {
 			$id_producto = $model->id_producto;
 			$sql = "UPDATE producto SET " . $set . " WHERE id_producto='" . $model->id_producto . "'";
-			mysql_query($sql);
+			$this->mysqli->query($sql);
 			$this->transmitir($sql);
 		}
 		
@@ -654,8 +654,8 @@ class class_Productos extends class_Base_elpintao
 			$item->id_producto = $id_producto;
 			$set = $this->prepararCampos($item);
 			$sql = "INSERT producto_item SET " . $set . ", activo=TRUE";
-			mysql_query($sql);
-			$id_producto_item = mysql_insert_id();
+			$this->mysqli->query($sql);
+			$id_producto_item = $this->mysqli->insert_id;
 			$item->id_producto_item = $id_producto_item;
 			$set = $this->prepararCampos($item);
 			$sql = "INSERT producto_item SET " . $set . ", activo=TRUE";
@@ -663,7 +663,7 @@ class class_Productos extends class_Base_elpintao
 			
 			foreach ($this->arraySucursal as $sucursal) {
 				$sql = "INSERT stock SET id_producto_item=" . $id_producto_item . ", id_sucursal=" . $sucursal->id_sucursal . ", stock=0, transmitir=FALSE";
-				mysql_query($sql);
+				$this->mysqli->query($sql);
 
 				if ($sucursal->id_sucursal != $this->rowParamet->id_sucursal && ! $sucursal->deposito) $this->transmitir($sql, $sucursal->id_sucursal);
 				
@@ -676,22 +676,22 @@ class class_Productos extends class_Base_elpintao
 		foreach ($items->modificados as $item) {
 			$set = $this->prepararCampos($item);
 			$sql = "UPDATE producto_item SET " . $set . " WHERE id_producto_item='" . $item->id_producto_item . "'";
-			mysql_query($sql);
+			$this->mysqli->query($sql);
 			$this->transmitir($sql);
 		}
 	
 		foreach ($items->eliminados as $item) {
 			$sql="UPDATE producto_item SET activo=FALSE WHERE id_producto_item='" . $item . "'";
-			mysql_query($sql);
+			$this->mysqli->query($sql);
 			$this->transmitir($sql);
 		}
 		
-		mysql_query("COMMIT");
+		$this->mysqli->query("COMMIT");
 		$resultado = $id_producto;
 	
 	} catch (Exception $e) {
 		$message = $e->getLine();
-		mysql_query("ROLLBACK");
+		$this->mysqli->query("ROLLBACK");
 		$resultado = $message;
 	}
 	
@@ -703,59 +703,59 @@ class class_Productos extends class_Base_elpintao
   public function method_eliminar_nodo($params, $error) {
   	$p = $params[0];
   	
-  	mysql_query("START TRANSACTION");
+  	$this->mysqli->query("START TRANSACTION");
   	
 	$sql="UPDATE arbol SET cant_hijos = cant_hijos - 1 WHERE id_arbol='" . $p->id_padre . "'";
-	mysql_query($sql);
+	$this->mysqli->query($sql);
 	$this->transmitir($sql);
 	$sql="DELETE FROM arbol WHERE id_arbol=" . $p->id_arbol;
-	mysql_query($sql);
+	$this->mysqli->query($sql);
 	$this->transmitir($sql);
 	
-	mysql_query("COMMIT");
+	$this->mysqli->query("COMMIT");
   }
 
   public function method_modificar_nodo($params, $error) {
   	$p = $params[0];
   	
-  	mysql_query("START TRANSACTION");
+  	$this->mysqli->query("START TRANSACTION");
   	
 	$sql="UPDATE arbol SET descrip='" . $p->descrip . "' WHERE id_arbol='" . $p->id_arbol . "'";
-	mysql_query($sql);
+	$this->mysqli->query($sql);
 	$this->transmitir($sql);
 	
 	foreach ($p->clasificacion as $item) {
 		$sql = "SELECT id_producto_item, busqueda FROM producto INNER JOIN producto_item USING(id_producto) WHERE id_arbol=" . $item->id_arbol;
-		$rs = mysql_query($sql);
-		while ($row = mysql_fetch_object($rs)) {
+		$rs = $this->mysqli->query($sql);
+		while ($row = $rs->fetch_object()) {
 			$busqueda = json_decode($row->busqueda);
 			$busqueda[0] = $item->clasificacion;
 			$busqueda = json_encode($busqueda);
 			$sql = "UPDATE producto_item SET busqueda = '" . $busqueda . "' WHERE id_producto_item=" . $row->id_producto_item;
-			mysql_query($sql);
+			$this->mysqli->query($sql);
 			$this->transmitir($sql);
 		}
 	}
 	
-	mysql_query("COMMIT");
+	$this->mysqli->query("COMMIT");
   }
 
   public function method_eliminar_producto($params, $error) {
   	$p = $params[0];
 	
-	mysql_query("START TRANSACTION");
+	$this->mysqli->query("START TRANSACTION");
 	
 	$sql="UPDATE arbol SET cant_productos = cant_productos - 1 WHERE id_arbol='" . $p->id_arbol . "'";
-	mysql_query($sql);
+	$this->mysqli->query($sql);
 	$this->transmitir($sql);
 	$sql="UPDATE producto SET activo=FALSE WHERE id_producto='" . $p->id_producto . "'";
-	mysql_query($sql);
+	$this->mysqli->query($sql);
 	$this->transmitir($sql);
 	$sql="UPDATE producto_item SET activo=FALSE WHERE id_producto='" . $p->id_producto . "'";
-	mysql_query($sql);
+	$this->mysqli->query($sql);
 	$this->transmitir($sql);
 	
-	mysql_query("COMMIT");
+	$this->mysqli->query("COMMIT");
   }
 
   public function method_buscar_productos($params, $error) {
@@ -789,11 +789,11 @@ class class_Productos extends class_Base_elpintao
 
 	$sql.=" ORDER BY fabrica, producto, color, unidad, capacidad";
 
-	$rs = mysql_query($sql);
-	while ($reg = mysql_fetch_object($rs)) {
+	$rs = $this->mysqli->query($sql);
+	while ($reg = $rs->fetch_object()) {
 		$sql="SELECT stock FROM stock WHERE id_sucursal='" . $this->rowParamet->id_sucursal . "' AND id_producto_item='" . $reg->id_producto_item . "'";
-		$rsStock = mysql_query($sql);
-		$rowStock = mysql_fetch_object($rsStock);
+		$rsStock = $this->mysqli->query($sql);
+		$rowStock = $rsStock->fetch_object();
 		
 		$reg->stock = (float) $rowStock->stock;
 		

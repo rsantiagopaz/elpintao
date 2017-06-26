@@ -9,56 +9,56 @@ class class_Cuentas extends class_Base
   public function method_eliminar_cuenta($params, $error) {
   	$p = $params[0];
   	
-  	mysql_query("START TRANSACTION");
+  	$this->mysqli->query("START TRANSACTION");
   	
 	$sql = "DELETE FROM cuenta WHERE id_cuenta=" . $p->id_cuenta;
-	mysql_query($sql);
+	$this->mysqli->query($sql);
 	$this->transmitir($sql);
 	
 	$sql = "DELETE FROM cuenta_tipo_gasto WHERE id_cuenta=" . $p->id_cuenta;
-	mysql_query($sql);
+	$this->mysqli->query($sql);
 	$this->transmitir($sql);
 	
 	$sql = "DELETE FROM sucursal_cuenta WHERE id_cuenta=" . $p->id_cuenta;
-	mysql_query($sql);
+	$this->mysqli->query($sql);
 	$this->transmitir($sql);
 	
-	mysql_query("COMMIT");
+	$this->mysqli->query("COMMIT");
   }
   
   
   public function method_eliminar_tipo_gasto($params, $error) {
   	$p = $params[0];
   	
-  	mysql_query("START TRANSACTION");
+  	$this->mysqli->query("START TRANSACTION");
 	
-	mysql_query("COMMIT");
+	$this->mysqli->query("COMMIT");
   }
   
 
   public function method_escribir_sucursal_cuenta($params, $error) {
   	$p = $params[0];
   	
-  	mysql_query("START TRANSACTION");
+  	$this->mysqli->query("START TRANSACTION");
   	
 	$sql = "UPDATE sucursal_cuenta SET marcado=" . (int)$p->marcado . " WHERE id_sucursal_cuenta=" . $p->id_sucursal_cuenta;
-	mysql_query($sql);
+	$this->mysqli->query($sql);
 	$this->transmitir($sql);
 	
-	mysql_query("COMMIT");
+	$this->mysqli->query("COMMIT");
   }
   
   
   public function method_escribir_cuenta_tipo_gasto($params, $error) {
   	$p = $params[0];
   	
-  	mysql_query("START TRANSACTION");
+  	$this->mysqli->query("START TRANSACTION");
   	
 	$sql = "UPDATE cuenta_tipo_gasto SET marcado=" . (int)$p->marcado . " WHERE id_cuenta_tipo_gasto=" . $p->id_cuenta_tipo_gasto;
-	mysql_query($sql);
+	$this->mysqli->query($sql);
 	$this->transmitir($sql);
 	
-	mysql_query("COMMIT");
+	$this->mysqli->query("COMMIT");
   }
   
   
@@ -72,8 +72,8 @@ class class_Cuentas extends class_Base
 	} else {
 		$sql = "SELECT cuenta_tipo_gasto.*, tipo_gasto.id_padre, tipo_gasto.descrip FROM tipo_gasto INNER JOIN cuenta_tipo_gasto USING(id_tipo_gasto) WHERE id_padre=" . $p->id_padre . " AND id_sucursal=" . $p->id_sucursal . " AND id_cuenta=" . $p->id_cuenta . " ORDER BY descrip";
 	}
-	$rsTipo_gasto = mysql_query($sql);
-	while ($rowTipo_gasto = mysql_fetch_object($rsTipo_gasto)) {
+	$rsTipo_gasto = $this->mysqli->query($sql);
+	while ($rowTipo_gasto = $rsTipo_gasto->fetch_object()) {
 		//$opciones = array("seleccion"=>"bool", "importe"=>"float");
 		//$sql = "SELECT cuenta.descrip, tipo_gasto_cuenta.* FROM cuenta INNER JOIN tipo_gasto_cuenta USING(id_cuenta) WHERE tipo_gasto_cuenta.id_tipo_gasto=" . $rowTipo_gasto->id_tipo_gasto . " ORDER BY cuenta.descrip";
 		//$rowTipo_gasto->cuenta = $this->toJson($sql, $opciones);
@@ -112,11 +112,11 @@ class class_Cuentas extends class_Base
   		$sql = "SELECT id_cuenta FROM cuenta";
   		$cuenta = $this->toJson($sql);
   		
-  		mysql_query("START TRANSACTION");
+  		$this->mysqli->query("START TRANSACTION");
   		
 		$sql = "INSERT tipo_gasto SET id_padre=" . $p->id_padre . ", descrip='" . $p->descrip . "'";
-		mysql_query($sql);
-		$id_tipo_gasto = mysql_insert_id();
+		$this->mysqli->query($sql);
+		$id_tipo_gasto = $this->mysqli->insert_id;
 		$resultado = $id_tipo_gasto;
 		$sql.= ", id_tipo_gasto=" . $id_tipo_gasto;
 		$this->transmitir($sql);
@@ -124,22 +124,22 @@ class class_Cuentas extends class_Base
 		foreach ($sucursal as $row_sucursal) {
 			foreach ($cuenta as $row_cuenta) {
 				$sql = "INSERT cuenta_tipo_gasto SET id_sucursal=" . $row_sucursal->id_sucursal . ", id_cuenta=" . $row_cuenta->id_cuenta . ", id_tipo_gasto=" . $id_tipo_gasto . ", marcado=0, importe=0";
-				mysql_query($sql);
-				$id_cuenta_tipo_gasto = mysql_insert_id();
+				$this->mysqli->query($sql);
+				$id_cuenta_tipo_gasto = $this->mysqli->insert_id;
 				$sql.= ", id_cuenta_tipo_gasto=" . $id_cuenta_tipo_gasto;
 				$this->transmitir($sql);
 			}
 		}
 		
-		mysql_query("COMMIT");
+		$this->mysqli->query("COMMIT");
   	} else {
-  		mysql_query("START TRANSACTION");
+  		$this->mysqli->query("START TRANSACTION");
   		
 		$sql = "UPDATE tipo_gasto SET descrip='" . $p->descrip . "' WHERE id_tipo_gasto=" . $p->id_tipo_gasto;
-		mysql_query($sql);
+		$this->mysqli->query($sql);
 		$this->transmitir($sql);
 		
-		mysql_query("COMMIT");
+		$this->mysqli->query("COMMIT");
   	}
   	
   	return $resultado;
@@ -158,40 +158,40 @@ class class_Cuentas extends class_Base
   		$sql = "SELECT id_tipo_gasto FROM tipo_gasto WHERE id_tipo_gasto <> 1";
   		$tipo_gasto = $this->toJson($sql);
   		
-  		mysql_query("START TRANSACTION");
+  		$this->mysqli->query("START TRANSACTION");
   		
 		$sql = "INSERT cuenta SET descrip='" . $p->descrip . "'";
-		mysql_query($sql);
-		$id_cuenta = mysql_insert_id();
+		$this->mysqli->query($sql);
+		$id_cuenta = $this->mysqli->insert_id;
 		$resultado = $id_cuenta;
 		$sql.= ", id_cuenta=" . $id_cuenta;
 		$this->transmitir($sql);
 		
 		foreach ($sucursal as $row_sucursal) {
 			$sql = "INSERT sucursal_cuenta SET id_sucursal=" . $row_sucursal->id_sucursal . ", id_cuenta=" . $id_cuenta . ", marcado=0";
-			mysql_query($sql);
-			$id_sucursal_cuenta = mysql_insert_id();
+			$this->mysqli->query($sql);
+			$id_sucursal_cuenta = $this->mysqli->insert_id;
 			$sql.= ", id_sucursal_cuenta=" . $id_sucursal_cuenta;
 			$this->transmitir($sql);
 			
 			foreach ($tipo_gasto as $row_tipo_gasto) {
 				$sql = "INSERT cuenta_tipo_gasto SET id_sucursal=" . $row_sucursal->id_sucursal . ", id_cuenta=" . $id_cuenta . ", id_tipo_gasto=" . $row_tipo_gasto->id_tipo_gasto . ", marcado=0, importe=0";
-				mysql_query($sql);
-				$id_cuenta_tipo_gasto = mysql_insert_id();
+				$this->mysqli->query($sql);
+				$id_cuenta_tipo_gasto = $this->mysqli->insert_id;
 				$sql.= ", id_cuenta_tipo_gasto=" . $id_cuenta_tipo_gasto;
 				$this->transmitir($sql);
 			}
 		}
 		
-		mysql_query("COMMIT");
+		$this->mysqli->query("COMMIT");
   	} else {
-  		mysql_query("START TRANSACTION");
+  		$this->mysqli->query("START TRANSACTION");
   		
 		$sql = "UPDATE cuenta SET descrip='" . $p->descrip . "' WHERE id_cuenta=" . $p->id_cuenta;
-		mysql_query($sql);
+		$this->mysqli->query($sql);
 		$this->transmitir($sql);
 		
-		mysql_query("COMMIT");
+		$this->mysqli->query("COMMIT");
   	}
   	
   	return $resultado;

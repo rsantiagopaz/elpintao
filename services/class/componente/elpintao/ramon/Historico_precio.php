@@ -11,7 +11,7 @@ class class_Historico_precio extends class_Base_elpintao
 
 	$opciones = array("iva"=>"float", "desc_fabrica"=>"float", "desc_producto"=>"float", "precio_lista"=>"float", "remarc_final"=>"float", "remarc_mayorista"=>"float", "desc_final"=>"float", "desc_mayorista"=>"float", "bonif_final"=>"float", "bonif_mayorista"=>"float", "comision_vendedor"=>"float");
 	$sql = "SELECT * FROM historico_precio WHERE id_producto_item=" . $p->id_producto_item . " ORDER BY fecha";
-	return $this->toJson(mysql_query($sql), $opciones);
+	return $this->toJson($this->mysqli->query($sql), $opciones);
   }
   
 
@@ -42,7 +42,7 @@ class class_Historico_precio extends class_Base_elpintao
 	$sql.=" ORDER BY fabrica, producto, color, unidad, capacidad";
 
 	$opciones = array("capacidad"=>"float");
-	return $this->toJson(mysql_query($sql), $opciones);
+	return $this->toJson($this->mysqli->query($sql), $opciones);
   }
 }
 

@@ -12,17 +12,17 @@ class class_Reparacion extends class_Base
   	$sucursal = $this->toJson("SELECT id_sucursal FROM sucursal ORDER BY id_sucursal");
   	
 	$sql = "SELECT id_producto_item FROM producto_item ORDER BY id_producto_item";
-	$rsProducto_item = mysql_query($sql);
+	$rsProducto_item = $this->mysqli->query($sql);
 	
-	mysql_query("START TRANSACTION");
+	$this->mysqli->query("START TRANSACTION");
 	
-	while ($rowProducto_item = mysql_fetch_object($rsProducto_item)) {
+	while ($rowProducto_item = $rsProducto_item->fetch_object()) {
 		foreach ($sucursal as $rowSucursal) {
 			$sql = "SELECT transmitir FROM stock WHERE id_producto_item=" . $rowProducto_item->id_producto_item . " AND id_sucursal=" . $rowSucursal->id_sucursal;
-			$rs = mysql_query($sql);
-			if (mysql_num_rows($rs)==0) {
+			$rs = $this->mysqli->query($sql);
+			if ($rs->num_rows == 0) {
 				$sql = "INSERT stock SET id_producto_item=" . $rowProducto_item->id_producto_item . ", id_sucursal=" . $rowSucursal->id_sucursal . ", stock=0, transmitir=FALSE";
-				mysql_query($sql);
+				$this->mysqli->query($sql);
 				if ($rowSucursal->id_sucursal!=$this->rowParamet->id_sucursal_deposito) {
 					$this->transmitir($sql, $rowSucursal->id_sucursal);
 				}
@@ -30,7 +30,7 @@ class class_Reparacion extends class_Base
 		}
 	}
 	
-	mysql_query("COMMIT");
+	$this->mysqli->query("COMMIT");
   }
   
   
@@ -41,17 +41,17 @@ class class_Reparacion extends class_Base
   	$cuenta = $this->toJson("SELECT id_cuenta FROM cuenta ORDER BY id_cuenta");
   	$tipo_gasto = $this->toJson("SELECT id_tipo_gasto FROM tipo_gasto ORDER BY id_tipo_gasto");
   	
-  	mysql_query("START TRANSACTION");
+  	$this->mysqli->query("START TRANSACTION");
   	
   	foreach ($sucursal as $rowSucursal) {
   		foreach ($cuenta as $rowCuenta) {
 			$sql = "SELECT id_sucursal_cuenta FROM sucursal_cuenta WHERE id_sucursal=" . $rowSucursal->id_sucursal . " AND id_cuenta=" . $rowCuenta->id_cuenta;
-			$rs = mysql_query($sql);
-			if (mysql_num_rows($rs)==0) {
+			$rs = $this->mysqli->query($sql);
+			if ($rs->num_rows == 0) {
 				$insert_id = 0;
 				$sql = "INSERT sucursal_cuenta SET id_sucursal_cuenta=" . $insert_id . ", id_sucursal=" . $rowSucursal->id_sucursal . ", id_cuenta=" . $rowCuenta->id_cuenta . ", marcado=FALSE";
-				mysql_query($sql);
-				$insert_id = mysql_insert_id();
+				$this->mysqli->query($sql);
+				$insert_id = $this->mysqli->insert_id;
 				$sql = "INSERT sucursal_cuenta SET id_sucursal_cuenta=" . $insert_id . ", id_sucursal=" . $rowSucursal->id_sucursal . ", id_cuenta=" . $rowCuenta->id_cuenta . ", marcado=FALSE";
 				$this->transmitir($sql);
 			}
@@ -63,12 +63,12 @@ class class_Reparacion extends class_Base
   			foreach ($tipo_gasto as $rowTipo_gasto) {
   				if ($rowTipo_gasto->id_tipo_gasto!="1") {
 					$sql = "SELECT id_cuenta_tipo_gasto FROM cuenta_tipo_gasto WHERE id_sucursal=" . $rowSucursal->id_sucursal . " AND id_cuenta=" . $rowCuenta->id_cuenta . " AND id_tipo_gasto=" . $rowTipo_gasto->id_tipo_gasto;
-					$rs = mysql_query($sql);
-					if (mysql_num_rows($rs)==0) {
+					$rs = $this->mysqli->query($sql);
+					if ($rs->num_rows == 0) {
   						$insert_id = 0;
 						$sql = "INSERT cuenta_tipo_gasto SET id_cuenta_tipo_gasto=" . $insert_id . ", id_sucursal=" . $rowSucursal->id_sucursal . ", id_cuenta=" . $rowCuenta->id_cuenta . ", id_tipo_gasto=" . $rowTipo_gasto->id_tipo_gasto . ", marcado=FALSE, importe=0";
-						mysql_query($sql);
-						$insert_id = mysql_insert_id();
+						$this->mysqli->query($sql);
+						$insert_id = $this->mysqli->insert_id;
 						$sql = "INSERT cuenta_tipo_gasto SET id_cuenta_tipo_gasto=" . $insert_id . ", id_sucursal=" . $rowSucursal->id_sucursal . ", id_cuenta=" . $rowCuenta->id_cuenta . ", id_tipo_gasto=" . $rowTipo_gasto->id_tipo_gasto . ", marcado=FALSE, importe=0";
 						$this->transmitir($sql);
   					}
@@ -77,7 +77,7 @@ class class_Reparacion extends class_Base
   		}
   	}
   	
-  	mysql_query("COMMIT");
+  	$this->mysqli->query("COMMIT");
   }
 
 
@@ -85,26 +85,26 @@ class class_Reparacion extends class_Base
   	set_time_limit(0);
   	
 	$sql="SELECT id_arbol, cant_hijos, cant_productos FROM arbol ORDER BY id_arbol";
-	$rsArbol = mysql_query($sql);
-	while ($row = mysql_fetch_object($rsArbol)) {
+	$rsArbol = $this->mysqli->query($sql);
+	while ($row = $rsArbol->fetch_object()) {
 		$row->cant_hijos = (float) $row->cant_hijos;
 		$row->cant_productos = (float) $row->cant_productos;
 		$sql="SELECT id_arbol FROM arbol WHERE id_padre=" . $row->id_arbol;
-		$rs = mysql_query($sql);
-		$cant_hijos = mysql_num_rows($rs);
+		$rs = $this->mysqli->query($sql);
+		$cant_hijos = $rs->num_rows;
 		
 		$sql="SELECT id_arbol FROM producto WHERE producto.activo AND id_arbol=" . $row->id_arbol;
-		$rs = mysql_query($sql);
-		$cant_productos = mysql_num_rows($rs);
+		$rs = $this->mysqli->query($sql);
+		$cant_productos = $rs->num_rows;
 
 		if ($row->cant_hijos != $cant_hijos || $row->cant_productos != $cant_productos) {
-			mysql_query("START TRANSACTION");
+			$this->mysqli->query("START TRANSACTION");
 			
 			$sql="UPDATE arbol SET cant_hijos=" . $cant_hijos . ", cant_productos=" . $cant_productos . " WHERE id_arbol=" . $row->id_arbol;
-			mysql_query($sql);
+			$this->mysqli->query($sql);
 			$this->transmitir($sql);
 			
-			mysql_query("COMMIT");
+			$this->mysqli->query("COMMIT");
 		}
 	}
   }
@@ -119,10 +119,10 @@ class class_Reparacion extends class_Base
 	$sql.=" FROM ((producto INNER JOIN fabrica USING(id_fabrica)) INNER JOIN producto_item USING (id_producto)) INNER JOIN color USING (id_color)";
 	$sql.=" WHERE producto.activo AND producto_item.activo";
 	//$sql.=" GROUP BY id_producto_item";
-	$rs = mysql_query($sql);
+	$rs = $this->mysqli->query($sql);
 	
 	$contador = 0;
-	while ($row = mysql_fetch_object($rs)) {
+	while ($row = $rs->fetch_object()) {
 		$aux = array();
 		$aux[] = $this->clasificacion_arbol($row->id_arbol);
 		$aux[] = $row->descrip;
@@ -134,19 +134,19 @@ class class_Reparacion extends class_Base
 			//var_dump($row->busqueda);
 			//var_dump($busqueda);
 			//return;
-			mysql_query("START TRANSACTION");
+			$this->mysqli->query("START TRANSACTION");
 			
 			$sql = "UPDATE producto_item SET busqueda = '" . $busqueda . "' WHERE id_producto_item='" . $row->id_producto_item . "'";
-			mysql_query($sql);
+			$this->mysqli->query($sql);
 			
 			$this->transmitir($sql);
 			
-			mysql_query("COMMIT");
+			$this->mysqli->query("COMMIT");
 			$contador = $contador + 1;
 		}
 	}
 	
-	return $contador . " de " . mysql_num_rows($rs);
+	return $contador . " de " . $rs->num_rows;
   }
   
   
@@ -157,8 +157,8 @@ class class_Reparacion extends class_Base
   		$resultado = "";
   	} else if (is_null($clasificacion[$id_arbol])) {
 		$sql = "SELECT descrip, id_padre FROM arbol WHERE id_arbol=" . $id_arbol;
-		$rs = mysql_query($sql);
-		$row = mysql_fetch_object($rs);
+		$rs = $this->mysqli->query($sql);
+		$row = $rs->fetch_object();
 		$resultado = $this->clasificacion_arbol($row->id_padre) . " / " . $row->descrip;
 		$clasificacion[$id_arbol] = $resultado;
   	} else {
@@ -195,8 +195,8 @@ class class_Reparacion extends class_Base
 	$sql.= " WHERE producto_item.activo AND producto.id_fabrica=" . $p->id_fabrica;
 	$sql.= " ORDER BY producto, color, unidad, capacidad";
 
-	$rs = mysql_query($sql);
-	while ($reg = mysql_fetch_object($rs)) {
+	$rs = $this->mysqli->query($sql);
+	while ($reg = $rs->fetch_object()) {
 		$reg->capacidad = (float) $reg->capacidad;
 		$resultado[] = $reg;
 	}
@@ -209,29 +209,29 @@ class class_Reparacion extends class_Base
   	
   	set_time_limit(0);
   	
-  	mysql_query("START TRANSACTION");
+  	$this->mysqli->query("START TRANSACTION");
   	
 	$sql = "UPDATE producto SET id_fabrica=" . $p->id_fabrica_destino . " WHERE id_fabrica=" . $p->id_fabrica_origen;
-	mysql_query($sql);
+	$this->mysqli->query($sql);
 	$this->transmitir($sql);
 	
 	$sql = "UPDATE pedido_ext SET id_fabrica=" . $p->id_fabrica_destino . " WHERE id_fabrica=" . $p->id_fabrica_origen;
-	mysql_query($sql);
+	$this->mysqli->query($sql);
 	$this->transmitir($sql);
 	
 	$sql = "UPDATE pedido_int SET id_fabrica=" . $p->id_fabrica_destino . " WHERE id_fabrica=" . $p->id_fabrica_origen;
-	mysql_query($sql);
+	$this->mysqli->query($sql);
 	$this->transmitir($sql);
 	
 	$sql = "UPDATE pedido_suc SET id_fabrica=" . $p->id_fabrica_destino . " WHERE id_fabrica=" . $p->id_fabrica_origen;
-	mysql_query($sql);
+	$this->mysqli->query($sql);
 	$this->transmitir($sql);
 	
 	$sql = "DELETE FROM fabrica WHERE id_fabrica=" . $p->id_fabrica_origen;
-	mysql_query($sql);
+	$this->mysqli->query($sql);
 	$this->transmitir($sql);
 
-	mysql_query("COMMIT");
+	$this->mysqli->query("COMMIT");
 	
 	
 	$this->method_arreglar_campo_busqueda($params, $error);
@@ -245,22 +245,22 @@ class class_Reparacion extends class_Base
 	$contador = 0;
 	
 	$sql = "SELECT id_producto_item FROM histo";
-	$rsHisto = mysql_query($sql);
-	$rowHisto = mysql_fetch_object($rsHisto);
+	$rsHisto = $this->mysqli->query($sql);
+	$rowHisto = $rsHisto->fetch_object();
 
 	$sql = "SELECT id_producto_item FROM producto_item WHERE id_producto_item>=" . $rowHisto->id_producto_item . " ORDER BY id_producto_item";
-	$rsProducto_item = mysql_query($sql);
+	$rsProducto_item = $this->mysqli->query($sql);
 	
 	try {
-		while ($rowProducto_item = mysql_fetch_object($rsProducto_item)) {
+		while ($rowProducto_item = $rsProducto_item->fetch_object()) {
 			$row = new stdClass;
 			
 			$sql = "SELECT * FROM historico_precio WHERE id_producto_item=" . $rowProducto_item->id_producto_item . " ORDER BY id_historico_precio";
-			$rsHistorico_precio = mysql_query($sql);
+			$rsHistorico_precio = $this->mysqli->query($sql);
 			
-			//mysql_query("START TRANSACTION");
+			//$this->mysqli->query("START TRANSACTION");
 			
-			while ($rowHistorico_precio = mysql_fetch_object($rsHistorico_precio)) {
+			while ($rowHistorico_precio = $rsHistorico_precio->fetch_object()) {
 				$rowHistorico_precio->iva = (float) $rowHistorico_precio->iva;
 				$rowHistorico_precio->desc_fabrica = (float) $rowHistorico_precio->desc_fabrica;
 				$rowHistorico_precio->desc_producto = (float) $rowHistorico_precio->desc_producto;
@@ -284,24 +284,24 @@ class class_Reparacion extends class_Base
 				
 				if ($bandera) {
 					$sql = "DELETE FROM historico_precio WHERE id_historico_precio=" . $rowHistorico_precio->id_historico_precio;
-					mysql_query($sql);
+					$this->mysqli->query($sql);
 					
-					$contador = $contador + mysql_affected_rows();
+					$contador = $contador + $this->mysqli->affected_rows;
 				} else {
 					$row = $rowHistorico_precio;
 				}
 			}
 			
-			//mysql_query("COMMIT");
+			//$this->mysqli->query("COMMIT");
 			$sql = "UPDATE histo SET id_producto_item=" . $rowProducto_item->id_producto_item . " WHERE id_histo=1";
-			mysql_query($sql);
+			$this->mysqli->query($sql);
 		}
 	} catch (Exception $e) {
 		return $contador . ", " . $rowProducto_item->id_producto_item . ", " . $rowHistorico_precio->id_historico_precio . ", " . $e->getMessage();
 	}
 	
 	$sql = "UPDATE histo SET texto='" . $contador . ", " . date("H:i:s") . "' WHERE id_histo=1";
-	mysql_query($sql);
+	$this->mysqli->query($sql);
 	
 	return $contador . ", " . date("H:i:s");
   }

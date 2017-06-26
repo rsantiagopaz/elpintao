@@ -10,9 +10,9 @@ class class_Ordenamiento extends class_Base_elpintao
   	$p = $params[0];
   	
 	$sql = "UPDATE ordenamiento SET indice = indice + 1 WHERE id_ordenamiento='" . $p->id_ordenamiento1 . "'";
-	mysql_query($sql);
+	$this->mysqli->query($sql);
 	$sql = "UPDATE ordenamiento SET indice = indice - 1 WHERE id_ordenamiento='" . $p->id_ordenamiento2 . "'";
-	mysql_query($sql);
+	$this->mysqli->query($sql);
   }
 
 
@@ -21,8 +21,8 @@ class class_Ordenamiento extends class_Base_elpintao
   	
   	$set = $this->prepararCampos($p->model);
 	$sql = "INSERT ordenamiento SET " . $set;
-	mysql_query($sql);
-	return mysql_insert_id();
+	$this->mysqli->query($sql);
+	return $this->mysqli->insert_id;
   }
 
   public function method_leer_items($params, $error) {
@@ -30,8 +30,8 @@ class class_Ordenamiento extends class_Base_elpintao
   	
   	$resultado = array();
   	$sql="SELECT * FROM ordenamiento WHERE tag='" . $p->tag . "' ORDER BY indice";
-	$rs = mysql_query($sql);
-	while ($row = mysql_fetch_object($rs)) {
+	$rs = $this->mysqli->query($sql);
+	while ($row = $rs->fetch_object()) {
 		$resultado[] = $row;
 	}
 
@@ -42,7 +42,7 @@ class class_Ordenamiento extends class_Base_elpintao
   	$p = $params[0];
   	
 	$sql = "DELETE FROM ordenamiento WHERE id_ordenamiento='" . $p->id_ordenamiento . "'";
-	mysql_query($sql);
+	$this->mysqli->query($sql);
   }
 }
 
