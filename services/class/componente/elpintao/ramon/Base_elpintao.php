@@ -12,7 +12,9 @@ class class_Base_elpintao extends class_Base_general
 	protected $arrayDeposito;
 	
 	function __construct() {
-		mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+		$aux = new mysqli_driver;
+		$aux->report_mode = MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT;
+		//mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 		
 		if (! is_null($_SESSION['conexion']->servidor)) {
 			$this->mysqli = new mysqli($_SESSION['conexion']->servidor, $_SESSION['conexion']->usuario, $_SESSION['conexion']->password, $_SESSION['conexion']->database);
