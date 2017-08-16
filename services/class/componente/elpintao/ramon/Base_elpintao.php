@@ -96,11 +96,17 @@ class class_Base_elpintao extends class_Base_general
   			if ($sucursal->id_sucursal != $this->rowParamet->id_sucursal) {
   				$sql = "INSERT transmision SET id_sucursal='" . $sucursal->id_sucursal . "', descrip='" . $descrip . "', sql_texto='" . $this->mysqli->real_escape_string($sql_texto) . "'";
   				$this->mysqli->query($sql);
+  				
+  				$sql = "INSERT transmision_log_ent SET id_sucursal='" . $sucursal->id_sucursal . "', descrip='" . $descrip . "', sql_texto='" . $this->mysqli->real_escape_string($sql_texto) . "'";
+  				$this->mysqli->query($sql);
   			}
   		}
   	} else {
 		$sql = "INSERT transmision SET id_sucursal='" . $id_sucursal . "', descrip='" . $descrip . "', sql_texto='" . $this->mysqli->real_escape_string($sql_texto) . "'";
   		$this->mysqli->query($sql);
+  		
+		$sql = "INSERT transmision_log_ent SET id_sucursal='" . $id_sucursal . "', descrip='" . $descrip . "', sql_texto='" . $this->mysqli->real_escape_string($sql_texto) . "'";
+		$this->mysqli->query($sql);
   	}
   }
 }

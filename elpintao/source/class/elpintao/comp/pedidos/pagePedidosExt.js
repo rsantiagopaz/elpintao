@@ -510,7 +510,7 @@ qx.Class.define("elpintao.comp.pedidos.pagePedidosExt",
 	
 	
 		var toolbar1 = new qx.ui.toolbar.ToolBar();
-		var rb1 = new qx.ui.toolbar.RadioButton(" Pedidos pendientes ");
+		var rb1 = new qx.ui.toolbar.RadioButton(" Pedidos generados ");
 		var rb2 = new qx.ui.toolbar.RadioButton(" Pedir a proveedor ");
 		rb1.addListener("execute", function(){stack1.setSelection([composite1]);});
 		rb2.addListener("execute", function(){stack1.setSelection([composite2]);});
