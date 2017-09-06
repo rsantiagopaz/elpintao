@@ -16,6 +16,10 @@ class class_Transmision_SA extends class_Base
 	$id_sucursal1 = $this->rowParamet->id_sucursal;
   	
 	foreach ($this->arraySucursal as $sucursal) {
+		
+		$mysqli_log = new mysqli($_SESSION['conexion']->servidor, $_SESSION['conexion']->usuario, $_SESSION['conexion']->password, $_SESSION['conexion']->database);
+		$mysqli_log->query("SET NAMES 'utf8'");
+		
 		$mysqli_01 = new mysqli($this->arraySucursal[$id_sucursal1]->url, $this->arraySucursal[$id_sucursal1]->username, $this->arraySucursal[$id_sucursal1]->password, $this->arraySucursal[$id_sucursal1]->base);
 		if ($mysqli_01->connect_errno == 0) {
 			$mysqli_01->query("SET NAMES 'utf8'");
@@ -38,6 +42,8 @@ class class_Transmision_SA extends class_Base
 							$gtrid1 = "gtrid1-" . $id_sucursal1 . "-" . $id_sucursal2 . "-" . $time;
 							$gtrid2 = "gtrid2-" . $id_sucursal1 . "-" . $id_sucursal2 . "-" . $time;
 							
+							$mysqli_log->query("START TRANSACTION");
+							
 							$sql = "XA START '" . $gtrid1 . "'";
 							$mysqli_01->query($sql);
 							$sql = "XA START '" . $gtrid2 . "'";
@@ -49,6 +55,9 @@ class class_Transmision_SA extends class_Base
 								$id_transmision = $row->id_transmision;
 								$sql = $row->sql_texto;
 								$mysqli_02->query($sql);
+								
+								$sql = "INSERT transmision_log_sal SET id_sucursal='" . $row->id_sucursal . "', descrip='" . $row->descrip . "', sql_texto='" . $mysqli_log->real_escape_string($row->sql_texto) . "'";
+								$mysqli_log->query($sql);
 								
 								$sql = "DELETE FROM transmision WHERE id_transmision=" . $row->id_transmision . "";
 								$mysqli_01->query($sql);
@@ -93,11 +102,15 @@ class class_Transmision_SA extends class_Base
 								$mysqli_02->query($sql);
 								$sql = "XA COMMIT '" . $gtrid1 . "'";
 								$mysqli_01->query($sql);
+								
+								$mysqli_log->query("COMMIT");
 							} else {
 								$sql = "XA ROLLBACK '" . $gtrid2 . "'";
 								$mysqli_02->query($sql);
 								$sql = "XA ROLLBACK '" . $gtrid1 . "'";
 								$mysqli_01->query($sql);
+								
+								$mysqli_log->query("ROLLBACK");
 							}
 						} catch (Exception $e) {
 							$sql = "INSERT transmision_error SET id_sucursal=" . $id_sucursal2 . ", tipo='actualizacion', hora='" . date("H:i:s") . "', descrip='transferencia', detalle='" . $this->mysqli->real_escape_string($e->getMessage() . " | " . $sql) . "', id_transmision=" . $id_transmision;
@@ -120,6 +133,8 @@ class class_Transmision_SA extends class_Base
 			}
 			
 			$mysqli_01->close();
+			
+			$mysqli_log->close();
 
 		} else {
 			$sql = "INSERT transmision_error SET id_sucursal=" . $id_sucursal1 . ", tipo='actualizacion', hora='" . date("H:i:s") . "', descrip='conexión local', detalle='" . $this->mysqli->real_escape_string($php_errormsg) . "'";
