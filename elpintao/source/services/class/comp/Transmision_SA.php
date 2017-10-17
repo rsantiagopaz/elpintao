@@ -16,8 +16,8 @@ class class_Transmision_SA extends class_Base
 	$id_sucursal1 = $this->rowParamet->id_sucursal;
   	
 	foreach ($this->arraySucursal as $sucursal) {
-		$mysqli_01 = new mysqli($this->arraySucursal[$id_sucursal1]->url, $this->arraySucursal[$id_sucursal1]->username, $this->arraySucursal[$id_sucursal1]->password, $this->arraySucursal[$id_sucursal1]->base);
-		if ($mysqli_01->connect_errno == 0) {
+		$mysqli_01 = @mysqli_connect($this->arraySucursal[$id_sucursal1]->url, $this->arraySucursal[$id_sucursal1]->username, $this->arraySucursal[$id_sucursal1]->password, $this->arraySucursal[$id_sucursal1]->base);
+		if ($mysqli_01) {
 			$mysqli_01->query("SET NAMES 'utf8'");
 			
 			$id_sucursal2 = $sucursal->id_sucursal;
@@ -29,8 +29,8 @@ class class_Transmision_SA extends class_Base
 				$sql = "SELECT * FROM transmision WHERE id_sucursal=" . $id_sucursal2 . " ORDER BY id_transmision";
 				$rs = $mysqli_01->query($sql);
 				if ($rs->num_rows > 0) {
-					$mysqli_02 = new mysqli($sucursal->url, $sucursal->username, $sucursal->password, $sucursal->base);
-					if ($mysqli_02->connect_errno == 0) {
+					$mysqli_02 = @mysqli_connect($sucursal->url, $sucursal->username, $sucursal->password, $sucursal->base);
+					if ($mysqli_02) {
 						try {
 							$mysqli_02->query("SET NAMES 'utf8'");
 							

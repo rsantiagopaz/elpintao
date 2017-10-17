@@ -8,7 +8,7 @@ qx.Class.define("elpintao.comp.remitos.pageResumenRemitos",
 		
 		
 		
-	this.setLabel("Resumen remitos emitidos");
+	this.setLabel("Resumen salidas de mercaderia");
 	this.setLayout(new qx.ui.layout.Canvas());
 	this.toggleShowCloseButton();
 		
@@ -27,11 +27,6 @@ qx.Class.define("elpintao.comp.remitos.pageResumenRemitos",
 	
 	
 	
-	var functionActualizar = this.functionActualizar = qx.lang.Function.bind(function(id_remito) {
-
-			
-	}, this);
-		
 		
 
 	var functionCalcularTotales = function(tableModelD, tableModelT) {
@@ -84,9 +79,9 @@ qx.Class.define("elpintao.comp.remitos.pageResumenRemitos",
 	
 	var slbEstado = this.slbEstado = new qx.ui.form.SelectBox();
 	slbEstado.setWidth(90);
-	slbEstado.add(new qx.ui.form.ListItem("Registrado"));
-	slbEstado.add(new qx.ui.form.ListItem("Autorizado"));
-	slbEstado.add(new qx.ui.form.ListItem("Todo"));
+	slbEstado.add(new qx.ui.form.ListItem("Pendiente de entrega", null, "Registrado"));
+	slbEstado.add(new qx.ui.form.ListItem("Entregado", null, "Autorizado"));
+	slbEstado.add(new qx.ui.form.ListItem("Todo", null, "Todo"));
 	slbEstado.setSelection([slbEstado.getChildren()[1]]);
 	composite.add(slbEstado, {row: 0, column: 1});
 	
@@ -115,7 +110,7 @@ qx.Class.define("elpintao.comp.remitos.pageResumenRemitos",
 	var slbSucursal = this.slbSucursal = new qx.ui.form.SelectBox();
 	slbSucursal.setWidth(120);
 	
-	slbSucursal.add(new qx.ui.form.ListItem(" ", null, "0"));
+	slbSucursal.add(new qx.ui.form.ListItem("-", null, "0"));
 	for (var x in resultado) {
 		slbSucursal.add(new qx.ui.form.ListItem(resultado[x].label, null, resultado[x].model));
 	}
@@ -146,7 +141,7 @@ qx.Class.define("elpintao.comp.remitos.pageResumenRemitos",
 	var slbFabrica = this.slbFabrica = new qx.ui.form.SelectBox();
 	slbFabrica.setWidth(200);
 	
-	slbFabrica.add(new qx.ui.form.ListItem(" ", null, "0"));
+	slbFabrica.add(new qx.ui.form.ListItem("-", null, "0"));
 	for (var x in resultado) {
 		slbFabrica.add(new qx.ui.form.ListItem(resultado[x].label, null, resultado[x].model));
 	}
@@ -190,7 +185,7 @@ qx.Class.define("elpintao.comp.remitos.pageResumenRemitos",
 		tblTotgen.setFocusedCell();
 		
 		var p = {};
-		p.estado = this.slbEstado.getSelection()[0].getLabel();
+		p.estado = this.slbEstado.getModelSelection().getItem(0);
 		p.desde = this.dtfDesde.getValue();
 		p.hasta = this.dtfHasta.getValue();
 		p.id_sucursal = this.slbSucursal.getModelSelection().getItem(0);

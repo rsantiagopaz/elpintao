@@ -13,7 +13,8 @@ class class_Base_elpintao extends class_Base_general
 	
 	function __construct() {
 		$aux = new mysqli_driver;
-		$aux->report_mode = MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT;
+		$aux->report_mode = MYSQLI_REPORT_ERROR;
+		//$aux->report_mode = MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT;
 		//mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 		
 		if (! is_null($_SESSION['conexion']->servidor)) {

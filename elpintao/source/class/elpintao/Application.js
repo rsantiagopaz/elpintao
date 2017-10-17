@@ -594,7 +594,7 @@ qx.Class.define("elpintao.Application",
 	mnuCentral.add(btnPedidosSuc);
 	mnuCentral.addSeparator()
 	
-	var btnRemitosEmiCentral = new qx.ui.menu.Button("Remitos emitidos");
+	var btnRemitosEmiCentral = new qx.ui.menu.Button("Salidas de mercaderia (Remitos)");
 	btnRemitosEmiCentral.addListener("execute", function(e){
 		if (pageRemitosEmi==null) {
 			pageRemitosEmi = this.pageRemitosEmi = new elpintao.comp.remitos.pageRemitos(true);
@@ -618,7 +618,7 @@ qx.Class.define("elpintao.Application",
 	}, this);
 	mnuCentral.add(btnRemitosEmiCentral);
 	
-	var btnRemitosRecCentral = new qx.ui.menu.Button("Remitos recibidos");
+	var btnRemitosRecCentral = new qx.ui.menu.Button("Entradas de mercaderia (Remitos)");
 	btnRemitosRecCentral.addListener("execute", function(e){
 		if (pageRemitosRec==null) {
 			pageRemitosRec = this.pageRemitosRec = new elpintao.comp.remitos.pageRemitos(false);
@@ -632,7 +632,7 @@ qx.Class.define("elpintao.Application",
 	}, this);
 	mnuCentral.add(btnRemitosRecCentral);
 	
-	var btnResumenRemitos = new qx.ui.menu.Button("Resumen de remitos emitidos");
+	var btnResumenRemitos = new qx.ui.menu.Button("Resumen de salidas de mercaderia");
 	btnResumenRemitos.addListener("execute", function(e){
 		if (pageResumenRemitos==null) {
 			pageResumenRemitos = new elpintao.comp.remitos.pageResumenRemitos();
@@ -727,7 +727,7 @@ qx.Class.define("elpintao.Application",
 	mnuSucursal.add(btnCargaStock);
 	mnuSucursal.addSeparator();
 	
-	var btnPedidos = new qx.ui.menu.Button("Pedidos internos");
+	var btnPedidos = new qx.ui.menu.Button("Pedidos a depósito");
 	btnPedidos.addListener("execute", function(e){
 		if (pagePedidosInt==null) {
 			pagePedidosInt = new elpintao.comp.pedidos.pagePedidosInt(this);
@@ -742,7 +742,7 @@ qx.Class.define("elpintao.Application",
 	mnuSucursal.add(btnPedidos);
 	mnuSucursal.addSeparator();
 	
-	var btnRemitosEmi = new qx.ui.menu.Button("Remitos emitidos");
+	var btnRemitosEmi = new qx.ui.menu.Button("Salidas de mercaderia (Remitos)");
 	btnRemitosEmi.addListener("execute", function(e){
 		if (pageRemitosEmi==null) {
 			pageRemitosEmi = this.pageRemitosEmi = new elpintao.comp.remitos.pageRemitos(true);
@@ -768,7 +768,7 @@ qx.Class.define("elpintao.Application",
 	}, this);
 	mnuSucursal.add(btnRemitosEmi);
 	
-	var btnRemitosRec = new qx.ui.menu.Button("Remitos recibidos");
+	var btnRemitosRec = new qx.ui.menu.Button("Entradas de mercaderia (Remitos)");
 	btnRemitosRec.addListener("execute", function(e){
 		if (pageRemitosRec==null) {
 			pageRemitosRec = this.pageRemitosRec = new elpintao.comp.remitos.pageRemitos(false);

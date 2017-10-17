@@ -212,14 +212,14 @@ qx.Class.define("elpintao.comp.remitos.windowRemito",
 	
 	
 	if (id_remito=="0") {
-		this.setCaption(((emitir) ? "Nuevo remito emitido" : "Nuevo remito recibido"));
+		this.setCaption(((emitir) ? "Nueva salida de mercaderia" : "Nueva entrada de mercaderia"));
 		if (!emitir) {
 			txtNr1.setEnabled(true);
 			txtNr2.setEnabled(true);
 		}
 		tblDetalle.setFocusedCell();
 	} else {
-		this.setCaption(((emitir) ? "Modificar remito emitido" : "Modificar remito recibido"));
+		this.setCaption(((emitir) ? "Modificar salida de mercaderia" : "Modificar entrada de mercaderia"));
 		
 		if (!emitir && rowRemito.tipo == "0") {
 			txtNr1.setEnabled(true);

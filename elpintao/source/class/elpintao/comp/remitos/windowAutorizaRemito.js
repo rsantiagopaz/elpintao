@@ -13,9 +13,9 @@ qx.Class.define("elpintao.comp.remitos.windowAutorizaRemito",
 	});
 	
 	if (emitir) {
-		this.setCaption("Autorizar remito emitido");
+		this.setCaption("Entregar mercaderia");
 	} else {
-		this.setCaption("Autorizar remito recibido");
+		this.setCaption("Ingresar mercaderia");
 	}
 	
 	this.setLayout(new qx.ui.layout.Canvas());

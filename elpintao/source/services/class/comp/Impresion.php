@@ -257,7 +257,7 @@ if ($_REQUEST['emitir']=="true") {
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 	<meta http-equiv="content-type" content="text/html; charset=utf-8"/>
-	<title>Impresion de Remito <?php echo (($_REQUEST['emitir']=="true") ? "emitido" : "recibido") ?></title>
+	<title>Impresion de <?php echo (($_REQUEST['emitir']=="true") ? "salida de mercaderia" : "entrada de mercaderia") ?></title>
 </head>
 <body>
 <table style="font-family:arial; font-size:12px; " border="0" cellpadding=0 cellspacing=0 width="100%" height=1% align="center">

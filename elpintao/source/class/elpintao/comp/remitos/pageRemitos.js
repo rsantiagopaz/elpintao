@@ -8,7 +8,7 @@ qx.Class.define("elpintao.comp.remitos.pageRemitos",
 		
 		
 		
-	this.setLabel((emitir) ? "Remitos emitidos" : "Remitos recibidos");
+	this.setLabel((emitir) ? "Salidas de mercaderia" : "Entradas de mercaderia");
 	this.setLayout(new qx.ui.layout.Canvas());
 	this.toggleShowCloseButton();
 		
@@ -74,7 +74,7 @@ qx.Class.define("elpintao.comp.remitos.pageRemitos",
 			imageLoadingRemito.setVisibility("visible");
 			
 			var p = {};
-			p.estado = this.slbEstado.getSelection()[0].getLabel();
+			p.estado = this.slbEstado.getModelSelection().getItem(0);
 			p.desde = this.dtfDesde.getValue();
 			p.hasta = this.dtfHasta.getValue();
 			p.id_sucursal = this.slbSucursal.getModelSelection().getItem(0);
@@ -172,9 +172,9 @@ qx.Class.define("elpintao.comp.remitos.pageRemitos",
 	
 	var slbEstado = this.slbEstado = new qx.ui.form.SelectBox();
 	slbEstado.setWidth(90);
-	slbEstado.add(new qx.ui.form.ListItem("Registrado"));
-	slbEstado.add(new qx.ui.form.ListItem("Autorizado"));
-	slbEstado.add(new qx.ui.form.ListItem("Todo"));
+	slbEstado.add(new qx.ui.form.ListItem((emitir) ? "Pendiente de entrega" : "Pendiente de ingreso", null, "Registrado"));
+	slbEstado.add(new qx.ui.form.ListItem((emitir) ? "Entregado" : "Ingresado", null, "Autorizado"));
+	slbEstado.add(new qx.ui.form.ListItem("Todo", null, "Todo"));
 	slbEstado.addListener("changeSelection", function(e){
 		this.functionActualizar();
 	}, this);
@@ -211,7 +211,7 @@ qx.Class.define("elpintao.comp.remitos.pageRemitos",
 	var slbSucursal = this.slbSucursal = new qx.ui.form.SelectBox();
 	slbSucursal.setWidth(120);
 	
-	slbSucursal.add(new qx.ui.form.ListItem(" ", null, "0"));
+	slbSucursal.add(new qx.ui.form.ListItem("-", null, "0"));
 	for (var x in resultado) {
 		slbSucursal.add(new qx.ui.form.ListItem(resultado[x].label, null, resultado[x].model));
 	}
@@ -289,7 +289,7 @@ qx.Class.define("elpintao.comp.remitos.pageRemitos",
 	//Menu de contexto Pedido
 	
 	var menutblRemito = new componente.general.ramon.ui.menu.Menu();
-	var btnAutorizar = new qx.ui.menu.Button("Autorizar...");
+	var btnAutorizar = new qx.ui.menu.Button((emitir) ? "Entregar..." : "Ingresar...");
 	btnAutorizar.setEnabled(false);
 	btnAutorizar.addListener("execute", function(e) {
 		var win = new elpintao.comp.remitos.windowAutorizaRemito(rowDataRemito, emitir);
@@ -402,8 +402,8 @@ qx.Class.define("elpintao.comp.remitos.pageRemitos",
 		
 		var cellrendererReplace = new qx.ui.table.cellrenderer.Replace();
 		cellrendererReplace.setReplaceMap({
-			"R": "Registrado",
-			"A": "Autorizado"
+			"R": (emitir) ? "Pendiente de entrega" : "Pendiente de ingreso",
+			"A": (emitir) ? "Entregado" : "Ingresado"
 		});
 		tableColumnModel.setDataCellRenderer(5, cellrendererReplace);
 		
