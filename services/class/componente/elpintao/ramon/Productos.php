@@ -145,6 +145,8 @@ class class_Productos extends class_Base_elpintao
   
   public function method_aplicar_porcentaje_recursivo($params, $error) {
   	$p = $params[0];
+  	
+  	$nick = ((is_null($_SESSION['usuario'])) ? "NULL" : $_SESSION['usuario']->nick);
 
 	if ($p->aplicar == "pcfcd") {
 		$sql = "SELECT producto.iva, producto.desc_producto, producto_item.*, fabrica.desc_fabrica FROM (producto INNER JOIN producto_item USING(id_producto)) INNER JOIN fabrica USING(id_fabrica) WHERE producto.activo AND producto.id_arbol=" . $p->id_arbol . (is_null($p->id_fabrica) ? "" : " AND producto.id_fabrica=" . $p->id_fabrica);
@@ -187,6 +189,8 @@ class class_Productos extends class_Base_elpintao
 	$rs = $this->mysqli->query($sql);
 	while ($row = $rs->fetch_object()) {
 		$row->fecha = $p->fecha;
+		$row->nick = $nick;
+		
 		$set = $this->prepararCampos($row, "historico_precio");
 		$sql = "INSERT historico_precio SET " . $set;
 		$this->mysqli->query($sql);
@@ -276,6 +280,7 @@ class class_Productos extends class_Base_elpintao
   	set_time_limit(0);
   	
   	$fecha = date("Y-m-d H:i:s");
+  	$nick = ((is_null($_SESSION['usuario'])) ? "NULL" : $_SESSION['usuario']->nick);
   	
     $this->mysqli->query("START TRANSACTION");
     
@@ -296,6 +301,8 @@ class class_Productos extends class_Base_elpintao
 		while ($item = $rs->fetch_object()) {
 			$item->fecha = $fecha;
 			$item->desc_fabrica = $p->desc_fabrica;
+			$item->nick = $nick;
+			
 			$set = $this->prepararCampos($item, "historico_precio");
 			$sql = "INSERT historico_precio SET " . $set;
 			$this->mysqli->query($sql);
@@ -310,6 +317,8 @@ class class_Productos extends class_Base_elpintao
 		$this->transmitir($sql);
 		
 		$item->fecha = $fecha;
+		$item->nick = $nick;
+		
 		$set = $this->prepararCampos($item, "historico_precio");
 		$sql = "INSERT historico_precio SET " . $set;
 		$this->mysqli->query($sql);
@@ -620,7 +629,10 @@ class class_Productos extends class_Base_elpintao
   public function method_alta_modifica_producto($params, $error) {
   	$p = $params[0];
   	
-  	$resultado=array();
+  	$resultado = array();
+  	
+  	$fecha = date("Y-m-d H:i:s");
+  	$nick = ((is_null($_SESSION['usuario'])) ? "NULL" : $_SESSION['usuario']->nick);
   	
 	$model = $p->model;
 	$items = $p->items;
@@ -632,7 +644,7 @@ class class_Productos extends class_Base_elpintao
 	try {
 	
 		if ($model->id_producto == "0") {
-			$sql="UPDATE arbol SET cant_productos = cant_productos + 1 WHERE id_arbol='" . $model->id_arbol . "'";
+			$sql = "UPDATE arbol SET cant_productos = cant_productos + 1 WHERE id_arbol='" . $model->id_arbol . "'";
 			$this->mysqli->query($sql);
 			$this->transmitir($sql);
 			
@@ -643,11 +655,20 @@ class class_Productos extends class_Base_elpintao
 			$set = $this->prepararCampos($model);
 			$sql = "INSERT producto SET " . $set . ", serializer='{\"agrupar\":false,\"colores\":{}}', activo=TRUE";
 			$this->transmitir($sql);
+			
+			
+			$sql = "INSERT log SET descrip='Alta producto', id='" . $model->id_producto . "', texto='" . $this->mysqli->real_escape_string(json_encode($model)) . "', fecha='" . $fecha . "', nick='" . $nick . "'";
+			$this->mysqli->query($sql);
+			
 		} else {
 			$id_producto = $model->id_producto;
 			$sql = "UPDATE producto SET " . $set . " WHERE id_producto='" . $model->id_producto . "'";
 			$this->mysqli->query($sql);
 			$this->transmitir($sql);
+			
+			
+			$sql = "INSERT log SET descrip='Modificar producto', id='" . $model->id_producto . "', texto='" . $this->mysqli->real_escape_string(json_encode($model)) . "', fecha='" . $fecha . "', nick='" . $nick . "'";
+			$this->mysqli->query($sql);
 		}
 		
 		foreach ($items->altas as $item) {
@@ -660,6 +681,11 @@ class class_Productos extends class_Base_elpintao
 			$set = $this->prepararCampos($item);
 			$sql = "INSERT producto_item SET " . $set . ", activo=TRUE";
 			$this->transmitir($sql);
+			
+			
+			$sql = "INSERT log SET descrip='Alta producto_item', id='" . $item->id_producto_item . "', texto='" . $this->mysqli->real_escape_string(json_encode($item)) . "', fecha='" . $fecha . "', nick='" . $nick . "'";
+			$this->mysqli->query($sql);
+			
 			
 			foreach ($this->arraySucursal as $sucursal) {
 				$sql = "INSERT stock SET id_producto_item=" . $id_producto_item . ", id_sucursal=" . $sucursal->id_sucursal . ", stock=0, transmitir=FALSE";
@@ -678,12 +704,20 @@ class class_Productos extends class_Base_elpintao
 			$sql = "UPDATE producto_item SET " . $set . " WHERE id_producto_item='" . $item->id_producto_item . "'";
 			$this->mysqli->query($sql);
 			$this->transmitir($sql);
+			
+			
+			$sql = "INSERT log SET descrip='Modificar producto_item', id='" . $item->id_producto_item . "', texto='" . $this->mysqli->real_escape_string(json_encode($item)) . "', fecha='" . $fecha . "', nick='" . $nick . "'";
+			$this->mysqli->query($sql);
 		}
 	
 		foreach ($items->eliminados as $item) {
-			$sql="UPDATE producto_item SET activo=FALSE WHERE id_producto_item='" . $item . "'";
+			$sql = "UPDATE producto_item SET activo=FALSE WHERE id_producto_item='" . $item->id_producto_item . "'";
 			$this->mysqli->query($sql);
 			$this->transmitir($sql);
+			
+			
+			$sql = "INSERT log SET descrip='Eliminar producto_item', id='" . $item->id_producto_item . "', texto='" . $this->mysqli->real_escape_string(json_encode($item)) . "', fecha='" . $fecha . "', nick='" . $nick . "'";
+			$this->mysqli->query($sql);
 		}
 		
 		$this->mysqli->query("COMMIT");
@@ -742,18 +776,46 @@ class class_Productos extends class_Base_elpintao
 
   public function method_eliminar_producto($params, $error) {
   	$p = $params[0];
+  	
+  	$fecha = date("Y-m-d H:i:s");
+  	$nick = ((is_null($_SESSION['usuario'])) ? "NULL" : $_SESSION['usuario']->nick);
 	
 	$this->mysqli->query("START TRANSACTION");
 	
-	$sql="UPDATE arbol SET cant_productos = cant_productos - 1 WHERE id_arbol='" . $p->id_arbol . "'";
+	
+	$sql = "SELECT * FROM producto WHERE id_producto=" . $p->id_producto;
+	$rs = $this->mysqli->query($sql);
+	$row = $rs->fetch_object();
+	
+	
+	
+	$sql = "UPDATE arbol SET cant_productos = cant_productos - 1 WHERE id_arbol='" . $p->id_arbol . "'";
 	$this->mysqli->query($sql);
 	$this->transmitir($sql);
-	$sql="UPDATE producto SET activo=FALSE WHERE id_producto='" . $p->id_producto . "'";
+	$sql = "UPDATE producto SET activo=FALSE WHERE id_producto='" . $p->id_producto . "'";
 	$this->mysqli->query($sql);
 	$this->transmitir($sql);
-	$sql="UPDATE producto_item SET activo=FALSE WHERE id_producto='" . $p->id_producto . "'";
+	
+	
+	$sql = "INSERT log SET descrip='Eliminar producto', id='" . $p->id_producto . "', texto='" . $this->mysqli->real_escape_string(json_encode($row)) . "', fecha='" . $fecha . "', nick='" . $nick . "'";
 	$this->mysqli->query($sql);
-	$this->transmitir($sql);
+	
+	
+	
+	
+	$sql = "SELECT * FROM producto_item WHERE id_producto=" . $p->id_producto;
+	$rs = $this->mysqli->query($sql);
+	while ($row = $rs->fetch_object()) {
+		$sql = "UPDATE producto_item SET activo=FALSE WHERE id_producto_item='" . $row->id_producto_item . "'";
+		$this->mysqli->query($sql);
+		$this->transmitir($sql);
+		
+		
+		$sql = "INSERT log SET descrip='Eliminar producto_item', id='" . $row->id_producto_item . "', texto='" . $this->mysqli->real_escape_string(json_encode($row)) . "', fecha='" . $fecha . "', nick='" . $nick . "'";
+		$this->mysqli->query($sql);
+	}
+	
+	
 	
 	$this->mysqli->query("COMMIT");
   }

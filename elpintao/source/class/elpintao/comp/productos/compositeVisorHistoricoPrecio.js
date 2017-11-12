@@ -300,7 +300,7 @@ qx.Class.define("elpintao.comp.productos.compositeVisorHistoricoPrecio",
 		//Tabla Datos
 
 		var tableModelDatos = new qx.ui.table.model.Simple();
-		tableModelDatos.setColumns(["Fecha", "Desc.fábrica", "Desc.produc.", "I.V.A.", "Precio lista", "Remarc.CF.", "Desc.CF.", "Bonif.CF.", "Remarc.may.", "Desc.may.", "Bonif.may.", "Comisión"], ["fecha", "desc_fabrica", "desc_producto", "iva", "precio_lista", "remarc_final", "desc_final", "bonif_final", "remarc_mayorista", "desc_mayorista", "bonif_mayorista", "comision_vendedor"]);
+		tableModelDatos.setColumns(["Fecha", "Usuario", "Desc.fábrica", "Desc.produc.", "I.V.A.", "Precio lista", "Rem.CF.", "Desc.CF.", "Bonif.CF.", "Rem.may.", "Desc.may.", "Bonif.may.", "Comisión"], ["fecha", "nick", "desc_fabrica", "desc_producto", "iva", "precio_lista", "remarc_final", "desc_final", "bonif_final", "remarc_mayorista", "desc_mayorista", "bonif_mayorista", "comision_vendedor"]);
 		
 		var custom = {tableColumnModel : function(obj) {
 			return new qx.ui.table.columnmodel.Resize(obj);
@@ -323,27 +323,28 @@ qx.Class.define("elpintao.comp.productos.compositeVisorHistoricoPrecio",
 		tableModelDatos.setColumnSortable(9, false);
 		tableModelDatos.setColumnSortable(10, false);
 		tableModelDatos.setColumnSortable(11, false);
+		tableModelDatos.setColumnSortable(12, false);
 		
 		var tableColumnModelDatos = tblDatos.getTableColumnModel();
 		
 		var resizeBehavior = tableColumnModelDatos.getBehavior();
-		resizeBehavior.set(0, {width:"13%", minWidth:100});
-		resizeBehavior.set(1, {width:"8.5%", minWidth:100});
-		resizeBehavior.set(2, {width:"9%", minWidth:100});
-		resizeBehavior.set(3, {width:"5%", minWidth:100});
-		resizeBehavior.set(4, {width:"7.5%", minWidth:100});
-		resizeBehavior.set(5, {width:"8.5%", minWidth:100});
+		resizeBehavior.set(0, {width:"12%", minWidth:100});
+		resizeBehavior.set(1, {width:"7%", minWidth:100});
+		resizeBehavior.set(2, {width:"8%", minWidth:100});
+		resizeBehavior.set(3, {width:"8%", minWidth:100});
+		resizeBehavior.set(4, {width:"5%", minWidth:100});
+		resizeBehavior.set(5, {width:"7.5%", minWidth:100});
 		resizeBehavior.set(6, {width:"7.5%", minWidth:100});
 		resizeBehavior.set(7, {width:"7.5%", minWidth:100});
-		resizeBehavior.set(8, {width:"9.5%", minWidth:100});
+		resizeBehavior.set(8, {width:"7.5%", minWidth:100});
 		resizeBehavior.set(9, {width:"7.5%", minWidth:100});
 		resizeBehavior.set(10, {width:"7.5%", minWidth:100});
 		resizeBehavior.set(11, {width:"7.5%", minWidth:100});
+		resizeBehavior.set(12, {width:"7.5%", minWidth:100});
 		
 		
 		var renderer = new qx.ui.table.cellrenderer.Number();
 		renderer.setNumberFormat(numberformatMonto);
-		tableColumnModelDatos.setDataCellRenderer(1, renderer);
 		tableColumnModelDatos.setDataCellRenderer(2, renderer);
 		tableColumnModelDatos.setDataCellRenderer(3, renderer);
 		tableColumnModelDatos.setDataCellRenderer(4, renderer);
@@ -354,6 +355,7 @@ qx.Class.define("elpintao.comp.productos.compositeVisorHistoricoPrecio",
 		tableColumnModelDatos.setDataCellRenderer(9, renderer);
 		tableColumnModelDatos.setDataCellRenderer(10, renderer);
 		tableColumnModelDatos.setDataCellRenderer(11, renderer);
+		tableColumnModelDatos.setDataCellRenderer(12, renderer);
 		
 		
 

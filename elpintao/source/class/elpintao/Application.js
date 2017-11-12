@@ -63,6 +63,7 @@ qx.Class.define("elpintao.Application",
 
 	var pageProductos = null;
 	var pageHistoricoPrecio = null;
+	var pageHistoricoProducto = null;
 	var pagePedidosInt = null;
 	var pageGeneradorRemitos = null;
 	var pagePedidosSuc = null;
@@ -77,6 +78,8 @@ qx.Class.define("elpintao.Application",
 	var arraySucursales;
 	var arrayDeposito;
 	var contexto = this;
+	
+	var usuario = this.usuario = {};
 	
 	
 
@@ -170,6 +173,10 @@ qx.Class.define("elpintao.Application",
 						if (resultado.id_arbol == null) {
 							callback({message: "id_arbol"});
 						} else {
+							for (var x in resultado) {
+								usuario[x] = resultado[x];
+							}
+
 							callback(null, resultado);
 						}
 					}
@@ -503,6 +510,22 @@ qx.Class.define("elpintao.Application",
 	mnuCentral.add(btnHistoricoPrecio);
 	
 	
+	var btnHistoricoProducto = new qx.ui.menu.Button("Historico producto");
+	btnHistoricoProducto.addListener("execute", function(e){
+		if (pageHistoricoProducto==null) {
+			//functionLogin(function(e) {
+				pageHistoricoProducto = new elpintao.comp.productos.pageHistoricoProducto();
+				pageHistoricoProducto.addListenerOnce("close", function(e){
+					pageHistoricoProducto = null;
+				});
+				tabviewMain.add(pageHistoricoProducto);
+				tabviewMain.setSelection([pageHistoricoProducto]);
+			//});
+		} else tabviewMain.setSelection([pageHistoricoProducto]);
+	}, this);
+	mnuCentral.add(btnHistoricoProducto);
+	
+	
 	var btnAplicarAjuste = new qx.ui.menu.Button("Aplicar ajustes desde Raiz de prod.");
 	btnAplicarAjuste.addListener("execute", function(e){
 		functionLogin(qx.lang.Function.bind(function(e) {
@@ -813,8 +836,8 @@ qx.Class.define("elpintao.Application",
 	toolbarMain.add(mnubtnEdicion);
 	toolbarMain.add(mnubtnVer);
 
-	toolbarMain.add(mnubtnCentral);
-	//toolbarMain.add(mnubtnSucursal);
+	//toolbarMain.add(mnubtnCentral);
+	toolbarMain.add(mnubtnSucursal);
 	
 	toolbarMain.addSpacer();
 	

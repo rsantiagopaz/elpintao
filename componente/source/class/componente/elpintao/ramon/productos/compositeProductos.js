@@ -681,6 +681,7 @@ qx.Class.define("componente.elpintao.ramon.productos.compositeProductos",
 				var p = {};
 				p.id_producto = id_producto;
 				p.id_arbol = nodoActual.get("id_arbol");
+				
 				var rpc = new qx.io.remote.Rpc(application.conexion.rpc_elpintao_services, "componente.elpintao.ramon.Productos");
 				try {
 					var resultado = rpc.callSync("eliminar_producto", p);

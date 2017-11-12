@@ -224,7 +224,7 @@ qx.Class.define("componente.elpintao.ramon.productos.windowProducto",
 	btnEliminar.addListener("execute", function(e){
 		var focusedRow = tbl.getFocusedRow();
 		var rowData = tableModel.getRowData(focusedRow); 
-		if (rowData.id_producto_item != 0) eliminados.push(rowData.id_producto_item);
+		if (rowData.id_producto_item != 0) eliminados.push(rowData);
 		
 		tableModel.removeRows(focusedRow, 1, false);
 		var rowCount = tableModel.getRowCount();
@@ -497,6 +497,9 @@ qx.Class.define("componente.elpintao.ramon.productos.windowProducto",
 				var p = {};
 				p.model = model;
 				p.items = items;
+				
+				//alert(qx.lang.Json.stringify(p, null, 2));
+				//return
 				
 				var rpc = new qx.io.remote.Rpc(application.conexion.rpc_elpintao_services, "componente.elpintao.ramon.Productos");
 				try {

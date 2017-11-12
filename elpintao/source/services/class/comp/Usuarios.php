@@ -22,6 +22,8 @@ class class_Usuarios extends class_Base
 				$row->perfil->{$rowPerfil->id_perfil} = true;
 			}
 			
+			$_SESSION['usuario'] = $row;
+			
 			return $row;
 		} else {
 			$error->SetError(0, "password");

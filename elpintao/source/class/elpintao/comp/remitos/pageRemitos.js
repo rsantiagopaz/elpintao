@@ -60,14 +60,17 @@ qx.Class.define("elpintao.comp.remitos.pageRemitos",
           this.timerId = null;
         }
         
-        application.debug("actualizar");
-
 		tblRemito.blur();
 		tblRemito.setFocusedCell();
         tableModelDetalle.setDataAsMapArray([], true);
 		tableModelTotales.setDataAsMapArray([], true);
 		tableModel.setDataAsMapArray([], true);
 		tableModelTotgen.setDataAsMapArray([], true);
+		
+		btnAutorizar.setEnabled(false);
+		btnImprimir.setEnabled(false);
+		btnModificar.setEnabled(false);
+		menutblRemito.memorizar([btnAutorizar, btnImprimir, btnModificar]);
 			
         // start a new listener to update the controller
 		this.timerId = timer.start(function(userData, timerId) {
@@ -349,9 +352,9 @@ qx.Class.define("elpintao.comp.remitos.pageRemitos",
 	
 	menutblRemito.add(btnAutorizar);
 	menutblRemito.add(btnImprimir);
+	menutblRemito.add(btnModificar);
 	menutblRemito.addSeparator();
 	menutblRemito.add(btnNuevo);
-	menutblRemito.add(btnModificar);
 	menutblRemito.memorizar();
 	
 		
@@ -411,7 +414,7 @@ qx.Class.define("elpintao.comp.remitos.pageRemitos",
 		
 		var selectionModel = tblRemito.getSelectionModel();
 		selectionModel.addListener("changeSelection", function(e){
-			if (!selectionModel.isSelectionEmpty()) {
+			if (! selectionModel.isSelectionEmpty()) {
 		        var timer = qx.util.TimerManager.getInstance();
 		        // check for the old listener
 		        if (this.timerId != null) {
@@ -427,6 +430,11 @@ qx.Class.define("elpintao.comp.remitos.pageRemitos",
 					rowDataRemito = tableModel.getRowData(tblRemito.getFocusedRow());
 					tblDetalle.setFocusedCell();
 					
+					btnModificar.setEnabled(rowDataRemito.estado == 'R');
+					btnAutorizar.setEnabled(rowDataRemito.estado == 'R');
+					btnImprimir.setEnabled(rowDataRemito.estado == 'A');
+					menutblRemito.memorizar([btnAutorizar, btnImprimir, btnModificar]);
+					
 					var p = {};
 					p.emitir = emitir;
 					p.id_remito = ((emitir) ? rowDataRemito.id_remito_emi : rowDataRemito.id_remito_rec) ;
@@ -440,10 +448,6 @@ qx.Class.define("elpintao.comp.remitos.pageRemitos",
 						
 						if (error == null) {
 							tableModelDetalle.setDataAsMapArray(resultado, true);
-							btnModificar.setEnabled(rowDataRemito.estado == 'R');
-							btnAutorizar.setEnabled(rowDataRemito.estado == 'R');
-							btnImprimir.setEnabled(rowDataRemito.estado == 'A');
-							menutblRemito.memorizar([btnAutorizar, btnImprimir, btnModificar]);
 						}
 						
 						functionCalcularTotales(tableModelDetalle, tableModelTotales);
