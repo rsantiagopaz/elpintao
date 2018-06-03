@@ -53,7 +53,7 @@ qx.Class.define("elpintao.comp.parametros.windowSucursales",
 
 		var tableModel = new qx.ui.table.model.Filtered();
 		tableModel.setColumns(["Descripción", "URL", "Username", "Password"], ["descrip", "url", "username", "password"]);
-		tableModel.setEditable(true);
+		//tableModel.setEditable(true);
 
 		var custom = {tableColumnModel : function(obj) {
 			return new qx.ui.table.columnmodel.Resize(obj);

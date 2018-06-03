@@ -672,6 +672,20 @@ qx.Class.define("elpintao.Application",
 	
 	var btnCuentas = new qx.ui.menu.Button("Cuentas");
 	btnCuentas.addListener("execute", function(e){
+		
+				var rpc = new qx.io.remote.Rpc("services/", "comp.Reparacion");
+				rpc.setTimeout(1000 * 60 * 10);
+				rpc.callAsync(function(resultado, error, id){
+					
+					alert(qx.lang.Json.stringify(error, null, 2));
+					alert(qx.lang.Json.stringify(resultado, null, 2));
+					
+				}, "arreglar_cuentas");
+				
+				return
+		
+		
+		
 		functionChequearPassword(this.rowParamet.password_general, function(e) {
 			var win = new elpintao.comp.cuentas.windowPrincipal();
 			win.setModal(true);
