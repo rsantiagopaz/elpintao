@@ -15,7 +15,10 @@ qx.Class.define("elpintao.comp.deposito.popupStock",
 	this.addListenerOnce("appear", function(e){
 		if (rowDataAcumulado.stock.length > 0) {
 			tblDetalle.setFocusedCell(2, 0, true);
-			commandEditar.execute();
+			tblDetalle.focus();
+			qx.event.Timer.once(function(){
+				commandEditar.execute();
+			}, this, 20);
 		}		
 	});
 	this.addListenerOnce("disappear", function(e){

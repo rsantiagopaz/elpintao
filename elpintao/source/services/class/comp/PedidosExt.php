@@ -66,7 +66,7 @@ class class_PedidosExt extends class_Base
   }
 
   public function method_leer_pedido($params, $error) {
-	$resultado = "";
+	$resultado = new stdClass;
 	$resultado->internos = $this->method_leer_internos($params, $error);
 	$resultado->externos = $this->method_leer_externos($params, $error);
 	

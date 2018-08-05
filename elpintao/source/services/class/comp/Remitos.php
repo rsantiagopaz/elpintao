@@ -110,7 +110,7 @@ class class_Remitos extends class_Base
 			
 			$this->mysqli->query("START TRANSACTION");
 			
-			$sql="UPDATE remito_rec SET fecha=NOW(), id_usuario_autoriza_rec='" . $rowAutoriza->id_usuario . "', id_usuario_transporta='" . $rowTransporta->id_usuario . "', estado='A' WHERE id_remito_rec=" . $p->id_remito;
+			$sql = "UPDATE remito_rec SET fecha=NOW(), id_usuario_autoriza_rec='" . $rowAutoriza->id_usuario . "', id_usuario_transporta='" . $rowTransporta->id_usuario . "', estado='A' WHERE id_remito_rec=" . $p->id_remito;
 			$this->mysqli->query($sql);
 			
 			$sql = "INSERT stock_log SET descrip='Remitos.method_autorizar_remito_rec', sql_texto='" . $this->mysqli->real_escape_string($sql) . "', fecha=NOW()";

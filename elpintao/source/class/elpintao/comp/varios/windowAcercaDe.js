@@ -1,23 +1,36 @@
 qx.Class.define("elpintao.comp.varios.windowAcercaDe",
 {
-	extend : qx.ui.window.Window,
+	extend : componente.general.ramon.ui.window.Window,
 	construct : function ()
 	{
-		this.base(arguments);
+	this.base(arguments);
+	
+	this.set({
+		caption: "Acerca de...",
+		width: 500,
+		height: 200,
+		showMinimize: false,
+		showMaximize: false,
+		allowMaximize: false,
+		resizable: false
+	});
 
-		this.set({
-			caption: "Acerca de...",
-			width: 400,
-			height: 400,
-			showMinimize: false,
-			showMaximize: false
-		});
-		this.setLayout(new qx.ui.layout.Basic());
+	var layout = new qx.ui.layout.HBox(0, "center");
+	layout.setAlignY("middle");
+	this.setLayout(layout);
+	
+	var layout = new qx.ui.layout.VBox(0, "middle");
+	layout.setAlignX("center");
+	
+	var composite = new qx.ui.container.Composite(layout)
+	this.add(composite, {flex: 1});
+	
+	composite.add(new qx.ui.basic.Label("Programador: Ramón S. Paz"), {flex: 1});
+	composite.add(new qx.ui.basic.Label("rsantiagopaz@gmail.com"), {flex: 1});
 
-		//this.add(new qx.ui.basic.Label("Abril de 2010"), {left: 20, top: 20});
-	},
-	members : 
-	{
+	
+	var application = qx.core.Init.getApplication();
 
+	
 	}
 });

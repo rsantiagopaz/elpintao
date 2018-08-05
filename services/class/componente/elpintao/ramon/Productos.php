@@ -79,6 +79,8 @@ class class_Productos extends class_Base_elpintao
   public function method_anotar_producto($params, $error) {
 	$p = $params[0];
 	
+	return;
+	
 	$p->model->fecha = date("Y-m-d H:i:s");
 	$p->model->sucursal = $this->arraySucursal[$this->rowParamet->id_sucursal]->descrip;
 	
@@ -437,13 +439,16 @@ class class_Productos extends class_Base_elpintao
 
 
   public function method_leer_producto($params, $error) {
-  	set_time_limit(0);
   	$p = $params[0];
+  	
+  	set_time_limit(0);
+  	
+  	
+	$resultado = new stdClass;
   	
 	$todos = is_null($p->id_producto);
 	
 	if ($todos) {
-		$resultado = new stdClass;
 		$resultado->producto_item = array();
 		$resultado->producto = array();
 	
@@ -584,7 +589,6 @@ class class_Productos extends class_Base_elpintao
 			}
 		}
 	} else {
-		$resultado = "";
 		$resultado->items = array();
 		
 		$sql = "SELECT";

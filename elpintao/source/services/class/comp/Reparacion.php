@@ -9,7 +9,10 @@ class class_Reparacion extends class_Base
   public function method_arreglar_stock($params, $error) {
   	set_time_limit(0);
 
-  	$sucursal = $this->toJson("SELECT id_sucursal FROM sucursal ORDER BY id_sucursal");
+	$resultado = array();
+	
+  	$sucursal = $this->arraySucursal;
+  	$deposito = $this->arrayDeposito;
   	
 	$sql = "SELECT id_producto_item FROM producto_item ORDER BY id_producto_item";
 	$rsProducto_item = $this->mysqli->query($sql);
@@ -18,19 +21,26 @@ class class_Reparacion extends class_Base
 	
 	while ($rowProducto_item = $rsProducto_item->fetch_object()) {
 		foreach ($sucursal as $rowSucursal) {
-			$sql = "SELECT transmitir FROM stock WHERE id_producto_item=" . $rowProducto_item->id_producto_item . " AND id_sucursal=" . $rowSucursal->id_sucursal;
-			$rs = $this->mysqli->query($sql);
-			if ($rs->num_rows == 0) {
-				$sql = "INSERT stock SET id_producto_item=" . $rowProducto_item->id_producto_item . ", id_sucursal=" . $rowSucursal->id_sucursal . ", stock=0, transmitir=FALSE";
-				$this->mysqli->query($sql);
-				if ($rowSucursal->id_sucursal!=$this->rowParamet->id_sucursal_deposito) {
-					$this->transmitir($sql, $rowSucursal->id_sucursal);
+			if ($rowSucursal->id_sucursal == $this->rowParamet->id_sucursal || isset($deposito[$this->rowParamet->id_sucursal])) {
+				$sql = "SELECT * FROM stock WHERE id_producto_item=" . $rowProducto_item->id_producto_item . " AND id_sucursal=" . $rowSucursal->id_sucursal;
+				$rs = $this->mysqli->query($sql);
+				
+				if ($rs->num_rows == 0) {
+					$sql = "INSERT stock SET id_producto_item=" . $rowProducto_item->id_producto_item . ", id_sucursal=" . $rowSucursal->id_sucursal . ", stock=0, transmitir=FALSE";
+					$this->mysqli->query($sql);
+					
+					$aux = new stdClass;
+					$aux->id_sucursal = $rowSucursal->id_sucursal;
+					$aux->id_producto_item = $rowProducto_item->id_producto_item;
+					$resultado[] = $aux;
 				}
 			}
 		}
 	}
 	
 	$this->mysqli->query("COMMIT");
+	
+	return $resultado;
   }
   
   

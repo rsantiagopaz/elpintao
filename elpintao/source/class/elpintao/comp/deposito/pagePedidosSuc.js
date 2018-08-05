@@ -100,7 +100,7 @@ qx.Class.define("elpintao.comp.deposito.pagePedidosSuc",
 			var deposito = 0;
 			var sucursales = 0;
 			for (var y in stock) {
-				if (stock[y].id_sucursal == application.rowParamet.id_sucursal_deposito) {
+				if (stock[y].id_sucursal == application.rowParamet.id_sucursal && application.arrayDeposito[application.rowParamet.id_sucursal] != null) {
 					indiceStock = y;
 					deposito+= stock[y].enviar;
 				} else {
@@ -593,7 +593,7 @@ qx.Class.define("elpintao.comp.deposito.pagePedidosSuc",
 					rowData.adicional = true;
 					
 					for (var y in rowData.stock) {
-						if (rowData.stock[y].id_sucursal == application.rowParamet.id_sucursal_deposito) {
+						if (rowData.stock[y].id_sucursal == application.rowParamet.id_sucursal && application.arrayDeposito[application.rowParamet.id_sucursal] != null) {
 							if (rowData.stock[y].stock >= rowData.cantidad) rowData.stock[y].enviar = rowData.cantidad; else rowData.stock[y].enviar = rowData.stock[y].stock;
 							if (rowData.stock[y].enviar < 0) rowData.stock[y].enviar = 0;
 							rowData.enviar = rowData.stock[y].enviar;
