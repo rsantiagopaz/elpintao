@@ -13,8 +13,8 @@ $aux->database = "deposito";
 $aux->rpc_elpintao_services = "../../../elpintao/services/";
 $aux->rpc_general_services = "../../../general/services/";
 
-$aux->require_elpintao_services = "/xampplite/htdocs/openworks-qx/5.x/elpintao/services/";
-$aux->require_general_services = "/xampplite/htdocs/openworks-qx/5.x/general/services/";
+$aux->require_elpintao_services = "/xampp/htdocs/openworks-qx/5.x/elpintao/services/";
+$aux->require_general_services = "/xampp/htdocs/openworks-qx/5.x/general/services/";
 
 
 
