@@ -146,30 +146,29 @@ break;
 
 case 'imprimir_pedido_interno': {
 	
-$json = json_decode($_REQUEST['json']);
-
 if ($_REQUEST['tipo']=="sucursal") {
 	$sql="SELECT * FROM pedido_int WHERE id_pedido_int=" . $_REQUEST['id'];
 	$rsP = $mysqli->query($sql);
 	$rowP = $rsP->fetch_object();
 	
-	$sql="SELECT pedido_int_detalle.*, fabrica.descrip AS fabrica, CONCAT(producto_item.cod_interno, ' - ', producto.descrip) AS producto, producto_item.capacidad, color.descrip AS color, unidad.descrip AS unidad FROM ((((pedido_int_detalle INNER JOIN producto_item USING(id_producto_item)) INNER JOIN producto USING(id_producto)) INNER JOIN fabrica USING(id_fabrica)) INNER JOIN color USING (id_color)) INNER JOIN unidad USING (id_unidad) WHERE id_pedido_int='" . $_REQUEST['id'] . "' ORDER BY producto.descrip";
-	$rsD = $mysqli->query($sql);
-		
-	$sql="SELECT sucursal.descrip FROM sucursal INNER JOIN paramet USING(id_sucursal)";
+	$sql="SELECT sucursal.* FROM sucursal INNER JOIN paramet USING(id_sucursal)";
 	$rsS = $mysqli->query($sql);
 	$rowS = $rsS->fetch_object();
+	
+	$sql="SELECT pedido_int_detalle.*, fabrica.descrip AS fabrica, CONCAT(producto_item.cod_interno, ' - ', producto.descrip) AS producto, producto_item.capacidad, color.descrip AS color, unidad.descrip AS unidad FROM ((((pedido_int_detalle INNER JOIN producto_item USING(id_producto_item)) INNER JOIN producto USING(id_producto)) INNER JOIN fabrica USING(id_fabrica)) INNER JOIN color USING (id_color)) INNER JOIN unidad USING (id_unidad) WHERE id_pedido_int='" . $_REQUEST['id'] . "' ORDER BY producto.descrip";
+	$rsD = $mysqli->query($sql);
+
 } else {
 	$sql="SELECT * FROM pedido_suc WHERE id_pedido_suc=" . $_REQUEST['id'];
 	$rsP = $mysqli->query($sql);
 	$rowP = $rsP->fetch_object();
 	
-	$sql="SELECT pedido_suc_detalle.*, fabrica.descrip AS fabrica, CONCAT(producto_item.cod_interno, ' - ', producto.descrip) AS producto, producto_item.capacidad, color.descrip AS color, unidad.descrip AS unidad FROM ((((pedido_suc_detalle INNER JOIN producto_item USING(id_producto_item)) INNER JOIN producto USING(id_producto)) INNER JOIN fabrica USING(id_fabrica)) INNER JOIN color USING (id_color)) INNER JOIN unidad USING (id_unidad) WHERE id_pedido_suc='" . $_REQUEST['id'] . "' ORDER BY producto.descrip ";
-	$rsD = $mysqli->query($sql);
-	
-	$sql="SELECT sucursal.descrip FROM sucursal WHERE id_sucursal=" . $rowP->id_sucursal;
+	$sql="SELECT sucursal.* FROM sucursal WHERE id_sucursal=" . $rowP->id_sucursal;
 	$rsS = $mysqli->query($sql);
 	$rowS = $rsS->fetch_object();
+	
+	$sql="SELECT pedido_suc_detalle.*, fabrica.descrip AS fabrica, CONCAT(producto_item.cod_interno, ' - ', producto.descrip) AS producto, producto_item.capacidad, color.descrip AS color, unidad.descrip AS unidad FROM ((((pedido_suc_detalle INNER JOIN producto_item USING(id_producto_item)) INNER JOIN producto USING(id_producto)) INNER JOIN fabrica USING(id_fabrica)) INNER JOIN color USING (id_color)) INNER JOIN unidad USING (id_unidad) WHERE id_pedido_suc='" . $_REQUEST['id'] . "' ORDER BY producto.descrip ";
+	$rsD = $mysqli->query($sql);
 }
 
  
@@ -184,18 +183,27 @@ if ($_REQUEST['tipo']=="sucursal") {
 <tr><td align="center" colspan="6" style="font-family:arial; font-size:16px; font-weight:bold;"><big>Pedido Interno <?php echo $rowS->descrip; ?></big></td></tr>
 <tr><td align="center" colspan="6">Fecha: <?php echo $rowP->fecha; ?></td></tr>
 <tr><td>&nbsp;</td></tr>
-<tr><th>Fábrica</th><th>Producto</th><th>Capacidad</th><th>U.</th><th>Color</th><th>Cantidad</th></tr>
+<tr><th>Fábrica</th><th>Producto</th><th>Capacidad</th><th>U.</th><th>Color</th><th>Stock suc.</th><th>Cantidad</th></tr>
 <tr><td colspan="10"><hr></td></tr>
 
 <?php
 	while ($rowD = $rsD->fetch_object()) {
+		$rowD->cantidad = (int) $rowD->cantidad;
+		
+		
+		$sql = "SELECT stock FROM stock WHERE id_producto_item=" . $rowD->id_producto_item . " AND id_sucursal=" . $rowS->id_sucursal;
+		$rsStock = $mysqli->query($sql);
+		$rowStock = $rsStock->fetch_object();
+		$rowStock->stock = (int) $rowStock->stock;
+		
+		
 		if (substr($rowD->capacidad, -3) == 0) {
 			$rowD->capacidad = (int) $rowD->capacidad; 
 		} else {
 			$rowD->capacidad = number_format($rowD->capacidad, '2', ',', '.');
 		}
 ?>
-		<tr><td><?php echo $rowD->fabrica ?></td><td><?php echo $rowD->producto ?></td><td align="right"><?php echo $rowD->capacidad ?></td><td><?php echo $rowD->unidad ?></td><td><?php echo $rowD->color ?></td><td align="right"><?php echo $rowD->cantidad ?></td></tr>
+		<tr><td><?php echo $rowD->fabrica ?></td><td><?php echo $rowD->producto ?></td><td align="right"><?php echo $rowD->capacidad ?></td><td><?php echo $rowD->unidad ?></td><td><?php echo $rowD->color ?></td><td align="right"><?php echo $rowStock->stock ?></td><td align="right"><?php echo $rowD->cantidad ?></td></tr>
 		<tr><td colspan="10"><hr></td></tr>
 <?php
 	}
@@ -212,18 +220,22 @@ break;
 
 	
 case 'imprimir_remito': {
+	
+$banderaStock = false;
 
 if ($_REQUEST['emitir']=="true") {
 	$sql="SELECT remito_emi.*, CASE WHEN id_sucursal_para<>0 THEN sucursal.descrip ELSE remito_emi.destino END AS destino_descrip, CASE remito_emi.estado WHEN 'R' THEN 'Registrado' ELSE 'Autorizado' END AS estado_descrip FROM remito_emi LEFT JOIN sucursal ON remito_emi.id_sucursal_para=sucursal.id_sucursal WHERE remito_emi.id_remito_emi='" . $_REQUEST['id_remito'] . "'";
 	$rsR = $mysqli->query($sql);
 	$rowR = $rsR->fetch_object();
+	$rowR->tipo = (int) $rowR->tipo;
 
 	$sql="SELECT remito_emi_detalle.*, fabrica.descrip AS fabrica, CONCAT(producto_item.cod_interno, ' - ', producto.descrip) AS producto, producto_item.capacidad, color.descrip AS color, unidad.descrip AS unidad FROM ((((remito_emi_detalle INNER JOIN producto_item USING(id_producto_item)) INNER JOIN producto USING(id_producto)) INNER JOIN fabrica USING(id_fabrica)) INNER JOIN color USING (id_color)) INNER JOIN unidad USING (id_unidad) WHERE id_remito_emi='" . $_REQUEST['id_remito'] . "' ORDER BY producto.descrip ";
 	$rsD = $mysqli->query($sql);
 	
-	$sql="SELECT descrip FROM sucursal INNER JOIN paramet USING(id_sucursal)";
+	$sql="SELECT sucursal.* FROM sucursal INNER JOIN paramet USING(id_sucursal)";
 	$rsSucursal = $mysqli->query($sql);
 	$rowSucursal = $rsSucursal->fetch_object();
+	$rowSucursal->deposito = (bool) $rowSucursal->deposito;
 
 	$sql="SELECT nick FROM usuario WHERE id_usuario=" . $rowR->id_usuario_autoriza_emi;
 	$rsAutoriza = $mysqli->query($sql);
@@ -242,6 +254,9 @@ if ($_REQUEST['emitir']=="true") {
 		$rowTransporta = new stdClass;
 		$rowTransporta->nick = "";
 	}
+	
+	if ($rowSucursal->deposito && $rowR->tipo != 0) $banderaStock = true;
+	
 } else {
 	$sql="SELECT remito_rec.*, CASE WHEN id_sucursal_de<>0 THEN sucursal.descrip ELSE remito_rec.destino END AS destino_descrip, CASE remito_rec.estado WHEN 'R' THEN 'Registrado' ELSE 'Autorizado' END AS estado_descrip FROM remito_rec LEFT JOIN sucursal ON remito_rec.id_sucursal_de=sucursal.id_sucursal WHERE remito_rec.id_remito_rec='" . $_REQUEST['id_remito'] . "'";
 	$rsR = $mysqli->query($sql);
@@ -275,18 +290,41 @@ if ($_REQUEST['emitir']=="true") {
 }
 ?>
 
-<tr><th>Fábrica</th><th>Producto</th><th>Capacidad</th><th>U.</th><th>Color</th><th>Cantidad</th></tr>
+<tr>
+	<th>Fábrica</th><th>Producto</th><th>Capacidad</th><th>U.</th><th>Color</th>
+
+<?php
+	if ($banderaStock) echo '<th>Stock suc.</th>';
+?>
+
+	<th>Cantidad</th>
+</tr>
 <tr><td colspan="10"><hr></td></tr>
 
 <?php
 	while ($rowD = $rsD->fetch_object()) {
+		$rowD->cantidad = (int) $rowD->cantidad;
+		
 		if (substr($rowD->capacidad, -3) == 0) {
 			$rowD->capacidad = (int) $rowD->capacidad; 
 		} else {
 			$rowD->capacidad = number_format($rowD->capacidad, '2', ',', '.');
 		}
+		
+		if ($banderaStock) {
+			$sql = "SELECT stock FROM stock WHERE id_producto_item=" . $rowD->id_producto_item . " AND id_sucursal=" . $rowR->id_sucursal_para;
+			$rsStock = $mysqli->query($sql);
+			$rowStock = $rsStock->fetch_object();
+			$rowStock->stock = (int) $rowStock->stock;
+		}
 ?>
-		<tr><td><?php echo $rowD->fabrica ?></td><td><?php echo $rowD->producto ?></td><td align="right"><?php echo $rowD->capacidad ?></td><td><?php echo $rowD->unidad ?></td><td><?php echo $rowD->color ?></td><td align="right"><?php echo $rowD->cantidad ?></td></tr>
+		<tr>
+			<td><?php echo $rowD->fabrica ?></td><td><?php echo $rowD->producto ?></td><td align="right"><?php echo $rowD->capacidad ?></td><td><?php echo $rowD->unidad ?></td><td><?php echo $rowD->color ?></td>
+<?php
+			if ($banderaStock) echo '<td align="right">' . $rowStock->stock . '</td>';
+?>
+			<td align="right"><?php echo $rowD->cantidad ?></td>
+		</tr>
 		<tr><td colspan="10"><hr></td></tr>
 
 <?php
