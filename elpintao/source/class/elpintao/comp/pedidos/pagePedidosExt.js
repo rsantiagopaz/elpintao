@@ -556,6 +556,7 @@ qx.Class.define("elpintao.comp.pedidos.pagePedidosExt",
 			var p = {};
 			p.id_pedido_ext = rowData.id_pedido_ext;
 			p.id_fabrica = rowData.id_fabrica;
+			p.fabrica_descrip = rowData.fabrica;
 			p.label = "Pedido a proveedor: " + rowData.fecha + " - " + rowData.fabrica;
 			p.detalle = tableModelDetalleExt.getDataAsMapArray();
 			application.functionPuntearPedidoExt(p);
@@ -580,7 +581,7 @@ qx.Class.define("elpintao.comp.pedidos.pagePedidosExt",
 	//Tabla
 
 	var tableModelPedidoExt = new qx.ui.table.model.Simple();
-	tableModelPedidoExt.setColumns(["Fecha", "Fábrica", "Recibido", "Teléfono", "E-mail", "Transporte", "Domic.entrega"], ["fecha", "fabrica", "fecha_recibido", "telefono", "email", "transporte", "domicilio"]);
+	tableModelPedidoExt.setColumns(["Fecha", "Fábrica", "Recibido", "Teléfono", "E-mail", "Transporte", "Domic.entrega", "Nro.remito"], ["fecha", "fabrica", "fecha_recibido", "telefono", "email", "transporte", "domicilio", "nro_remito"]);
 	tableModelPedidoExt.setColumnSortable(0, false);
 	tableModelPedidoExt.setColumnSortable(1, false);
 	tableModelPedidoExt.setColumnSortable(2, false);
@@ -588,6 +589,7 @@ qx.Class.define("elpintao.comp.pedidos.pagePedidosExt",
 	tableModelPedidoExt.setColumnSortable(4, false);
 	tableModelPedidoExt.setColumnSortable(5, false);
 	tableModelPedidoExt.setColumnSortable(6, false);
+	tableModelPedidoExt.setColumnSortable(7, false);
 	//tableModelPedido.setColumns(["Fecha", "Fábrica"], ["fecha", "id_fabrica"]);
 	//tableModelPedido.setEditable(true);
 	

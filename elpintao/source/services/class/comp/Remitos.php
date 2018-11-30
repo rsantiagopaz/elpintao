@@ -1,7 +1,5 @@
 <?php
-
 require_once("Base.php");
-
 class class_Remitos extends class_Base
 {
   
@@ -245,7 +243,6 @@ class class_Remitos extends class_Base
   	
 	$resultado = new stdClass;
 	$resultado->remito = array();
-
   	
 	$sql = "SELECT remito_rec.*, sucursal.descrip";
 	$sql.= " FROM remito_rec LEFT JOIN sucursal ON remito_rec.id_sucursal_de = sucursal.id_sucursal";
@@ -309,7 +306,6 @@ class class_Remitos extends class_Base
 	$resultado = new stdClass;
 	$resultado->remito = array();
 	$resultado->calc = array();
-
 	$calc = new stdClass;
 	$aux = new stdClass;
 	$aux->descrip = "Costo";
@@ -346,7 +342,6 @@ class class_Remitos extends class_Base
 	if ($p->id_fabrica > "0") {
 		$sql.= " AND producto.id_fabrica=" . $p->id_fabrica;
 	}
-
 	if (! empty($p->buscar)) {
 		$descrip = explode(" ", $p->buscar);
 		foreach ($descrip as $palabra) {
@@ -363,8 +358,6 @@ class class_Remitos extends class_Base
 	}
 	
 	$sql.= " ORDER BY id_remito_emi DESC";
-
-
 	$rsRemito = $this->mysqli->query($sql);
 	while ($rowRemito = $rsRemito->fetch_object()) {
 		if (empty($rowRemito->id_usuario_autoriza_emi)) {
@@ -509,5 +502,4 @@ class class_Remitos extends class_Base
 	return $this->toJson($sql);
   }
 }
-
 ?>

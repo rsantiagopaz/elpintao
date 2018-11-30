@@ -9,8 +9,52 @@ qx.Class.define("elpintao.comp.pedidos.pagePunteoPedidoExt",
 	this.setLayout(new qx.ui.layout.Canvas());
 	this.toggleShowCloseButton();
 	
+	this.addListenerOnce("appear", function(e){
+		txtNr1.focus();
+		txtNr1.selectAllText();
+	});
+	
+	
+	
 	var application = qx.core.Init.getApplication();
 	var contexto = this;
+	
+	
+	
+	
+	
+	
+	var txtNr1 = new qx.ui.form.TextField("0");
+	//txtNr1.setEnabled(false);
+	txtNr1.setWidth(40);
+	txtNr1.setMaxLength(4);
+	txtNr1.setFilter(/[0-9]/);
+	txtNr1.addListener("blur", function(e){
+		var aux = txtNr1.getValue();
+		if (aux=="") aux = 0; else aux = parseFloat(aux);
+		txtNr1.setValue(String(aux));
+	})
+	
+	
+	var txtNr2 = new qx.ui.form.TextField("0");
+	//txtNr2.setEnabled(false);
+	txtNr2.setWidth(60);
+	txtNr2.setMaxLength(8);
+	txtNr2.setFilter(/[0-9]/);
+	txtNr2.addListener("blur", function(e){
+		var aux = txtNr2.getValue();
+		if (aux=="") aux = 0; else aux = parseFloat(aux); 
+		txtNr2.setValue(String(aux));
+	})
+	
+	this.add(txtNr1, {left: 100, top: 0});
+	this.add(txtNr2, {left: 150, top: 0});
+	
+	this.add(new qx.ui.basic.Label("-"), {left: 143, top: 3});
+	this.add(new qx.ui.basic.Label("Nro.remito: "), {left: 18, top: 3});
+	
+	
+	
 	
 	
 	//Menu de contexto Detalle
@@ -39,49 +83,66 @@ qx.Class.define("elpintao.comp.pedidos.pagePunteoPedidoExt",
 		p.id_pedido_ext = parametro.id_pedido_ext;
 		p.detalle = [];
 		
-		for (var x = 0; x < tableModelPedido.getRowCount(); x++) {
-			rowData = tableModelPedido.getRowData(x);
-			if (rowData.total > 0) {
-				p.detalle.push(rowData);
-				bandera = true;
-			}
-		}
-
-		if (bandera) {
-			(new dialog.Confirm({
-				"message"     : "Desea guardar el pedido recibido?",
-				"callback"    : qx.lang.Function.bind(function(e){
-									if (e) {
-										var rpc = new qx.io.remote.Rpc("services/", "comp.PedidosExt");
-										try {
-											var resultado = rpc.callSync("recibir_pedido", p);
-										} catch (ex) {
-											alert("Sync exception: " + ex);
-										}
-								
-										application.functionActualizarPedidoExt(parametro.id_pedido_ext);
-										this.fireEvent("close");
-									}
-								}, this),
-				"context"     : null,
-				"image"       : "icon/48/status/dialog-questionmark.png"
-			})).show();
+		//alert(qx.lang.Json.stringify(parametro, null, 2));
+		
+		txtNr1.setValid(true);
+		txtNr2.setValid(true);
+		
+		if (txtNr1.getValue()=="0" && txtNr2.getValue()=="0") {
+			txtNr1.setInvalidMessage("Debe ingresar un nro.remito válido");
+			txtNr1.setValid(false);
+			txtNr2.setInvalidMessage("Debe ingresar un nro.remito válido");
+			txtNr2.setValid(false);
+			txtNr1.focus();
+		} else {
 			
-			
-			
-			/*
-			var rpc = new qx.io.remote.Rpc("services/", "comp.PedidosExt");
-			try {
-				var resultado = rpc.callSync("recibir_pedido", p);
-			} catch (ex) {
-				alert("Sync exception: " + ex);
+			p.nro_remito = qx.lang.String.pad(txtNr1.getValue(), 4, "0") + "-" + qx.lang.String.pad(txtNr2.getValue(), 8, "0");
+			p.fabrica_descrip = parametro.fabrica_descrip;
+		
+			for (var x = 0; x < tableModelPedido.getRowCount(); x++) {
+				rowData = tableModelPedido.getRowData(x);
+				if (rowData.total > 0) {
+					p.detalle.push(rowData);
+					bandera = true;
+				}
 			}
 	
-			application.functionActualizarPedidoExt(parametro.id_pedido_ext);
-			this.fireEvent("close");
-			*/
-		} else {
-			dialog.Dialog.warning("Debe ingresar alguna cantidad recibida.", function(e){tblPedido.focus();});
+			if (bandera) {
+				(new dialog.Confirm({
+					"message"     : "Desea guardar el pedido recibido?",
+					"callback"    : qx.lang.Function.bind(function(e){
+										if (e) {
+											var rpc = new qx.io.remote.Rpc("services/", "comp.PedidosExt");
+											try {
+												var resultado = rpc.callSync("recibir_pedido", p);
+											} catch (ex) {
+												alert("Sync exception: " + ex);
+											}
+									
+											application.functionActualizarPedidoExt(parametro.id_pedido_ext);
+											this.fireEvent("close");
+										}
+									}, this),
+					"context"     : null,
+					"image"       : "icon/48/status/dialog-questionmark.png"
+				})).show();
+				
+				
+				
+				/*
+				var rpc = new qx.io.remote.Rpc("services/", "comp.PedidosExt");
+				try {
+					var resultado = rpc.callSync("recibir_pedido", p);
+				} catch (ex) {
+					alert("Sync exception: " + ex);
+				}
+		
+				application.functionActualizarPedidoExt(parametro.id_pedido_ext);
+				this.fireEvent("close");
+				*/
+			} else {
+				dialog.Dialog.warning("Debe ingresar alguna cantidad recibida.", function(e){tblPedido.focus();});
+			}
 		}
 	}, this);
 	menutblDetalle.add(btnNuevoDetalle);
@@ -178,9 +239,9 @@ qx.Class.define("elpintao.comp.pedidos.pagePunteoPedidoExt",
 	});
 
 
-	this.add(tblPedido, {left:0 , top: 20, right: 0, bottom: 0});
+	this.add(tblPedido, {left:0 , top: 50, right: 0, bottom: 0});
 	
-	this.add(new qx.ui.basic.Label("Detalle pedido:"), {left:0 , top: 0});
+	this.add(new qx.ui.basic.Label("Detalle pedido:"), {left:0 , top: 30});
 	
 	
 
@@ -230,9 +291,6 @@ qx.Class.define("elpintao.comp.pedidos.pagePunteoPedidoExt",
 	//tableModelPedido.sortByColumn(0, true);
 	tblPedido.setFocusedCell(5, 0, true);
 
-	this.addListenerOnce("appear", function(e){
-		tblPedido.focus();
-	});
 	
 	},
 	members : 
