@@ -6,7 +6,7 @@ qx.Class.define("elpintao.comp.remitos.windowRemito",
 	this.base(arguments);
 	
 	this.set({
-		width: 800,
+		width: 960,
 		height: 600,
 		showMinimize: false,
 		showMaximize: false
@@ -22,10 +22,10 @@ qx.Class.define("elpintao.comp.remitos.windowRemito",
 	});
 	
 	var application = qx.core.Init.getApplication();
-	var contexto = this;
 	
 	var id_remito = ((rowRemito==null) ? "0": ((emitir) ? rowRemito.id_remito_emi : rowRemito.id_remito_rec));
 	var id_sucursal = ((rowRemito==null) ? "0": ((emitir) ? rowRemito.id_sucursal_para : rowRemito.id_sucursal_de));
+	var id_fabrica = ((rowRemito==null) ? "0": rowRemito.id_fabrica);
 
 	var slbSucursal = new qx.ui.form.SelectBox();
 	var listItem;
@@ -38,6 +38,27 @@ qx.Class.define("elpintao.comp.remitos.windowRemito",
 	}
 	this.add(slbSucursal, {left: 100 , top: 0});
 	
+	
+
+	
+	var rpc = new qx.io.remote.Rpc("services/", "comp.Reparacion");
+	try {
+		var resultado = rpc.callSync("autocompletarFabrica", {texto: ""});
+	} catch (ex) {
+		alert("Sync exception: " + ex);
+	}
+	
+	
+	var slbFabrica = new qx.ui.form.SelectBox();
+	slbFabrica.setWidth(200);
+	for (var x in resultado) {
+		listItem = new qx.ui.form.ListItem(resultado[x].label, null, resultado[x].model);
+		slbFabrica.add(listItem);
+		if (resultado[x].model==id_fabrica) slbFabrica.setSelection([listItem]);
+	}
+	this.add(slbFabrica, {left: 340 , top: 0});
+	
+	
 
 	var txtDestino = new qx.ui.form.TextField("");
 	txtDestino.setWidth(300);
@@ -45,22 +66,24 @@ qx.Class.define("elpintao.comp.remitos.windowRemito",
 	txtDestino.addListener("blur", function(e){
 		txtDestino.setValue(txtDestino.getValue().trim());
 	});
-	this.add(txtDestino, {left: 340 , top: 0});
+	this.add(txtDestino, {left: 640 , top: 0});
 	
 	
 	var rbt1 = new qx.ui.form.RadioButton(((emitir) ? "Para sucursal: " : "De sucursal: "));
-	rbt1.addListener("changeValue", function(e){
-		var data = e.getData();
-		slbSucursal.setEnabled(data);
-		txtDestino.setEnabled(! data);
-	});
 	var rbt2 = new qx.ui.form.RadioButton(((emitir) ? "Para: " : "De: "));
+	var rbt3 = new qx.ui.form.RadioButton(((emitir) ? "P/fab.: " : "De fab.: "));
 
 	var mgr = new qx.ui.form.RadioGroup();
-	mgr.add(rbt1, rbt2);
+	mgr.addListener("changeSelection", function(){
+		slbSucursal.setEnabled(rbt1.getValue());
+		slbFabrica.setEnabled(rbt3.getValue());
+		txtDestino.setEnabled(rbt2.getValue());
+	});
+	mgr.add(rbt1, rbt3, rbt2);
 	
 	this.add(rbt1, {left: 0 , top: 3});
-	this.add(rbt2, {left: 280 , top: 3});
+	this.add(rbt3, {left: 280 , top: 3});
+	this.add(rbt2, {left: 580 , top: 3});
 	
 
 	
@@ -96,6 +119,8 @@ qx.Class.define("elpintao.comp.remitos.windowRemito",
 	
 	var commandNuevoDetalle = new qx.ui.command.Command("Insert");
 	commandNuevoDetalle.addListener("execute", function(){
+		windowProducto.id_fabrica = (rbt3.getValue()) ? slbFabrica.getModelSelection().getItem(0) : "1";
+		
 		windowProducto.center();
 		windowProducto.open();
 	});
@@ -230,8 +255,17 @@ qx.Class.define("elpintao.comp.remitos.windowRemito",
 		txtNr1.setValue(((isNaN(aux[0])) ? "0" : String(parseFloat(aux[0]))));
 		txtNr2.setValue(((isNaN(aux[1])) ? "0" : String(parseFloat(aux[1]))));
 		
-		rbt2.setValue(id_sucursal=="0");
-		txtDestino.setValue(rowRemito.destino);
+		
+		if (id_sucursal == "0") {
+			if (id_fabrica == "0") {
+				rbt2.setValue(true);
+				txtDestino.setValue(rowRemito.destino);
+			} else {
+				rbt3.setValue(true);
+			}
+		} else {
+			rbt1.setValue(true);
+		}
 		
 		var p = {};
 		p.emitir = emitir;
@@ -249,8 +283,10 @@ qx.Class.define("elpintao.comp.remitos.windowRemito",
 		tblDetalle.setFocusedCell(0, 0, true);
 		if ((emitir && rowRemito.tipo == "1") || (!emitir && rowRemito.tipo > "0")) {
 			slbSucursal.setEnabled(false);
+			slbFabrica.setEnabled(false);
 			rbt1.setEnabled(false);
 			rbt2.setEnabled(false);
+			rbt3.setEnabled(false);
 			txtDestino.setEnabled(false);
 		}
 	}
@@ -260,11 +296,16 @@ qx.Class.define("elpintao.comp.remitos.windowRemito",
 	
 	var btnAceptar = new qx.ui.form.Button("Aceptar");
 	btnAceptar.addListener("execute", function(e){
+		slbFabrica.setValid(true);
 		txtDestino.setValid(true);
 		txtNr1.setValid(true);
 		txtNr2.setValid(true);
 		
-		if (rbt2.getValue() && txtDestino.getValue()=="") {
+		if (rbt3.getValue() && slbFabrica.isSelectionEmpty()) {
+			slbFabrica.setInvalidMessage("Debe seleccionar fábrica");
+			slbFabrica.setValid(false);
+			slbFabrica.focus();
+		} else if (rbt2.getValue() && txtDestino.getValue()=="") {
 			txtDestino.setInvalidMessage("Debe ingresar nombre/razón social");
 			txtDestino.setValid(false);
 			txtDestino.focus();
@@ -287,8 +328,11 @@ qx.Class.define("elpintao.comp.remitos.windowRemito",
 				p.nro_remito = (id_remito=="0") ? "" : rowRemito.nro_remito;
 			}
 			p.id_sucursal = ((rbt1.getValue()) ? slbSucursal.getModelSelection().getItem(0) : "0");
-			p.destino = ((rbt1.getValue()) ? "" : txtDestino.getValue());
+			p.id_fabrica = ((rbt3.getValue()) ? slbFabrica.getModelSelection().getItem(0) : "0");
+			p.destino = ((rbt2.getValue()) ? txtDestino.getValue() : "");
 			p.detalle = tableModelDetalle.getDataAsMapArray();
+			
+			//alert(qx.lang.Json.stringify(p, null, 2));
 			
 			var rpc = new qx.io.remote.Rpc("services/", "comp.Remitos");
 			try {
@@ -303,24 +347,29 @@ qx.Class.define("elpintao.comp.remitos.windowRemito",
 			btnCancelar.execute();
 		}
 	}, this);
-	this.add(btnAceptar, {left: 270, bottom: 0})
 	
 	var btnCancelar = new qx.ui.form.Button("Cancelar");
 	btnCancelar.addListener("execute", function(e){
 		this.destroy();
 	}, this);
-	this.add(btnCancelar, {left: 470, bottom: 0})
+	
+	this.add(btnAceptar, {left: "30%", bottom: 0});
+	this.add(btnCancelar, {right: "30%", bottom: 0});
+	
+	
 	
 	
 	rbt1.setTabIndex(1);
 	slbSucursal.setTabIndex(2);
-	rbt2.setTabIndex(3);
-	txtDestino.setTabIndex(4);
-	txtNr1.setTabIndex(5);
-	txtNr2.setTabIndex(6);
-	tblDetalle.setTabIndex(7);
-	btnAceptar.setTabIndex(8);
-	btnCancelar.setTabIndex(9);
+	rbt3.setTabIndex(3);
+	slbFabrica.setTabIndex(4);
+	rbt2.setTabIndex(5);
+	txtDestino.setTabIndex(6);
+	txtNr1.setTabIndex(7);
+	txtNr2.setTabIndex(8);
+	tblDetalle.setTabIndex(9);
+	btnAceptar.setTabIndex(10);
+	btnCancelar.setTabIndex(11);
 	
 	
 	

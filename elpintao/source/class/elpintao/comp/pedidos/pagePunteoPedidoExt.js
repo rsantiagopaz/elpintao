@@ -97,7 +97,7 @@ qx.Class.define("elpintao.comp.pedidos.pagePunteoPedidoExt",
 		} else {
 			
 			p.nro_remito = qx.lang.String.pad(txtNr1.getValue(), 4, "0") + "-" + qx.lang.String.pad(txtNr2.getValue(), 8, "0");
-			p.fabrica_descrip = parametro.fabrica_descrip;
+			p.id_fabrica = parametro.id_fabrica;
 		
 			for (var x = 0; x < tableModelPedido.getRowCount(); x++) {
 				rowData = tableModelPedido.getRowData(x);

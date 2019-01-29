@@ -17,6 +17,8 @@ class class_Base_elpintao extends class_Base_general
 		//$aux->report_mode = MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT;
 		//mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 		
+		date_default_timezone_set("America/Argentina/Buenos_Aires");
+		
 		if (! is_null($_SESSION['conexion']->servidor)) {
 			$this->mysqli = new mysqli($_SESSION['conexion']->servidor, $_SESSION['conexion']->usuario, $_SESSION['conexion']->password, $_SESSION['conexion']->database);
 			$this->mysqli->query("SET NAMES 'utf8'");

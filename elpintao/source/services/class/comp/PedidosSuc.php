@@ -36,7 +36,7 @@ class class_PedidosSuc extends class_Base
 					$this->mysqli->query($sql);
 					$id_remito_suc[$stock->id_sucursal] = $this->mysqli->insert_id;
 					
-					$sql = "INSERT remito_emi SET nro_remito='', tipo=1, id_sucursal_para='" . $p->id_sucursal . "', fecha='" . $fecha . "', json='" . $json . "', estado='R'";
+					$sql = "INSERT remito_emi SET nro_remito='', tipo=1, id_sucursal_para='" . $p->id_sucursal . "', id_fabrica=0, fecha='" . $fecha . "', json='" . $json . "', estado='R'";
 					$this->transmitir($sql, $stock->id_sucursal);
 					$sql = "SET @id_remito_emi = LAST_INSERT_ID()";
 					$this->transmitir($sql, $stock->id_sucursal);

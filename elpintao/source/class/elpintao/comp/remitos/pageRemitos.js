@@ -92,7 +92,7 @@ qx.Class.define("elpintao.comp.remitos.pageRemitos",
 				tableModel.setDataAsMapArray(resultado.remito, true);
 				
 				if (id_remito == null) {
-					if (tableModel.getRowCount() > 0) tblRemito.setFocusedCell(0, 0, true);
+					//if (tableModel.getRowCount() > 0) tblRemito.setFocusedCell(0, 0, true);
 				} else {
 					if (emitir) {
 						tblRemito.buscar("id_remito_emi", id_remito);
@@ -178,9 +178,7 @@ qx.Class.define("elpintao.comp.remitos.pageRemitos",
 	slbEstado.add(new qx.ui.form.ListItem((emitir) ? "Pendiente de entrega" : "Pendiente de ingreso", null, "Registrado"));
 	slbEstado.add(new qx.ui.form.ListItem((emitir) ? "Entregado" : "Ingresado", null, "Autorizado"));
 	slbEstado.add(new qx.ui.form.ListItem("Todo", null, "Todo"));
-	slbEstado.addListener("changeSelection", function(e){
-		this.functionActualizar();
-	}, this);
+
 	composite.add(slbEstado, {row: 0, column: 1});
 	
 	var aux = new Date;
@@ -191,12 +189,6 @@ qx.Class.define("elpintao.comp.remitos.pageRemitos",
 	dtfHasta.setValue(aux);
 	aux.setMonth(aux.getMonth() - 1);
 	dtfDesde.setValue(aux);
-	dtfDesde.addListener("changeValue", function(e){
-		this.functionActualizar();
-	}, this);
-	dtfHasta.addListener("changeValue", function(e){
-		this.functionActualizar();
-	}, this);
 	
 	composite.add(new qx.ui.basic.Label("Desde:"), {row: 0, column: 3});
 	composite.add(dtfDesde, {row: 0, column: 4});
@@ -218,9 +210,6 @@ qx.Class.define("elpintao.comp.remitos.pageRemitos",
 	for (var x in resultado) {
 		slbSucursal.add(new qx.ui.form.ListItem(resultado[x].label, null, resultado[x].model));
 	}
-	slbSucursal.addListener("changeSelection", function(e){
-		this.functionActualizar();
-	}, this);
 	
 	composite.add(new qx.ui.basic.Label("Sucursal:"), {row: 0, column: 8});
 	composite.add(slbSucursal, {row: 0, column: 9});
@@ -248,16 +237,13 @@ qx.Class.define("elpintao.comp.remitos.pageRemitos",
 	var slbFabrica = this.slbFabrica = new qx.ui.form.SelectBox();
 	slbFabrica.setWidth(200);
 	
-	slbFabrica.add(new qx.ui.form.ListItem(" ", null, "0"));
+	slbFabrica.add(new qx.ui.form.ListItem("-", null, "0"));
 	for (var x in resultado) {
 		slbFabrica.add(new qx.ui.form.ListItem(resultado[x].label, null, resultado[x].model));
 	}
-	slbFabrica.addListener("changeSelection", function(e){
-		this.functionActualizar();
-	}, this);
 	
-	//composite.add(new qx.ui.basic.Label("Fábrica:"), {row: 0, column: 11});
-	//composite.add(slbFabrica, {row: 0, column: 12});
+	composite.add(new qx.ui.basic.Label("Fábrica:"), {row: 0, column: 11});
+	composite.add(slbFabrica, {row: 0, column: 12});
 	
 	
 	/*
@@ -287,6 +273,12 @@ qx.Class.define("elpintao.comp.remitos.pageRemitos",
 	
 		
 	
+	var btnFiltrar = new qx.ui.form.Button("Filtrar");
+	btnFiltrar.addListener("execute", function(e){
+		this.functionActualizar();
+	}, this);
+	
+	composite.add(btnFiltrar, {row: 0, column: 18});
 	
 	
 	//Menu de contexto Pedido
@@ -576,8 +568,7 @@ qx.Class.define("elpintao.comp.remitos.pageRemitos",
 	
 	
 	
-	functionActualizar();
-	if (tableModel.getRowCount()>0) tblRemito.setFocusedCell(0, 0, true);
+	btnFiltrar.execute();
 	
 	
 	slbEstado.setTabIndex(1);
@@ -586,10 +577,11 @@ qx.Class.define("elpintao.comp.remitos.pageRemitos",
 	slbSucursal.setTabIndex(4);
 	slbFabrica.setTabIndex(5);
 	txtBuscar.setTabIndex(6);
-	tblRemito.setTabIndex(7);
-	tblTotgen.setTabIndex(8);
-	tblDetalle.setTabIndex(9);
-	tblTotales.setTabIndex(10);
+	btnFiltrar.setTabIndex(7);
+	tblRemito.setTabIndex(8);
+	tblTotgen.setTabIndex(9);
+	tblDetalle.setTabIndex(10);
+	tblTotales.setTabIndex(11);
 	
 	
 	

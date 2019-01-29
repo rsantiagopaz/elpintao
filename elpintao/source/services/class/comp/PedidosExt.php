@@ -10,7 +10,12 @@ class class_PedidosExt extends class_Base
   	$p = $params[0];
   	set_time_limit(120);
   	
-	$sql = "SELECT descrip AS label, id_fabrica AS model, fabrica.* FROM fabrica WHERE descrip LIKE '%" . $p->texto . "%' ORDER BY label";
+  	if (isset($p->parametros)) {
+  		$sql = "SELECT descrip AS label, id_fabrica AS model, fabrica.* FROM fabrica WHERE id_fabrica=" . $p->parametros->id_fabrica;
+  	} else {
+  		$sql = "SELECT descrip AS label, id_fabrica AS model, fabrica.* FROM fabrica WHERE descrip LIKE '%" . $p->texto . "%' ORDER BY label";
+  	}
+	
 	return $this->toJson($sql);
   }
 
@@ -20,7 +25,7 @@ class class_PedidosExt extends class_Base
   	
   	$this->mysqli->query("START TRANSACTION");
   	
-	$sql="INSERT remito_rec SET nro_remito='" . $p->nro_remito . "', tipo=0, id_sucursal_de=0, destino='" . $p->fabrica_descrip . "', fecha=NOW(), id_usuario_transporta=0, estado='R'";
+	$sql="INSERT remito_rec SET nro_remito='" . $p->nro_remito . "', tipo=0, id_sucursal_de=0, id_fabrica=" . $p->id_fabrica . ", fecha=NOW(), id_usuario_transporta=0, estado='R'";
 	$this->mysqli->query($sql);
 	$id_remito_rec = $this->mysqli->insert_id;
   	

@@ -223,21 +223,22 @@ case 'imprimir_remito': {
 	
 $banderaStock = false;
 
+$sql = "SELECT sucursal.* FROM sucursal INNER JOIN paramet USING(id_sucursal)";
+$rsSucursal = $mysqli->query($sql);
+$rowSucursal = $rsSucursal->fetch_object();
+$rowSucursal->deposito = (bool) $rowSucursal->deposito;
+
 if ($_REQUEST['emitir']=="true") {
-	$sql="SELECT remito_emi.*, CASE WHEN id_sucursal_para<>0 THEN sucursal.descrip ELSE remito_emi.destino END AS destino_descrip, CASE remito_emi.estado WHEN 'R' THEN 'Registrado' ELSE 'Autorizado' END AS estado_descrip FROM remito_emi LEFT JOIN sucursal ON remito_emi.id_sucursal_para=sucursal.id_sucursal WHERE remito_emi.id_remito_emi='" . $_REQUEST['id_remito'] . "'";
+	$sql = "SELECT remito_emi.*, CASE WHEN id_sucursal_para<>0 THEN sucursal.descrip WHEN remito_emi.id_fabrica<>0 THEN fabrica.descrip ELSE remito_emi.destino END AS destino_descrip, CASE remito_emi.estado WHEN 'R' THEN 'Registrado' ELSE 'Autorizado' END AS estado_descrip FROM (remito_emi LEFT JOIN sucursal ON remito_emi.id_sucursal_para=sucursal.id_sucursal) LEFT JOIN fabrica ON remito_emi.id_fabrica=fabrica.id_fabrica WHERE remito_emi.id_remito_emi='" . $_REQUEST['id_remito'] . "'";
 	$rsR = $mysqli->query($sql);
 	$rowR = $rsR->fetch_object();
 	$rowR->tipo = (int) $rowR->tipo;
 
-	$sql="SELECT remito_emi_detalle.*, fabrica.descrip AS fabrica, CONCAT(producto_item.cod_interno, ' - ', producto.descrip) AS producto, producto_item.capacidad, color.descrip AS color, unidad.descrip AS unidad FROM ((((remito_emi_detalle INNER JOIN producto_item USING(id_producto_item)) INNER JOIN producto USING(id_producto)) INNER JOIN fabrica USING(id_fabrica)) INNER JOIN color USING (id_color)) INNER JOIN unidad USING (id_unidad) WHERE id_remito_emi='" . $_REQUEST['id_remito'] . "' ORDER BY producto.descrip ";
+	$sql = "SELECT remito_emi_detalle.*, fabrica.descrip AS fabrica, CONCAT(producto_item.cod_interno, ' - ', producto.descrip) AS producto, producto_item.capacidad, color.descrip AS color, unidad.descrip AS unidad FROM ((((remito_emi_detalle INNER JOIN producto_item USING(id_producto_item)) INNER JOIN producto USING(id_producto)) INNER JOIN fabrica USING(id_fabrica)) INNER JOIN color USING (id_color)) INNER JOIN unidad USING (id_unidad) WHERE id_remito_emi='" . $_REQUEST['id_remito'] . "' ORDER BY producto.descrip ";
 	$rsD = $mysqli->query($sql);
 	
-	$sql="SELECT sucursal.* FROM sucursal INNER JOIN paramet USING(id_sucursal)";
-	$rsSucursal = $mysqli->query($sql);
-	$rowSucursal = $rsSucursal->fetch_object();
-	$rowSucursal->deposito = (bool) $rowSucursal->deposito;
 
-	$sql="SELECT nick FROM usuario WHERE id_usuario=" . $rowR->id_usuario_autoriza_emi;
+	$sql = "SELECT nick FROM usuario WHERE id_usuario=" . $rowR->id_usuario_autoriza_emi;
 	$rsAutoriza = $mysqli->query($sql);
 	if ($rsAutoriza->num_rows > 0) {
 		$rowAutoriza = $rsAutoriza->fetch_object();
@@ -246,24 +247,34 @@ if ($_REQUEST['emitir']=="true") {
 		$rowAutoriza->nick = "";
 	}
 	
-	$sql="SELECT nick FROM usuario WHERE id_usuario=" . $rowR->id_usuario_transporta;
-	$rsTransporta = $mysqli->query($sql);
-	if ($rsTransporta->num_rows > 0) {
-		$rowTransporta = $rsTransporta->fetch_object();
-	} else {
-		$rowTransporta = new stdClass;
-		$rowTransporta->nick = "";
-	}
-	
 	if ($rowSucursal->deposito && $rowR->tipo != 0) $banderaStock = true;
 	
 } else {
-	$sql="SELECT remito_rec.*, CASE WHEN id_sucursal_de<>0 THEN sucursal.descrip ELSE remito_rec.destino END AS destino_descrip, CASE remito_rec.estado WHEN 'R' THEN 'Registrado' ELSE 'Autorizado' END AS estado_descrip FROM remito_rec LEFT JOIN sucursal ON remito_rec.id_sucursal_de=sucursal.id_sucursal WHERE remito_rec.id_remito_rec='" . $_REQUEST['id_remito'] . "'";
+	$sql="SELECT remito_rec.*, CASE WHEN id_sucursal_de<>0 THEN sucursal.descrip WHEN remito_rec.id_fabrica<>0 THEN fabrica.descrip ELSE remito_rec.destino END AS destino_descrip, CASE remito_rec.estado WHEN 'R' THEN 'Registrado' ELSE 'Autorizado' END AS estado_descrip FROM (remito_rec LEFT JOIN sucursal ON remito_rec.id_sucursal_de=sucursal.id_sucursal) LEFT JOIN fabrica ON remito_rec.id_fabrica=fabrica.id_fabrica WHERE remito_rec.id_remito_rec='" . $_REQUEST['id_remito'] . "'";
 	$rsR = $mysqli->query($sql);
 	$rowR = $rsR->fetch_object();
 
 	$sql="SELECT remito_rec_detalle.*, fabrica.descrip AS fabrica, CONCAT(producto_item.cod_interno, ' - ', producto.descrip) AS producto, producto_item.capacidad, color.descrip AS color, unidad.descrip AS unidad FROM ((((remito_rec_detalle INNER JOIN producto_item USING(id_producto_item)) INNER JOIN producto USING(id_producto)) INNER JOIN fabrica USING(id_fabrica)) INNER JOIN color USING (id_color)) INNER JOIN unidad USING (id_unidad) WHERE id_remito_rec='" . $_REQUEST['id_remito'] . "'";
 	$rsD = $mysqli->query($sql);
+	
+	
+	$sql = "SELECT nick FROM usuario WHERE id_usuario=" . $rowR->id_usuario_autoriza_rec;
+	$rsAutoriza = $mysqli->query($sql);
+	if ($rsAutoriza->num_rows > 0) {
+		$rowAutoriza = $rsAutoriza->fetch_object();
+	} else {
+		$rowAutoriza = new stdClass;
+		$rowAutoriza->nick = "";
+	}
+}
+
+$sql = "SELECT nick FROM usuario WHERE id_usuario=" . $rowR->id_usuario_transporta;
+$rsTransporta = $mysqli->query($sql);
+if ($rsTransporta->num_rows > 0) {
+	$rowTransporta = $rsTransporta->fetch_object();
+} else {
+	$rowTransporta = new stdClass;
+	$rowTransporta->nick = "";
 }
  
 //$sql = "SELECT movimiento.*, oas_usuarios.SYSusuario AS usuario FROM movimiento INNER JOIN salud1.oas_usuarios ON movimiento.id_oas_usuario_movimiento=oas_usuarios.id_oas_usuario WHERE id_bien=" . $_REQUEST['id_bien'] . " ORDER BY id_movimiento";
@@ -279,11 +290,19 @@ if ($_REQUEST['emitir']=="true") {
 <tr><td align="center" colspan="6" style="font-family:arial; font-size:16px; font-weight:bold;"><big>Remito <?php echo $rowR->nro_remito ?></big></td></tr>
 <tr><td align="center" colspan="6"><?php echo "Fecha: " . $rowR->fecha ?></td></tr>
 <tr><td>&nbsp;</td></tr>
+<tr><td align="center" colspan="6"><?php echo (($_REQUEST['emitir']=="true") ? "Salida de mercaderia" : "Entrada de mercaderia"); ?></td></tr>
+<tr><td>&nbsp;</td></tr>
 
 <?php
 if ($_REQUEST['emitir']=="true") {
 ?>
 	<tr><td align="center" colspan="6"><?php echo "De: " . $rowSucursal->descrip . " - Para: " . $rowR->destino_descrip ?></td></tr>
+	<tr><td align="center" colspan="6"><?php echo "Autoriza: " . $rowAutoriza->nick . " - Transporta: " . $rowTransporta->nick ?></td></tr>
+	<tr><td>&nbsp;</td></tr>
+<?php
+} else {
+?>
+	<tr><td align="center" colspan="6"><?php echo "De: " . $rowR->destino_descrip . " - Para: " . $rowSucursal->descrip ?></td></tr>
 	<tr><td align="center" colspan="6"><?php echo "Autoriza: " . $rowAutoriza->nick . " - Transporta: " . $rowTransporta->nick ?></td></tr>
 	<tr><td>&nbsp;</td></tr>
 <?php
