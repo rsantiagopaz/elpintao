@@ -55,12 +55,60 @@ qx.Class.define("elpintao.Application",
 
 
 
+
+     
+      
+      
+	var rpc = new qx.io.remote.Rpc("services/", "comp.Conexion");
+	try {
+		var resultado = rpc.callSync("leer_conexion");
+	} catch (ex) {
+		alert("Sync exception: " + ex);
+	}
+	
+	var conexion = this.conexion = resultado;
+      
+      
+      
+	
+	
+	var id_version = 1;
+	
+	var rpc = new qx.io.remote.Rpc("services/", "comp.Base");
+	try {
+		var resultado = rpc.callSync("leer_version");
+	} catch (ex) {
+		alert("Sync exception: " + ex);
+	}
+	
+	if (id_version == resultado.id_version) {
+		this.initApp();
+		
+	} else {
+		alert("Presione F5 para actualizar aplicación. Si el problema persiste comunicarse con servicio técnico.");
+		
+		location.reload(true);
+	}
+	
+	
+	
+
+	
+    },
+    
+    
+	initApp: function()
+	{
+		
+		
       // Document is the application root
 	var doc = this.getRoot();
       
 	doc.set({blockerColor: '#bfbfbf', blockerOpacity: 0.4});
 	//doc.set({blockerColor: 'white', blockerOpacity: 0.4});
 
+		
+		
 	var pageProductos = null;
 	var pageHistoricoPrecio = null;
 	var pageHistoricoProducto = null;
@@ -155,7 +203,7 @@ qx.Class.define("elpintao.Application",
 		*/
 	
 		var loginWidget = new dialog.Login({
-			text : "Productos - Ingrese datos de identificación",
+			text : "Ingrese datos de identificación",
 			checkCredentials : function(username, password, callback) {
 				loginWidget._username.setValid(true);
 				loginWidget._password.setValid(true);
@@ -170,15 +218,11 @@ qx.Class.define("elpintao.Application",
 					if (error) {
 						callback(error);
 					} else {
-						if (resultado.id_arbol == null) {
-							callback({message: "id_arbol"});
-						} else {
-							for (var x in resultado) {
-								usuario[x] = resultado[x];
-							}
-
-							callback(null, resultado);
+						for (var x in resultado) {
+							usuario[x] = resultado[x];
 						}
+	
+						callback(null, resultado);
 					}
 				}, "leer_usuario", p);
 			},
@@ -199,10 +243,10 @@ qx.Class.define("elpintao.Application",
 		
 		
 		loginWidget._password.setInvalidMessage("Contraseña incorrecta");
-		
 		loginWidget._loginButton.setLabel("Aceptar");
+		loginWidget._cancelButton.setVisibility("hidden");
+		
 		loginWidget._username.addListener("appear", function(e) {
-			//loginWidget.activate();
 			loginWidget._username.focus();
 		});
 		
@@ -302,19 +346,9 @@ qx.Class.define("elpintao.Application",
 	
 	
 	
-	/*
-	var req = new qx.io.remote.Request("services/class/comp/Conexion.php");
-	req.setAsynchronous(false);
-	req.send();
-	*/
 	
-	var rpc = new qx.io.remote.Rpc("services/", "comp.Conexion");
-	try {
-		var resultado = rpc.callSync("leer_conexion");
-	} catch (ex) {
-		alert("Sync exception: " + ex);
-	}
-	var conexion = this.conexion = resultado;
+	
+	var conexion = this.conexion;
 	
 	
 	
@@ -480,31 +514,31 @@ qx.Class.define("elpintao.Application",
 	var mnuCentral = new qx.ui.menu.Menu();
 	var btnProductos = new qx.ui.menu.Button("Productos");
 	btnProductos.addListener("execute", function(e){
-		if (pageProductos==null) {
-			functionLogin(qx.lang.Function.bind(function(e) {
-				pageProductos = new elpintao.comp.productos.pageProductos(e.getData());
+		if (usuario.id_arbol == null) {
+			dialog.Dialog.error("El usuario no cuenta con los permisos necesarios");
+		} else {
+			if (pageProductos==null) {
+				pageProductos = new elpintao.comp.productos.pageProductos(usuario);
 				//pageProductos = new elpintao.comp.productos.pageProductos({id_arbol: 1});
 				pageProductos.addListenerOnce("close", function(e){
 					pageProductos = null;
 				});
 				tabviewMain.add(pageProductos);
 				tabviewMain.setSelection([pageProductos]);
-			}, this));
-		} else tabviewMain.setSelection([pageProductos]);
+			} else tabviewMain.setSelection([pageProductos]);
+		}
 	}, this);
 	mnuCentral.add(btnProductos);
 	
 	var btnHistoricoPrecio = new qx.ui.menu.Button("Historico precio");
 	btnHistoricoPrecio.addListener("execute", function(e){
 		if (pageHistoricoPrecio==null) {
-			//functionLogin(function(e) {
-				pageHistoricoPrecio = new elpintao.comp.productos.pageHistoricoPrecio();
-				pageHistoricoPrecio.addListenerOnce("close", function(e){
-					pageHistoricoPrecio = null;
-				});
-				tabviewMain.add(pageHistoricoPrecio);
-				tabviewMain.setSelection([pageHistoricoPrecio]);
-			//});
+			pageHistoricoPrecio = new elpintao.comp.productos.pageHistoricoPrecio();
+			pageHistoricoPrecio.addListenerOnce("close", function(e){
+				pageHistoricoPrecio = null;
+			});
+			tabviewMain.add(pageHistoricoPrecio);
+			tabviewMain.setSelection([pageHistoricoPrecio]);
 		} else tabviewMain.setSelection([pageHistoricoPrecio]);
 	}, this);
 	mnuCentral.add(btnHistoricoPrecio);
@@ -513,14 +547,12 @@ qx.Class.define("elpintao.Application",
 	var btnHistoricoProducto = new qx.ui.menu.Button("Historico producto");
 	btnHistoricoProducto.addListener("execute", function(e){
 		if (pageHistoricoProducto==null) {
-			//functionLogin(function(e) {
-				pageHistoricoProducto = new elpintao.comp.productos.pageHistoricoProducto();
-				pageHistoricoProducto.addListenerOnce("close", function(e){
-					pageHistoricoProducto = null;
-				});
-				tabviewMain.add(pageHistoricoProducto);
-				tabviewMain.setSelection([pageHistoricoProducto]);
-			//});
+			pageHistoricoProducto = new elpintao.comp.productos.pageHistoricoProducto();
+			pageHistoricoProducto.addListenerOnce("close", function(e){
+				pageHistoricoProducto = null;
+			});
+			tabviewMain.add(pageHistoricoProducto);
+			tabviewMain.setSelection([pageHistoricoProducto]);
 		} else tabviewMain.setSelection([pageHistoricoProducto]);
 	}, this);
 	mnuCentral.add(btnHistoricoProducto);
@@ -528,24 +560,22 @@ qx.Class.define("elpintao.Application",
 	
 	var btnAplicarAjuste = new qx.ui.menu.Button("Aplicar ajustes desde Raiz de prod.");
 	btnAplicarAjuste.addListener("execute", function(e){
-		functionLogin(qx.lang.Function.bind(function(e) {
-			var win = new componente.elpintao.ramon.productos.windowAplicarAjustes("1");
-			win.addListener("aceptado", function(e){
-				if (pageProductos != null) pageProductos.actualizar();
+		var win = new componente.elpintao.ramon.productos.windowAplicarAjustes("1");
+		win.addListener("aceptado", function(e){
+			if (pageProductos != null) pageProductos.actualizar();
 
-				/*
-				if (banderaModoBuscar) {
-					slbFabrica.fireEvent("changeSelection");
-				} else {
-					tree.getSelection().fireDataEvent("change");
-				}
-				*/
-			});
-			win.setModal(true);
-			this.getRoot().add(win);
-			win.center();
-			win.open();
-		}, this));
+			/*
+			if (banderaModoBuscar) {
+				slbFabrica.fireEvent("changeSelection");
+			} else {
+				tree.getSelection().fireDataEvent("change");
+			}
+			*/
+		});
+		win.setModal(true);
+		this.getRoot().add(win);
+		win.center();
+		win.open();
 	}, this);
 	mnuCentral.add(btnAplicarAjuste);
 	mnuCentral.addSeparator();
@@ -816,6 +846,16 @@ qx.Class.define("elpintao.Application",
 		*/
 	}, this);
 	mnuSucursal.add(btnRemitosRec);
+	
+	
+	
+      var mnuSesion = new qx.ui.menu.Menu();
+    
+      var btnCerrar = new qx.ui.menu.Button("Cerrar");
+      btnCerrar.addListener("execute", function(e){
+        location.reload(true);
+      });
+      mnuSesion.add(btnCerrar);
 
 	
 	
@@ -825,10 +865,12 @@ qx.Class.define("elpintao.Application",
 	var mnubtnVer = new qx.ui.toolbar.MenuButton('Ver');
 	var mnubtnCentral = new qx.ui.toolbar.MenuButton('Depósito');
 	var mnubtnSucursal = new qx.ui.toolbar.MenuButton('Sucursal');
+	var mnubtnSesion = new qx.ui.toolbar.MenuButton('Sesión');
 	
 	mnubtnArchivo.setMenu(mnuArchivo);
 	mnubtnCentral.setMenu(mnuCentral);
 	mnubtnSucursal.setMenu(mnuSucursal);
+	mnubtnSesion.setMenu(mnuSesion);
 	  
 	
 	var toolbarMain = new qx.ui.toolbar.ToolBar();
@@ -838,6 +880,8 @@ qx.Class.define("elpintao.Application",
 
 	//toolbarMain.add(mnubtnCentral);
 	toolbarMain.add(mnubtnSucursal);
+	
+	toolbarMain.add(mnubtnSesion);
 	
 	toolbarMain.addSpacer();
 	
@@ -903,28 +947,32 @@ qx.Class.define("elpintao.Application",
 	
 	
 	
+	functionLogin(qx.lang.Function.bind(function(e) {
 		
-/*
-	var compositeTransmision = new qx.ui.container.Composite(new qx.ui.layout.Basic());
-	compositeTransmision.setWidth(200);
-	compositeTransmision.setHeight(30);
-	compositeTransmision.addListener("mouseover", function(e){
-		if (!popupTransmision.isSeeable()) {
-			popupTransmision.placeToWidget(compositeTransmision, false);
-			popupTransmision.show();
-		}
-	});
-	compositeTransmision.addListener("mouseout", function(e){
-		if (popupTransmision.isSeeable()) {
-			popupTransmision.hide();
-		}
-	});
-	doc.add(compositeTransmision, {top: 5, right: 5});
-*/	
-	
-	
+		//alert(qx.lang.Json.stringify(usuario, null, 2));
+		
+		btnProductos.setEnabled(usuario.perfil["101"] != null);
+		btnAplicarAjuste.setEnabled(usuario.perfil["102"] != null);
+		btnCargaStock2.setEnabled(usuario.perfil["103"] != null);
+		btnReparar.setEnabled(usuario.perfil["104"] != null);
+		btnPedidosExt.setEnabled(usuario.perfil["105"] != null);
+		btnPedidosSuc.setEnabled(usuario.perfil["106"] != null);
+		btnRemitosEmiCentral.setEnabled(usuario.perfil["107"] != null);
+		btnRemitosRecCentral.setEnabled(usuario.perfil["108"] != null);
+		btnCuentas.setEnabled(usuario.perfil["109"] != null);
+		btnSucursales.setEnabled(usuario.perfil["110"] != null);
+		btnUsuarios.setEnabled(usuario.perfil["111"] != null);
+		btnFabricas.setEnabled(usuario.perfil["112"] != null);
+		
+		
+		btnCargaStock.setEnabled(usuario.perfil["201"] != null);
+		btnPedidos.setEnabled(usuario.perfil["202"] != null);
+		btnRemitosEmi.setEnabled(usuario.perfil["203"] != null);
+		btnRemitosRec.setEnabled(usuario.perfil["204"] != null);
 
+	}, this));
 	
-    }
+	
+	}
   }
 });
