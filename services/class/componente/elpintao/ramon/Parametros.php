@@ -220,38 +220,50 @@ class class_Parametros extends class_Base_elpintao
 	}
   }
 
-
-  public function method_escribir_fabrica($params, $error) {
+  
+  
+  public function method_alta_modifica_fabrica($params, $error) {
   	$p = $params[0];
   	
-  	$cambios = $p->cambios;
+  	$sql = "SELECT id_fabrica FROM fabrica WHERE descrip='" . $p->model->descrip . "' AND id_fabrica <> " . $p->model->id_fabrica;
+  	$rs = $this->mysqli->query($sql);
+  	if ($rs->num_rows > 0) {
+  		$error->SetError(0, "descrip");
+  		return $error;
+  	}
   	
-	try {
-		$this->mysqli->query("START TRANSACTION");
+	$id_fabrica = $p->model->id_fabrica;
+	
+	$set = $this->prepararCampos($p->model, "fabrica");
+	
+	
+	$this->mysqli->query("START TRANSACTION");
 		
-		foreach ($cambios->altas as $item) {
-			$insert_id = "0";
-			$sql="INSERT fabrica SET id_fabrica=" . $insert_id . ", descrip='" . $item->descrip . "', desc_fabrica='" . $item->desc_fabrica . "'";
-			$this->mysqli->query($sql);
-			$insert_id = $this->mysqli->insert_id;
-			$sql="INSERT fabrica SET id_fabrica=" . $insert_id . ", descrip='" . $item->descrip . "', desc_fabrica='" . $item->desc_fabrica . "'";
-			$this->transmitir($sql);
-			
-			$sql="INSERT usuario_fabrica SELECT id_usuario, '" . $insert_id . "' AS id_fabrica FROM usuario";
-			$this->mysqli->query($sql);
-		}
-	
-		foreach ($cambios->modificados as $item) {
-			$sql="UPDATE fabrica SET descrip='" . $item->descrip . "', desc_fabrica='" . $item->desc_fabrica . "' WHERE id_fabrica='" . $item->id_fabrica . "'";
-			$this->mysqli->query($sql);
-			$this->transmitir($sql);
-		}	
-	
-		$this->mysqli->query("COMMIT");
-	
-	} catch (Exception $e) {
-		$this->mysqli->query("ROLLBACK");
+	if ($id_fabrica == "0") {
+		$sql = "INSERT fabrica SET " . $set;
+		$this->mysqli->query($sql);
+		
+		$id_fabrica = $this->mysqli->insert_id;
+		
+		$p->model->id_fabrica = $id_fabrica;
+		$set = $this->prepararCampos($p->model, "fabrica");
+		
+		$sql = "INSERT fabrica SET " . $set;
+		$this->transmitir($sql);
+		
+		
+		$sql = "INSERT usuario_fabrica SELECT id_usuario, '" . $id_fabrica . "' AS id_fabrica FROM usuario";
+		$this->mysqli->query($sql);
+
+	} else {
+		$sql = "UPDATE fabrica SET " . $set . " WHERE id_fabrica=" . $id_fabrica;
+		$this->mysqli->query($sql);
+		$this->transmitir($sql);
 	}
+	
+	$this->mysqli->query("COMMIT");
+	
+	return $id_fabrica;
   }
 }
 

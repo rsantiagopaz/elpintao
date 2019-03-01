@@ -58,6 +58,11 @@ qx.Class.define("elpintao.Application",
 
      
       
+     
+      // Document is the application root
+	var doc = this.getRoot();
+	
+      
       
 	var rpc = new qx.io.remote.Rpc("services/", "comp.Conexion");
 	try {
@@ -72,7 +77,7 @@ qx.Class.define("elpintao.Application",
       
 	
 	
-	var id_version = 1;
+	var id_version = 2;
 	
 	var rpc = new qx.io.remote.Rpc("services/", "comp.Base");
 	try {
@@ -82,7 +87,22 @@ qx.Class.define("elpintao.Application",
 	}
 	
 	if (id_version == resultado.id_version) {
-		this.initApp();
+		qx.event.Timer.once(function(){
+			var win = new elpintao.comp.varios.windowLogin();
+			win.addListener("aceptado", function(e){
+				var data = e.getData();
+				
+				this.usuario = data;
+				
+				qx.event.Timer.once(function(){
+					this.initApp();
+				}, this, 20);
+			}, this);
+			win.setModal(true);
+			doc.add(win);
+			win.center();
+			win.open();
+		}, this, 20);
 		
 	} else {
 		alert("Presione F5 para actualizar aplicación. Si el problema persiste comunicarse con servicio técnico.");
@@ -127,11 +147,23 @@ qx.Class.define("elpintao.Application",
 	var arrayDeposito;
 	var contexto = this;
 	
-	var usuario = this.usuario = {};
+	var usuario = this.usuario;
 	
 	
-
-
+	var numberformatMontoEs = this.numberformatMontoEs = new qx.util.format.NumberFormat("es");
+	numberformatMontoEs.setGroupingUsed(true);
+	numberformatMontoEs.setMaximumFractionDigits(2);
+	numberformatMontoEs.setMinimumFractionDigits(2);
+	
+	var numberformatMontoEn = this.numberformatMontoEn = new qx.util.format.NumberFormat("en");
+	numberformatMontoEn.setGroupingUsed(false);
+	numberformatMontoEn.setMaximumFractionDigits(2);
+	numberformatMontoEn.setMinimumFractionDigits(2);
+	
+	var numberformatEntero = this.numberformatEntero = new qx.util.format.NumberFormat("en");
+	numberformatEntero.setGroupingUsed(false);
+	numberformatEntero.setMaximumFractionDigits(0);
+	numberformatEntero.setMinimumFractionDigits(0);
 	
 	
 	
@@ -503,11 +535,11 @@ qx.Class.define("elpintao.Application",
 	var mnuArchivo = new qx.ui.menu.Menu();
 	var btnAcercaDe = new qx.ui.menu.Button("Acerca de...");
 	btnAcercaDe.addListener("execute", function(){
-		var windowAcercaDe = new elpintao.comp.varios.windowAcercaDe();
-		windowAcercaDe.setModal(true);
-		doc.add(windowAcercaDe);
-		windowAcercaDe.center();
-		windowAcercaDe.open();
+		var win = new elpintao.comp.varios.windowAcercaDe();
+		win.setModal(true);
+		doc.add(win);
+		win.center();
+		win.open();
 	});
 	mnuArchivo.add(btnAcercaDe);
 	  
@@ -878,8 +910,8 @@ qx.Class.define("elpintao.Application",
 	toolbarMain.add(mnubtnEdicion);
 	toolbarMain.add(mnubtnVer);
 
-	//toolbarMain.add(mnubtnCentral);
-	toolbarMain.add(mnubtnSucursal);
+	toolbarMain.add(mnubtnCentral);
+	//toolbarMain.add(mnubtnSucursal);
 	
 	toolbarMain.add(mnubtnSesion);
 	
@@ -921,7 +953,7 @@ qx.Class.define("elpintao.Application",
 				popupTransmision.tableModel.setDataAsMapArray(objTransmision[id_sucursal].resultado, true);
 			
 				popupTransmision.placeToWidget(target, false);
-				popupTransmision.show();				
+				popupTransmision.show();
 			} else {
 				popupTransmision.hide();
 			}
@@ -945,33 +977,28 @@ qx.Class.define("elpintao.Application",
 	
 	windowMensajes = new elpintao.comp.mensajes.windowMensajes();
 	
-	
-	
-	functionLogin(qx.lang.Function.bind(function(e) {
-		
-		//alert(qx.lang.Json.stringify(usuario, null, 2));
-		
-		btnProductos.setEnabled(usuario.perfil["101"] != null);
-		btnAplicarAjuste.setEnabled(usuario.perfil["102"] != null);
-		btnCargaStock2.setEnabled(usuario.perfil["103"] != null);
-		btnReparar.setEnabled(usuario.perfil["104"] != null);
-		btnPedidosExt.setEnabled(usuario.perfil["105"] != null);
-		btnPedidosSuc.setEnabled(usuario.perfil["106"] != null);
-		btnRemitosEmiCentral.setEnabled(usuario.perfil["107"] != null);
-		btnRemitosRecCentral.setEnabled(usuario.perfil["108"] != null);
-		btnCuentas.setEnabled(usuario.perfil["109"] != null);
-		btnSucursales.setEnabled(usuario.perfil["110"] != null);
-		btnUsuarios.setEnabled(usuario.perfil["111"] != null);
-		btnFabricas.setEnabled(usuario.perfil["112"] != null);
-		
-		
-		btnCargaStock.setEnabled(usuario.perfil["201"] != null);
-		btnPedidos.setEnabled(usuario.perfil["202"] != null);
-		btnRemitosEmi.setEnabled(usuario.perfil["203"] != null);
-		btnRemitosRec.setEnabled(usuario.perfil["204"] != null);
 
-	}, this));
+
 	
+	
+	btnProductos.setEnabled(usuario.perfil["101"] != null);
+	btnAplicarAjuste.setEnabled(usuario.perfil["102"] != null);
+	btnCargaStock2.setEnabled(usuario.perfil["103"] != null);
+	btnReparar.setEnabled(usuario.perfil["104"] != null);
+	btnPedidosExt.setEnabled(usuario.perfil["105"] != null);
+	btnPedidosSuc.setEnabled(usuario.perfil["106"] != null);
+	btnRemitosEmiCentral.setEnabled(usuario.perfil["107"] != null);
+	btnRemitosRecCentral.setEnabled(usuario.perfil["108"] != null);
+	btnCuentas.setEnabled(usuario.perfil["109"] != null);
+	btnSucursales.setEnabled(usuario.perfil["110"] != null);
+	btnUsuarios.setEnabled(usuario.perfil["111"] != null);
+	btnFabricas.setEnabled(usuario.perfil["112"] != null);
+	
+	
+	btnCargaStock.setEnabled(usuario.perfil["201"] != null);
+	btnPedidos.setEnabled(usuario.perfil["202"] != null);
+	btnRemitosEmi.setEnabled(usuario.perfil["203"] != null);
+	btnRemitosRec.setEnabled(usuario.perfil["204"] != null);
 	
 	}
   }

@@ -507,12 +507,11 @@ class class_Remitos extends class_Base
   
   public function method_autocompletarUsuario($params, $error) {
   	$p = $params[0];
-  	set_time_limit(120);
   	
   	if (is_numeric($p->texto)) {
-		$sql = "SELECT CONCAT(nro_vendedor, ' (', TRIM(nick), ')') AS label, nick AS model FROM usuario WHERE nro_vendedor LIKE '" . $p->texto . "%' ORDER BY label";
+		$sql = "SELECT CONCAT(nro_vendedor, ' (', TRIM(nick), ')') AS label, nick AS model, id_usuario FROM usuario WHERE nro_vendedor LIKE '" . $p->texto . "%' ORDER BY label";
   	} else {
-  		$sql = "SELECT CONCAT(TRIM(nick), ' (', nro_vendedor, ')') AS label, nick AS model FROM usuario WHERE nick LIKE '%" . $p->texto . "%' ORDER BY label";
+  		$sql = "SELECT CONCAT(TRIM(nick), ' (', nro_vendedor, ')') AS label, nick AS model, id_usuario FROM usuario WHERE nick LIKE '%" . $p->texto . "%' ORDER BY label";
   	}
 	return $this->toJson($sql);
   }
