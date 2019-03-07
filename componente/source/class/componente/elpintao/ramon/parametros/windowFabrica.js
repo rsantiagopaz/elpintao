@@ -37,14 +37,15 @@ qx.Class.define("componente.elpintao.ramon.parametros.windowFabrica",
 	});
 	form.add(txtDescrip, "Descripción", null, "descrip");
 	
-	var txtCuit = new qx.ui.form.Spinner(0, 0, 100);
-	txtCuit.setMaxWidth(60);
-	txtCuit.setNumberFormat(application.numberformatMontoEn);
-	txtCuit.getChildControl("upbutton").setVisibility("excluded");
-	txtCuit.getChildControl("downbutton").setVisibility("excluded");
-	txtCuit.setSingleStep(0);
-	txtCuit.setPageStep(0);
-	form.add(txtCuit, "Desc.fábrica %", null, "desc_fabrica");
+	var txtDesc_fabrica = new qx.ui.form.Spinner(0, 0, 100);
+	txtDesc_fabrica.setEnabled(false);
+	txtDesc_fabrica.setMaxWidth(60);
+	txtDesc_fabrica.setNumberFormat(application.numberformatMontoEn);
+	txtDesc_fabrica.getChildControl("upbutton").setVisibility("excluded");
+	txtDesc_fabrica.getChildControl("downbutton").setVisibility("excluded");
+	txtDesc_fabrica.setSingleStep(0);
+	txtDesc_fabrica.setPageStep(0);
+	form.add(txtDesc_fabrica, "Desc.fábrica %", null, "desc_fabrica");
 	
 	var txtComision = new qx.ui.form.Spinner(0, 0, 100);
 	txtComision.setMaxWidth(60);
@@ -96,7 +97,7 @@ qx.Class.define("componente.elpintao.ramon.parametros.windowFabrica",
 	
 	var btnCancelar = new qx.ui.form.Button("Cancelar");
 	btnCancelar.addListener("execute", function(e){
-		txtCuit.setValid(true);
+		txtDesc_fabrica.setValid(true);
 		txtDescrip.setValid(true);
 		
 		this.close();
