@@ -120,7 +120,6 @@ qx.Class.define("elpintao.Application",
 	initApp: function()
 	{
 		
-		
       // Document is the application root
 	var doc = this.getRoot();
       
@@ -918,7 +917,7 @@ qx.Class.define("elpintao.Application",
 	toolbarMain.addSpacer();
 	
 	
-	var btnMensajes = this.btnMensajes = new qx.ui.toolbar.Button("Mensajes");
+	var btnMensajes = this.btnMensajes = new qx.ui.toolbar.Button("Usuario: " + this.usuario.nick);
 	btnMensajes.addListener("execute", function(e){
 		if (windowMensajes.isVisible()) {
 			windowMensajes.getLayoutParent().getWindowManager().bringToFront(windowMensajes);

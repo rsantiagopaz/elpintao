@@ -113,7 +113,7 @@ qx.Class.define("elpintao.comp.mensajes.windowMensajes",
   store.addListener("loaded", function(e){
   	var data = e.getData();
   	if (data.getLength() > 0) {
-  		application.btnMensajes.setLabel("Mensajes (" + data.getLength() + ")");
+  		application.btnMensajes.setLabel("Usuario: " + application.usuario.nick + " (" + data.getLength() + ")");
 	  	if (data.getItem(0).get("mostrar")) {
 			if (this.isVisible()) {
 				this.getLayoutParent().getWindowManager().bringToFront(this);
