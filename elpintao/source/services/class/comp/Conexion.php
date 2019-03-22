@@ -71,46 +71,12 @@ $aux->require_general_services = "/var/www/general/services/";
 
 
 
-/*
-$_SESSION['servidor'] = "localhost";
-$_SESSION['usuario'] = "root";
-$_SESSION['password'] = "";
-$_SESSION['base'] = "elpintao";
-$_SESSION['services_require'] = "../../../services/class/comp/elpintao/ramon/";
-*/
-
-
-
-/*
-$_SESSION['servidor'] = "localhost";
-$_SESSION['usuario'] = "root";
-$_SESSION['password'] = "";
-$_SESSION['base'] = "deposito";
-$_SESSION['services_require'] = "../../../services/class/comp/elpintao/ramon/";
-*/
 
 
 
 
 
-/*
-$_SESSION['servidor'] = "localhost";
-$_SESSION['usuario'] = "elpintao";
-$_SESSION['password'] = "1qaz2wsx";
-$_SESSION['base'] = "elpintao";
-$_SESSION['services_require'] = "../../../services/class/comp/elpintao/ramon/";
-*/
 
-
-
-
-/*
-$_SESSION['servidor'] = "localhost";
-$_SESSION['usuario'] = "elpintao";
-$_SESSION['password'] = "1qaz2wsx";
-$_SESSION['base'] = "deposito";
-$_SESSION['services_require'] = "../../../services/class/comp/elpintao/ramon/";
-*/
 
 
 

@@ -7,7 +7,6 @@ class class_Parametro
 	protected $mysqli;
 	
 	function __construct() {
-		//require('Conexion.php');
 		
 		$aux = new mysqli_driver;
 		$aux->report_mode = MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT;
