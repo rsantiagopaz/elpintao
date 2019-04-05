@@ -113,7 +113,7 @@ qx.Class.define("elpintao.comp.mensajes.windowMensajes",
   store.addListener("loaded", function(e){
   	var data = e.getData();
   	if (data.getLength() > 0) {
-  		application.btnMensajes.setLabel("Usuario: " + application.usuario.nick + " (" + data.getLength() + ")");
+  		application.btnMensajes.setLabel("Sucursal: " + application.arraySucursales[application.rowParamet.id_sucursal].descrip + ", Usuario: " + application.conexion.login.nick + " - Mensajes (" + data.getLength() + ")");
 	  	if (data.getItem(0).get("mostrar")) {
 			if (this.isVisible()) {
 				this.getLayoutParent().getWindowManager().bringToFront(this);
@@ -123,7 +123,7 @@ qx.Class.define("elpintao.comp.mensajes.windowMensajes",
 				this.open();
 			}
 	  	}
-  	} else application.btnMensajes.setLabel("Mensajes");
+  	} else application.btnMensajes.setLabel("Sucursal: " + application.arraySucursales[application.rowParamet.id_sucursal].descrip + ", Usuario: " + application.conexion.login.nick + " - Mensajes");
   	
   	list.setSelectionMode("single");
   	list.setSelectionMode("one");

@@ -64,7 +64,7 @@ qx.Class.define("elpintao.Application",
 	
       
       
-	var rpc = new qx.io.remote.Rpc("services/", "comp.Conexion");
+	var rpc = new qx.io.remote.Rpc("services/", "comp.Conexion2");
 	try {
 		var resultado = rpc.callSync("leer_conexion");
 	} catch (ex) {
@@ -73,11 +73,15 @@ qx.Class.define("elpintao.Application",
 	
 	var conexion = this.conexion = resultado;
       
-      
+	if (conexion.ocupada) {
+		while (true) {
+			alert("ATENCIÓN: Otra sesión de la aplicación ya fue abierta." + String.fromCharCode(13) + String.fromCharCode(13) + "Cierre el navegador e intente de nuevo." + String.fromCharCode(13) + String.fromCharCode(13) + " ");
+		}
+	}
       
 	
 	
-	var id_version = 2;
+	var id_version = 3;
 	
 	var rpc = new qx.io.remote.Rpc("services/", "comp.Base");
 	try {
@@ -92,7 +96,7 @@ qx.Class.define("elpintao.Application",
 			win.addListener("aceptado", function(e){
 				var data = e.getData();
 				
-				this.usuario = data;
+				this.conexion.login = data;
 				
 				qx.event.Timer.once(function(){
 					this.initApp();
@@ -146,7 +150,6 @@ qx.Class.define("elpintao.Application",
 	var arrayDeposito;
 	var contexto = this;
 	
-	var usuario = this.usuario;
 	
 	
 	var numberformatMontoEs = this.numberformatMontoEs = new qx.util.format.NumberFormat("es");
@@ -199,107 +202,6 @@ qx.Class.define("elpintao.Application",
 	};
 	
 	
-	var functionLogin = this.functionLogin = function (functionSuccess) {
-		/*
-		var checkearCredentials = function(username, password, callback) {
-			loginWidget._username.setValid(true);
-			loginWidget._password.setValid(true);
-			
-			var p = {};
-			p.nick = username;
-			p.password = password;
-			
-			var rpc = new qx.io.remote.Rpc("services/", "comp.Usuarios");
-			rpc.setTimeout(1000 * 60);
-			rpc.callAsync(function(resultado, error, id){
-				if (error) {
-					callback(error);
-				} else {
-					if (resultado.id_arbol == null) {
-						callback({message: "id_arbol"});
-					} else {
-						callback(null, resultado);
-					}
-				}
-			}, "leer_usuario", p);
-		}
-		
-		var finalCallback = function(err, data) {
-			if(err) {
-				//alert(qx.lang.Json.stringify(err, null, 2));
-			} else {
-				//alert(qx.lang.Json.stringify(data, null, 2));
-			}
-		}
-		*/
-	
-		var loginWidget = new dialog.Login({
-			text : "Ingrese datos de identificación",
-			checkCredentials : function(username, password, callback) {
-				loginWidget._username.setValid(true);
-				loginWidget._password.setValid(true);
-				
-				var p = {};
-				p.nick = username;
-				p.password = password;
-				
-				var rpc = new qx.io.remote.Rpc("services/", "comp.Usuarios");
-				rpc.setTimeout(1000 * 60);
-				rpc.callAsync(function(resultado, error, id){
-					if (error) {
-						callback(error);
-					} else {
-						for (var x in resultado) {
-							usuario[x] = resultado[x];
-						}
-	
-						callback(null, resultado);
-					}
-				}, "leer_usuario", p);
-			},
-			callback : function(err, data) {
-				if(err) {
-					//alert(qx.lang.Json.stringify(err, null, 2));
-				} else {
-					//alert(qx.lang.Json.stringify(data, null, 2));
-				}
-			}
-		});
-		
-		loginWidget._username.getLayoutParent().getLayout().getCellWidget(0, 0).setValue("Usuario:");
-		loginWidget._username.getLayoutParent().getLayout().getCellWidget(1, 0).setValue("Contraseña:");
-		
-		//loginWidget._username.getLayoutParent().getLayout().getCellWidget(0, 1).setValue("ramonpaz");
-		//loginWidget._username.getLayoutParent().getLayout().getCellWidget(1, 1).setValue("ramonpaz");
-		
-		
-		loginWidget._password.setInvalidMessage("Contraseña incorrecta");
-		loginWidget._loginButton.setLabel("Aceptar");
-		loginWidget._cancelButton.setVisibility("hidden");
-		
-		loginWidget._username.addListener("appear", function(e) {
-			loginWidget._username.focus();
-		});
-		
-		loginWidget.addListener("loginSuccess", functionSuccess);
-		loginWidget.addListener("loginFailure", function(e){
-			var data = e.getData();
-			if (data.message=="id_arbol") {
-				loginWidget._username.setInvalidMessage("El usuario no cuenta con los permisos necesarios");
-				loginWidget._username.setValid(false);
-				loginWidget._username.focus();
-			} else if (data.message=="nick") {
-				loginWidget._username.setInvalidMessage("Usuario no encontrado");
-				loginWidget._username.setValid(false);
-				loginWidget._username.focus();
-			} else if (data.message=="password") {
-				loginWidget._password.setValid(false);
-				loginWidget._password.focus();
-			}
-		});
-		
-		loginWidget.show();
-	}
 	
 	
 	var functionChequearPassword = this.functionChequearPassword = function (password_chequear, functionSuccess) {
@@ -343,35 +245,7 @@ qx.Class.define("elpintao.Application",
 	}
 	
 	
-	/*
-	var functionChequearPassword = this.functionChequearPassword = function (password_chequear, functionSuccess) {
-		var sampleCallbackFunc = function(username, password, callback, context) {
-			if (password == password_chequear) {
-				callback.call(context, true);
-			} else {
-				callback.call(context, false, "Contraseña incorrecta");
-			}
-		}
-			
-		var loginWidget = new dialog.Login({
-			text        : "Ingrese contraseña de autorización",
-			callback    : sampleCallbackFunc,
-			context     : contexto
-		});
-		
-		loginWidget._username.setVisibility("excluded");
-		loginWidget._username.getLayoutParent().getLayout().getCellWidget(0, 0).setVisibility("excluded");
-		loginWidget._username.getLayoutParent().getLayout().getCellWidget(1, 0).setValue("Contraseña:");
-		loginWidget._loginButton.setLabel("Aceptar");
-		
-		loginWidget.addListener("loginSuccess", functionSuccess, contexto);
-		loginWidget.addListener("loginFailure", function(e){
-			dialog.Dialog.warning(e.getData());
-		});
-		 loginWidget.show();
-	}
-	*/
-	
+
 	var commandF5 = new qx.ui.command.Command("F5");
 	var commandCtrlR = new qx.ui.command.Command("Ctrl+R");
 	
@@ -502,7 +376,7 @@ qx.Class.define("elpintao.Application",
 	
 	
 	var timerTransmision = this.timerTransmision = new qx.event.Timer(30000 * 1);
-	timerTransmision.addListener("interval", function(e){
+	timerTransmision.addListener("interval", qx.lang.Function.bind(function(e){
 		var rpc = new qx.io.remote.Rpc("services/", "comp.Transmision_SA");
 		rpc.setTimeout(60000 * 5);
 		rpc.callAsync(function(resultado, error, id) {
@@ -520,7 +394,18 @@ qx.Class.define("elpintao.Application",
 				}
 			}
 		}, "leer_transmision_error");
-	});
+		
+		
+		var rpc2 = new qx.io.remote.Rpc("services/", "comp.Conexion2");
+		rpc2.addListener("complete", function(e){
+			var data = e.getData();
+			
+			conexion = this.conexion = data;
+		}, this)
+		
+		rpc2.callAsyncListeners(true, "leer_conexion");
+		
+	}, this));
 	timerTransmision.start();
 	
 	
@@ -545,11 +430,11 @@ qx.Class.define("elpintao.Application",
 	var mnuCentral = new qx.ui.menu.Menu();
 	var btnProductos = new qx.ui.menu.Button("Productos");
 	btnProductos.addListener("execute", function(e){
-		if (usuario.id_arbol == null) {
+		if (this.conexion.login.id_arbol == null) {
 			dialog.Dialog.error("El usuario no cuenta con los permisos necesarios");
 		} else {
 			if (pageProductos==null) {
-				pageProductos = new elpintao.comp.productos.pageProductos(usuario);
+				pageProductos = new elpintao.comp.productos.pageProductos(this.conexion.login);
 				//pageProductos = new elpintao.comp.productos.pageProductos({id_arbol: 1});
 				pageProductos.addListenerOnce("close", function(e){
 					pageProductos = null;
@@ -909,15 +794,15 @@ qx.Class.define("elpintao.Application",
 	toolbarMain.add(mnubtnEdicion);
 	toolbarMain.add(mnubtnVer);
 
-	toolbarMain.add(mnubtnCentral);
-	//toolbarMain.add(mnubtnSucursal);
+	//toolbarMain.add(mnubtnCentral);
+	toolbarMain.add(mnubtnSucursal);
 	
 	toolbarMain.add(mnubtnSesion);
 	
 	toolbarMain.addSpacer();
 	
 	
-	var btnMensajes = this.btnMensajes = new qx.ui.toolbar.Button("Usuario: " + this.usuario.nick);
+	var btnMensajes = this.btnMensajes = new qx.ui.toolbar.Button("Sucursal: " + this.arraySucursales[this.rowParamet.id_sucursal].descrip + " - Usuario: " + this.conexion.login.nick);
 	btnMensajes.addListener("execute", function(e){
 		if (windowMensajes.isVisible()) {
 			windowMensajes.getLayoutParent().getWindowManager().bringToFront(windowMensajes);
@@ -980,24 +865,24 @@ qx.Class.define("elpintao.Application",
 
 	
 	
-	btnProductos.setEnabled(usuario.perfil["101"] != null);
-	btnAplicarAjuste.setEnabled(usuario.perfil["102"] != null);
-	btnCargaStock2.setEnabled(usuario.perfil["103"] != null);
-	btnReparar.setEnabled(usuario.perfil["104"] != null);
-	btnPedidosExt.setEnabled(usuario.perfil["105"] != null);
-	btnPedidosSuc.setEnabled(usuario.perfil["106"] != null);
-	btnRemitosEmiCentral.setEnabled(usuario.perfil["107"] != null);
-	btnRemitosRecCentral.setEnabled(usuario.perfil["108"] != null);
-	btnCuentas.setEnabled(usuario.perfil["109"] != null);
-	btnSucursales.setEnabled(usuario.perfil["110"] != null);
-	btnUsuarios.setEnabled(usuario.perfil["111"] != null);
-	btnFabricas.setEnabled(usuario.perfil["112"] != null);
+	btnProductos.setEnabled(this.conexion.login.perfil["101"] != null);
+	btnAplicarAjuste.setEnabled(this.conexion.login.perfil["102"] != null);
+	btnCargaStock2.setEnabled(this.conexion.login.perfil["103"] != null);
+	btnReparar.setEnabled(this.conexion.login.perfil["104"] != null);
+	btnPedidosExt.setEnabled(this.conexion.login.perfil["105"] != null);
+	btnPedidosSuc.setEnabled(this.conexion.login.perfil["106"] != null);
+	btnRemitosEmiCentral.setEnabled(this.conexion.login.perfil["107"] != null);
+	btnRemitosRecCentral.setEnabled(this.conexion.login.perfil["108"] != null);
+	btnCuentas.setEnabled(this.conexion.login.perfil["109"] != null);
+	btnSucursales.setEnabled(this.conexion.login.perfil["110"] != null);
+	btnUsuarios.setEnabled(this.conexion.login.perfil["111"] != null);
+	btnFabricas.setEnabled(this.conexion.login.perfil["112"] != null);
 	
 	
-	btnCargaStock.setEnabled(usuario.perfil["201"] != null);
-	btnPedidos.setEnabled(usuario.perfil["202"] != null);
-	btnRemitosEmi.setEnabled(usuario.perfil["203"] != null);
-	btnRemitosRec.setEnabled(usuario.perfil["204"] != null);
+	btnCargaStock.setEnabled(this.conexion.login.perfil["201"] != null);
+	btnPedidos.setEnabled(this.conexion.login.perfil["202"] != null);
+	btnRemitosEmi.setEnabled(this.conexion.login.perfil["203"] != null);
+	btnRemitosRec.setEnabled(this.conexion.login.perfil["204"] != null);
 	
 	}
   }

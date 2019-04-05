@@ -273,7 +273,7 @@ qx.Class.define("elpintao.comp.remitos.pageRemitos",
 	
 		
 	
-	var btnFiltrar = new qx.ui.form.Button("Filtrar");
+	var btnFiltrar = new qx.ui.form.Button("Aplicar filtro");
 	btnFiltrar.addListener("execute", function(e){
 		this.functionActualizar();
 	}, this);

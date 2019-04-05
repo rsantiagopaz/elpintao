@@ -1,96 +1,64 @@
 <?php
 
-session_start();
 
+$conexion = new stdClass;
+$conexion->servidor = "localhost";
+$conexion->usuario = "root";
+$conexion->password = "";
+$conexion->database = "deposito";
 
+$conexion->rpc_elpintao_services = "../../../elpintao/services/";
+$conexion->rpc_general_services = "../../../general/services/";
 
-$aux = new stdClass;
-$aux->servidor = "localhost";
-$aux->usuario = "root";
-$aux->password = "";
-$aux->database = "deposito";
-
-$aux->rpc_elpintao_services = "../../../elpintao/services/";
-$aux->rpc_general_services = "../../../general/services/";
-
-$aux->require_elpintao_services = "/xampp/htdocs/openworks-qx/5.x/elpintao/services/";
-$aux->require_general_services = "/xampp/htdocs/openworks-qx/5.x/general/services/";
+$conexion->require_elpintao_services = "/xampp/htdocs/openworks-qx/5.x/elpintao/services/";
+$conexion->require_general_services = "/xampp/htdocs/openworks-qx/5.x/general/services/";
 
 
 
 /*
-$aux = new stdClass;
-$aux->servidor = "localhost";
-$aux->usuario = "root";
-$aux->password = "";
-$aux->database = "elpintao";
+$conexion = new stdClass;
+$conexion->servidor = "localhost";
+$conexion->usuario = "root";
+$conexion->password = "";
+$conexion->database = "elpintao";
 
-$aux->rpc_elpintao_services = "../../../elpintao/services/";
-$aux->rpc_general_services = "../../../general/services/";
+$conexion->rpc_elpintao_services = "../../../elpintao/services/";
+$conexion->rpc_general_services = "../../../general/services/";
 
-$aux->require_elpintao_services = "/xampplite/htdocs/openworks-qx/5.x/elpintao/services/";
-$aux->require_general_services = "/xampplite/htdocs/openworks-qx/5.x/general/services/";
+$conexion->require_elpintao_services = "/xampplite/htdocs/openworks-qx/5.x/elpintao/services/";
+$conexion->require_general_services = "/xampplite/htdocs/openworks-qx/5.x/general/services/";
 */
 
 
 
 /*
-$aux = new stdClass;
-$aux->servidor = "localhost";
-$aux->usuario = "elpintao";
-$aux->password = "1qaz2wsx";
-$aux->database = "deposito";
+$conexion = new stdClass;
+$conexion->servidor = "localhost";
+$conexion->usuario = "elpintao";
+$conexion->password = "1qaz2wsx";
+$conexion->database = "deposito";
 
-$aux->rpc_elpintao_services = "../../../elpintao/services/";
-$aux->rpc_general_services = "../../../general/services/";
+$conexion->rpc_elpintao_services = "../../../elpintao/services/";
+$conexion->rpc_general_services = "../../../general/services/";
 
-$aux->require_elpintao_services = "/var/www/elpintao/services/";
-$aux->require_general_services = "/var/www/general/services/";
+$conexion->require_elpintao_services = "/var/www/elpintao/services/";
+$conexion->require_general_services = "/var/www/general/services/";
 */
 
 
 
 /*
-$aux = new stdClass;
-$aux->servidor = "localhost";
-$aux->usuario = "elpintao";
-$aux->password = "1qaz2wsx";
-$aux->database = "elpintao";
+$conexion = new stdClass;
+$conexion->servidor = "localhost";
+$conexion->usuario = "elpintao";
+$conexion->password = "1qaz2wsx";
+$conexion->database = "elpintao";
 
-$aux->rpc_elpintao_services = "../../../elpintao/services/";
-$aux->rpc_general_services = "../../../general/services/";
+$conexion->rpc_elpintao_services = "../../../elpintao/services/";
+$conexion->rpc_general_services = "../../../general/services/";
 
-$aux->require_elpintao_services = "/var/www/elpintao/services/";
-$aux->require_general_services = "/var/www/general/services/";
+$conexion->require_elpintao_services = "/var/www/elpintao/services/";
+$conexion->require_general_services = "/var/www/general/services/";
 */
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-$_SESSION['conexion'] = $aux;
-
-
-class class_Conexion
-{
-
-
-  public function method_leer_conexion($params, $error) {
-	
-	return $_SESSION['conexion'];
-  }
-}
 
 ?>
