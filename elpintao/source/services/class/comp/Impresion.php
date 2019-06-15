@@ -1,5 +1,6 @@
 <?php
-session_start();
+//session_start();
+require_once("Base.php");
 
 set_time_limit(0);
 
@@ -97,7 +98,7 @@ break;
 
 case 'imprimir_pi_gral': {
 	
-ksort($_SESSION["pi_gral"]);
+//ksort($_SESSION["pi_gral"]);
 
 $sql="SELECT descrip FROM sucursal WHERE id_sucursal=" . $_REQUEST['id_sucursal'];
 $rsS = $mysqli->query($sql);
@@ -119,16 +120,76 @@ $rowS = $rsS->fetch_object();
 <tr><td colspan="10"><hr></td></tr>
 
 <?php
+
+	$base = new class_Base;
+
+	$total = array();
+	$total['costo'] = new stdClass;
+	$total['costo']->descrip = "Costo";
+	$total['costo']->total = 0;
+	
+
 	foreach ($_SESSION["pi_gral"] as $rowD) {
-	//while ($rowD = $rsD->fetch_object()) {
+		
+		$sql = "SELECT producto_item.*, producto.iva, producto.desc_producto, fabrica.desc_fabrica FROM producto_item INNER JOIN producto USING(id_producto) INNER JOIN fabrica USING(id_fabrica) WHERE producto_item.id_producto_item=" . $rowD->id_producto_item;
+		$rsProducto_item = $mysqli->query($sql);
+		$rowProducto_item = $rsProducto_item->fetch_object();
+		
+		$rowProducto_item->iva = (float) $rowProducto_item->iva;
+		$rowProducto_item->desc_producto = (float) $rowProducto_item->desc_producto;
+		
+		$rowProducto_item->precio_lista = (float) $rowProducto_item->precio_lista;
+		$rowProducto_item->remarc_final = (float) $rowProducto_item->remarc_final;
+		$rowProducto_item->remarc_mayorista = (float) $rowProducto_item->remarc_mayorista;
+		$rowProducto_item->desc_final = (float) $rowProducto_item->desc_final;
+		$rowProducto_item->desc_mayorista = (float) $rowProducto_item->desc_mayorista;
+		$rowProducto_item->bonif_final = (float) $rowProducto_item->bonif_final;
+		$rowProducto_item->bonif_mayorista = (float) $rowProducto_item->bonif_mayorista;
+		$rowProducto_item->desc_lista = (float) $rowProducto_item->desc_lista;
+		$rowProducto_item->comision_vendedor = (float) $rowProducto_item->comision_vendedor;
+		
+		$rowProducto_item->desc_fabrica = (float) $rowProducto_item->desc_fabrica;
+		
+		
+		$base->functionCalcularImportes($rowProducto_item);
+		
+		
+		$total['costo']->total+= $rowProducto_item->costo;
+		
+		if (isset($total[$rowD->id_unidad])) {
+			$total[$rowD->id_unidad]->total+= $rowD->cantidad * (float) $rowD->capacidad;
+		} else {
+			$total[$rowD->id_unidad] = new stdClass;
+			$total[$rowD->id_unidad]->descrip = $rowD->unidad;
+			$total[$rowD->id_unidad]->total = $rowD->cantidad * (float) $rowD->capacidad;
+		}
+		
+		
+		
+		
+		
+		
+		
 		if (substr($rowD->capacidad, -3) == 0) {
 			$rowD->capacidad = (int) $rowD->capacidad; 
 		} else {
-			$rowD->capacidad = number_format($rowD->capacidad, '2', ',', '.');
+			$rowD->capacidad = number_format($rowD->capacidad, 2, ',', '.');
 		}
 ?>
 		<tr><td><?php echo $rowD->fabrica ?></td><td><?php echo $rowD->producto ?></td><td align="right"><?php echo $rowD->capacidad ?></td><td><?php echo $rowD->unidad ?></td><td><?php echo $rowD->color ?></td><td align="right"><?php echo $rowD->stock_suc ?></td><td align="right"><?php echo $rowD->cantidad ?></td></tr>
 		<tr><td colspan="10"><hr></td></tr>
+<?php
+	}
+	
+?>
+		<tr><td>&nbsp;</td></tr>
+		<tr><td>&nbsp;</td></tr>
+<?php
+
+	foreach ($total as $item) {
+?>
+		<tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td align="right"><?php echo $item->descrip ?></td><td align="right"><?php echo number_format($item->total, 2, ',', '.') ?></td></tr>
+		<tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td colspan="2"><hr></td></tr>
 <?php
 	}
 ?>
@@ -155,7 +216,7 @@ if ($_REQUEST['tipo']=="sucursal") {
 	$rsS = $mysqli->query($sql);
 	$rowS = $rsS->fetch_object();
 	
-	$sql="SELECT pedido_int_detalle.*, fabrica.descrip AS fabrica, CONCAT(producto_item.cod_interno, ' - ', producto.descrip) AS producto, producto_item.capacidad, color.descrip AS color, unidad.descrip AS unidad FROM ((((pedido_int_detalle INNER JOIN producto_item USING(id_producto_item)) INNER JOIN producto USING(id_producto)) INNER JOIN fabrica USING(id_fabrica)) INNER JOIN color USING (id_color)) INNER JOIN unidad USING (id_unidad) WHERE id_pedido_int='" . $_REQUEST['id'] . "' ORDER BY producto.descrip";
+	$sql="SELECT pedido_int_detalle.*, fabrica.descrip AS fabrica, CONCAT(producto_item.cod_interno, ' - ', producto.descrip) AS producto, producto_item.capacidad, color.descrip AS color, unidad.id_unidad, unidad.descrip AS unidad FROM ((((pedido_int_detalle INNER JOIN producto_item USING(id_producto_item)) INNER JOIN producto USING(id_producto)) INNER JOIN fabrica USING(id_fabrica)) INNER JOIN color USING (id_color)) INNER JOIN unidad USING (id_unidad) WHERE id_pedido_int='" . $_REQUEST['id'] . "' ORDER BY producto.descrip";
 	$rsD = $mysqli->query($sql);
 
 } else {
@@ -167,7 +228,7 @@ if ($_REQUEST['tipo']=="sucursal") {
 	$rsS = $mysqli->query($sql);
 	$rowS = $rsS->fetch_object();
 	
-	$sql="SELECT pedido_suc_detalle.*, fabrica.descrip AS fabrica, CONCAT(producto_item.cod_interno, ' - ', producto.descrip) AS producto, producto_item.capacidad, color.descrip AS color, unidad.descrip AS unidad FROM ((((pedido_suc_detalle INNER JOIN producto_item USING(id_producto_item)) INNER JOIN producto USING(id_producto)) INNER JOIN fabrica USING(id_fabrica)) INNER JOIN color USING (id_color)) INNER JOIN unidad USING (id_unidad) WHERE id_pedido_suc='" . $_REQUEST['id'] . "' ORDER BY producto.descrip ";
+	$sql="SELECT pedido_suc_detalle.*, fabrica.descrip AS fabrica, CONCAT(producto_item.cod_interno, ' - ', producto.descrip) AS producto, producto_item.capacidad, color.descrip AS color, unidad.id_unidad, unidad.descrip AS unidad FROM ((((pedido_suc_detalle INNER JOIN producto_item USING(id_producto_item)) INNER JOIN producto USING(id_producto)) INNER JOIN fabrica USING(id_fabrica)) INNER JOIN color USING (id_color)) INNER JOIN unidad USING (id_unidad) WHERE id_pedido_suc='" . $_REQUEST['id'] . "' ORDER BY producto.descrip ";
 	$rsD = $mysqli->query($sql);
 }
 
@@ -187,8 +248,54 @@ if ($_REQUEST['tipo']=="sucursal") {
 <tr><td colspan="10"><hr></td></tr>
 
 <?php
+
+	$base = new class_Base;
+
+	$total = array();
+	$total['costo'] = new stdClass;
+	$total['costo']->descrip = "Costo";
+	$total['costo']->total = 0;
+	
+
 	while ($rowD = $rsD->fetch_object()) {
 		$rowD->cantidad = (int) $rowD->cantidad;
+		
+		
+		$sql = "SELECT producto_item.*, producto.iva, producto.desc_producto, fabrica.desc_fabrica FROM producto_item INNER JOIN producto USING(id_producto) INNER JOIN fabrica USING(id_fabrica) WHERE producto_item.id_producto_item=" . $rowD->id_producto_item;
+		$rsProducto_item = $mysqli->query($sql);
+		$rowProducto_item = $rsProducto_item->fetch_object();
+		
+		$rowProducto_item->iva = (float) $rowProducto_item->iva;
+		$rowProducto_item->desc_producto = (float) $rowProducto_item->desc_producto;
+		
+		$rowProducto_item->precio_lista = (float) $rowProducto_item->precio_lista;
+		$rowProducto_item->remarc_final = (float) $rowProducto_item->remarc_final;
+		$rowProducto_item->remarc_mayorista = (float) $rowProducto_item->remarc_mayorista;
+		$rowProducto_item->desc_final = (float) $rowProducto_item->desc_final;
+		$rowProducto_item->desc_mayorista = (float) $rowProducto_item->desc_mayorista;
+		$rowProducto_item->bonif_final = (float) $rowProducto_item->bonif_final;
+		$rowProducto_item->bonif_mayorista = (float) $rowProducto_item->bonif_mayorista;
+		$rowProducto_item->desc_lista = (float) $rowProducto_item->desc_lista;
+		$rowProducto_item->comision_vendedor = (float) $rowProducto_item->comision_vendedor;
+		
+		$rowProducto_item->desc_fabrica = (float) $rowProducto_item->desc_fabrica;
+		
+		
+		$base->functionCalcularImportes($rowProducto_item);
+		
+		
+		$total['costo']->total+= $rowProducto_item->costo;
+		
+		if (isset($total[$rowD->id_unidad])) {
+			$total[$rowD->id_unidad]->total+= $rowD->cantidad * (float) $rowD->capacidad;
+		} else {
+			$total[$rowD->id_unidad] = new stdClass;
+			$total[$rowD->id_unidad]->descrip = $rowD->unidad;
+			$total[$rowD->id_unidad]->total = $rowD->cantidad * (float) $rowD->capacidad;
+		}
+		
+		
+		
 		
 		
 		$sql = "SELECT stock FROM stock WHERE id_producto_item=" . $rowD->id_producto_item . " AND id_sucursal=" . $rowS->id_sucursal;
@@ -200,11 +307,23 @@ if ($_REQUEST['tipo']=="sucursal") {
 		if (substr($rowD->capacidad, -3) == 0) {
 			$rowD->capacidad = (int) $rowD->capacidad; 
 		} else {
-			$rowD->capacidad = number_format($rowD->capacidad, '2', ',', '.');
+			$rowD->capacidad = number_format($rowD->capacidad, 2, ',', '.');
 		}
 ?>
 		<tr><td><?php echo $rowD->fabrica ?></td><td><?php echo $rowD->producto ?></td><td align="right"><?php echo $rowD->capacidad ?></td><td><?php echo $rowD->unidad ?></td><td><?php echo $rowD->color ?></td><td align="right"><?php echo $rowStock->stock ?></td><td align="right"><?php echo $rowD->cantidad ?></td></tr>
 		<tr><td colspan="10"><hr></td></tr>
+<?php
+	}
+	
+?>
+		<tr><td>&nbsp;</td></tr>
+		<tr><td>&nbsp;</td></tr>
+<?php
+
+	foreach ($total as $item) {
+?>
+		<tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td align="right"><?php echo $item->descrip ?></td><td align="right"><?php echo number_format($item->total, 2, ',', '.') ?></td></tr>
+		<tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td colspan="2"><hr></td></tr>
 <?php
 	}
 ?>

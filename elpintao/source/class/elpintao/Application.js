@@ -73,7 +73,7 @@ qx.Class.define("elpintao.Application",
 	
 	var conexion = this.conexion = resultado;
       
-	if (conexion.ocupada) {
+	if (conexion.ocupada && ! qx.core.Environment.get("qx.debug")) {
 		while (true) {
 			alert("ATENCIÓN: Otra sesión de la aplicación ya fue abierta." + String.fromCharCode(13) + String.fromCharCode(13) + "Cierre el navegador e intente de nuevo." + String.fromCharCode(13) + String.fromCharCode(13) + " ");
 		}
