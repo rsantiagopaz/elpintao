@@ -47,6 +47,7 @@ class class_Base_elpintao extends class_Base_general
 	$rs = $this->mysqli->query($sql);
 	while ($row = $rs->fetch_object()) {
 		$row->deposito = (bool) $row->deposito;
+		$row->arancel = (float) $row->arancel;
 		
 		$this->arraySucursal[$row->id_sucursal] = $row;
 	}
@@ -60,6 +61,7 @@ class class_Base_elpintao extends class_Base_general
 	$rs = $this->mysqli->query($sql);
 	while ($row = $rs->fetch_object()) {
 		$row->deposito = (bool) $row->deposito;
+		$row->arancel = (float) $row->arancel;
 		
 		$this->arrayDeposito[$row->id_sucursal] = $row;
 	}

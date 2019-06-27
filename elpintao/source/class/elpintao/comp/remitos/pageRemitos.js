@@ -121,18 +121,35 @@ qx.Class.define("elpintao.comp.remitos.pageRemitos",
 
 	var functionCalcularTotales = function(tableModelD, tableModelT) {
 		var rowDataAsMapDetalle, rowDataAsMapTotales;
-		var bandera;
+		var bandera; 
+		var agregar_arancel = false;
 		
-		//tableModelT.setDataAsMapArray([{descrip: "Costo", total: 0}, {descrip: "P.lis.+IVA", total: 0}], true);
-		tableModelT.setDataAsMapArray([], true);
+		var sucursal = application.arraySucursales[application.rowParamet.id_sucursal];
+		
+		if (emitir && sucursal.deposito && rowDataRemito.id_sucursal_para != "0") {
+			sucursal = application.arraySucursales[rowDataRemito.id_sucursal_para];
+			
+			//alert(qx.lang.Json.stringify(sucursal, null, 2));
+			
+			if (rowDataRemito.fecha >= sucursal.fecha_arancel) {
+				agregar_arancel = true;
+				tableModelT.setDataAsMapArray([{descrip: "Costo", total: 0}], true);
+			} else {
+				tableModelT.setDataAsMapArray([], true);
+			}
+		} else {
+			tableModelT.setDataAsMapArray([], true);
+		}
 		
 		for (var i = 0; i < tableModelD.getRowCount(); i++) {
 			rowDataAsMapDetalle = tableModelD.getRowDataAsMap(i);
 			
 			if (rowDataAsMapDetalle.cantidad > 0) {
-				//rowDataAsMapTotales = tableModelT.getRowDataAsMap(0);
+				if (agregar_arancel) {
+					rowDataAsMapTotales = tableModelT.getRowDataAsMap(0);
+					tableModelT.setValueById("total", 0, rowDataAsMapTotales.total + (rowDataAsMapDetalle.cantidad * rowDataAsMapDetalle.costo));
+				}
 				
-				//tableModelT.setValueById("total", 0, rowDataAsMapTotales.total + (rowDataAsMapDetalle.cantidad * rowDataAsMapDetalle.costo));
 				//rowDataAsMapTotales = tableModelT.getRowDataAsMap(1);
 				//tableModelT.setValueById("total", 1, rowDataAsMapTotales.total + (rowDataAsMapDetalle.cantidad * rowDataAsMapDetalle.plmasiva));
 				bandera = true;
@@ -148,6 +165,11 @@ qx.Class.define("elpintao.comp.remitos.pageRemitos",
 					tableModelT.addRowsAsMapArray([{id_unidad: rowDataAsMapDetalle.id_unidad, descrip: rowDataAsMapDetalle.unidad, total: rowDataAsMapDetalle.cantidad * rowDataAsMapDetalle.capacidad}], null, true);
 				}
 			}
+		}
+		
+		if (agregar_arancel) {
+			rowDataAsMapTotales = tableModelT.getRowDataAsMap(0);
+			tableModelT.setValueById("total", 0, rowDataAsMapTotales.total + ((rowDataAsMapTotales.total * sucursal.arancel) / 100));
 		}
 	}
 	
@@ -421,6 +443,8 @@ qx.Class.define("elpintao.comp.remitos.pageRemitos",
 					
 					rowDataRemito = tableModel.getRowData(tblRemito.getFocusedRow());
 					tblDetalle.setFocusedCell();
+					
+					//alert(qx.lang.Json.stringify(rowDataRemito, null, 2));
 					
 					btnModificar.setEnabled(rowDataRemito.estado == 'R');
 					btnAutorizar.setEnabled(rowDataRemito.estado == 'R');

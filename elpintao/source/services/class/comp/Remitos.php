@@ -482,7 +482,6 @@ class class_Remitos extends class_Base
 		$row->capacidad = (float) $row->capacidad;
 		$row->cantidad = (float) $row->cantidad;
 		
-		/*
 		$row->precio_lista = (float) $row->precio_lista;
 		$row->iva = (float) $row->iva;
 		$row->desc_fabrica = (float) $row->desc_fabrica;
@@ -496,7 +495,6 @@ class class_Remitos extends class_Base
 		$row->comision_vendedor = (float) $row->comision_vendedor;
 		
 		$this->functionCalcularImportes($row);
-		*/
 		
 		$resultado[] = $row;
 	}

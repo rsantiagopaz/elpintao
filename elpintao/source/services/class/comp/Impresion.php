@@ -353,7 +353,7 @@ if ($_REQUEST['emitir']=="true") {
 	$rowR = $rsR->fetch_object();
 	$rowR->tipo = (int) $rowR->tipo;
 
-	$sql = "SELECT remito_emi_detalle.*, fabrica.descrip AS fabrica, CONCAT(producto_item.cod_interno, ' - ', producto.descrip) AS producto, producto_item.capacidad, color.descrip AS color, unidad.descrip AS unidad FROM ((((remito_emi_detalle INNER JOIN producto_item USING(id_producto_item)) INNER JOIN producto USING(id_producto)) INNER JOIN fabrica USING(id_fabrica)) INNER JOIN color USING (id_color)) INNER JOIN unidad USING (id_unidad) WHERE id_remito_emi='" . $_REQUEST['id_remito'] . "' ORDER BY producto.descrip ";
+	$sql = "SELECT remito_emi_detalle.*, fabrica.descrip AS fabrica, CONCAT(producto_item.cod_interno, ' - ', producto.descrip) AS producto, producto_item.capacidad, color.descrip AS color, unidad.id_unidad, unidad.descrip AS unidad FROM ((((remito_emi_detalle INNER JOIN producto_item USING(id_producto_item)) INNER JOIN producto USING(id_producto)) INNER JOIN fabrica USING(id_fabrica)) INNER JOIN color USING (id_color)) INNER JOIN unidad USING (id_unidad) WHERE id_remito_emi='" . $_REQUEST['id_remito'] . "'";
 	$rsD = $mysqli->query($sql);
 	
 
@@ -373,7 +373,7 @@ if ($_REQUEST['emitir']=="true") {
 	$rsR = $mysqli->query($sql);
 	$rowR = $rsR->fetch_object();
 
-	$sql="SELECT remito_rec_detalle.*, fabrica.descrip AS fabrica, CONCAT(producto_item.cod_interno, ' - ', producto.descrip) AS producto, producto_item.capacidad, color.descrip AS color, unidad.descrip AS unidad FROM ((((remito_rec_detalle INNER JOIN producto_item USING(id_producto_item)) INNER JOIN producto USING(id_producto)) INNER JOIN fabrica USING(id_fabrica)) INNER JOIN color USING (id_color)) INNER JOIN unidad USING (id_unidad) WHERE id_remito_rec='" . $_REQUEST['id_remito'] . "'";
+	$sql="SELECT remito_rec_detalle.*, fabrica.descrip AS fabrica, CONCAT(producto_item.cod_interno, ' - ', producto.descrip) AS producto, producto_item.capacidad, color.descrip AS color, unidad.id_unidad, unidad.descrip AS unidad FROM ((((remito_rec_detalle INNER JOIN producto_item USING(id_producto_item)) INNER JOIN producto USING(id_producto)) INNER JOIN fabrica USING(id_fabrica)) INNER JOIN color USING (id_color)) INNER JOIN unidad USING (id_unidad) WHERE id_remito_rec='" . $_REQUEST['id_remito'] . "'";
 	$rsD = $mysqli->query($sql);
 	
 	
@@ -440,8 +440,70 @@ if ($_REQUEST['emitir']=="true") {
 <tr><td colspan="10"><hr></td></tr>
 
 <?php
+
+	$base = new class_Base;
+
+	$total = array();
+	
+	$agregar_arancel = false;
+		
+	if ($_REQUEST['emitir']=="true" && $rowSucursal->deposito && $rowR->id_sucursal_para != "0") {
+		
+		$sql = "SELECT * FROM sucursal WHERE id_sucursal=" . $rowR->id_sucursal_para;
+		$rsSucursal = $mysqli->query($sql);
+		$rowSucursal = $rsSucursal->fetch_object();
+		$rowSucursal->arancel = (float) $rowSucursal->arancel;
+		
+		if ($rowR->fecha >= $rowSucursal->fecha_arancel) {
+			$agregar_arancel = true;
+			
+			$total['costo'] = new stdClass;
+			$total['costo']->descrip = "Costo";
+			$total['costo']->total = 0;
+		}
+	}
+
 	while ($rowD = $rsD->fetch_object()) {
 		$rowD->cantidad = (int) $rowD->cantidad;
+		
+	
+		if ($agregar_arancel) {
+			$sql = "SELECT producto_item.*, producto.iva, producto.desc_producto, fabrica.desc_fabrica FROM producto_item INNER JOIN producto USING(id_producto) INNER JOIN fabrica USING(id_fabrica) WHERE producto_item.id_producto_item=" . $rowD->id_producto_item;
+			$rsProducto_item = $mysqli->query($sql);
+			$rowProducto_item = $rsProducto_item->fetch_object();
+			
+			$rowProducto_item->iva = (float) $rowProducto_item->iva;
+			$rowProducto_item->desc_producto = (float) $rowProducto_item->desc_producto;
+			
+			$rowProducto_item->precio_lista = (float) $rowProducto_item->precio_lista;
+			$rowProducto_item->remarc_final = (float) $rowProducto_item->remarc_final;
+			$rowProducto_item->remarc_mayorista = (float) $rowProducto_item->remarc_mayorista;
+			$rowProducto_item->desc_final = (float) $rowProducto_item->desc_final;
+			$rowProducto_item->desc_mayorista = (float) $rowProducto_item->desc_mayorista;
+			$rowProducto_item->bonif_final = (float) $rowProducto_item->bonif_final;
+			$rowProducto_item->bonif_mayorista = (float) $rowProducto_item->bonif_mayorista;
+			$rowProducto_item->desc_lista = (float) $rowProducto_item->desc_lista;
+			$rowProducto_item->comision_vendedor = (float) $rowProducto_item->comision_vendedor;
+			
+			$rowProducto_item->desc_fabrica = (float) $rowProducto_item->desc_fabrica;
+			
+			
+			$base->functionCalcularImportes($rowProducto_item);
+			
+			$total['costo']->total+= $rowD->cantidad * $rowProducto_item->costo;
+		}
+		
+		
+		if (isset($total[$rowD->id_unidad])) {
+			$total[$rowD->id_unidad]->total+= $rowD->cantidad * (float) $rowD->capacidad;
+		} else {
+			$total[$rowD->id_unidad] = new stdClass;
+			$total[$rowD->id_unidad]->descrip = $rowD->unidad;
+			$total[$rowD->id_unidad]->total = $rowD->cantidad * (float) $rowD->capacidad;
+		}
+		
+		
+		
 		
 		if (substr($rowD->capacidad, -3) == 0) {
 			$rowD->capacidad = (int) $rowD->capacidad; 
@@ -457,7 +519,7 @@ if ($_REQUEST['emitir']=="true") {
 		}
 ?>
 		<tr>
-			<td><?php echo $rowD->fabrica ?></td><td><?php echo $rowD->producto ?></td><td align="right"><?php echo $rowD->capacidad ?></td><td><?php echo $rowD->unidad ?></td><td><?php echo $rowD->color ?></td>
+			<td><?php echo $rowD->fabrica ?></td><td><?php echo $rowD->producto ?></td><td align="right"><?php echo $rowD->capacidad ?></td><td align="center"><?php echo $rowD->unidad ?></td><td><?php echo $rowD->color ?></td>
 <?php
 			if ($banderaStock) echo '<td align="right">' . $rowStock->stock . '</td>';
 ?>
@@ -465,6 +527,20 @@ if ($_REQUEST['emitir']=="true") {
 		</tr>
 		<tr><td colspan="10"><hr></td></tr>
 
+<?php
+	}
+?>
+		<tr><td>&nbsp;</td></tr>
+		<tr><td>&nbsp;</td></tr>
+<?php
+	if ($agregar_arancel) {
+		$total['costo']->total+= $total['costo']->total * $rowSucursal->arancel / 100;
+	}
+	
+	foreach ($total as $item) {
+?>
+		<tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td align="right"><?php echo $item->descrip ?></td><td align="right"><?php echo number_format($item->total, 2, ',', '.') ?></td></tr>
+		<tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td colspan="2"><hr></td></tr>
 <?php
 	}
 ?>

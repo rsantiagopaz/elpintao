@@ -81,7 +81,7 @@ qx.Class.define("elpintao.Application",
       
 	
 	
-	var id_version = 3;
+	var id_version = 4;
 	
 	var rpc = new qx.io.remote.Rpc("services/", "comp.Base");
 	try {
@@ -268,7 +268,7 @@ qx.Class.define("elpintao.Application",
 	
 	
 	
-	var rpc = new qx.io.remote.Rpc(conexion.rpc_elpintao_services, "componente.elpintao.ramon.Base_elpintao");
+	var rpc = new componente.general.ramon.io.rpc.Rpc(conexion.rpc_elpintao_services, "componente.elpintao.ramon.Base_elpintao");
 	try {
 		var resultado = rpc.callSync("leer_sucursales");
 	} catch (ex) {
@@ -277,7 +277,7 @@ qx.Class.define("elpintao.Application",
 	this.arraySucursales = resultado;
 	
 	
-	var rpc = new qx.io.remote.Rpc(conexion.rpc_elpintao_services, "componente.elpintao.ramon.Base_elpintao");
+	var rpc = new componente.general.ramon.io.rpc.Rpc(conexion.rpc_elpintao_services, "componente.elpintao.ramon.Base_elpintao");
 	try {
 		var resultado = rpc.callSync("leer_depositos");
 	} catch (ex) {
@@ -794,8 +794,8 @@ qx.Class.define("elpintao.Application",
 	toolbarMain.add(mnubtnEdicion);
 	toolbarMain.add(mnubtnVer);
 
-	//toolbarMain.add(mnubtnCentral);
-	toolbarMain.add(mnubtnSucursal);
+	toolbarMain.add(mnubtnCentral);
+	//toolbarMain.add(mnubtnSucursal);
 	
 	toolbarMain.add(mnubtnSesion);
 	
