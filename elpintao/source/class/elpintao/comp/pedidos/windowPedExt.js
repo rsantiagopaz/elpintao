@@ -10,7 +10,8 @@ qx.Class.define("elpintao.comp.pedidos.windowPedExt",
 			width: 410,
 			height: 200,
 			showMinimize: false,
-			showMaximize: false
+			showMaximize: false,
+			allowMaximize: false
 		});
 		
 		this.setLayout(new qx.ui.layout.Basic());
@@ -52,6 +53,8 @@ qx.Class.define("elpintao.comp.pedidos.windowPedExt",
 	application.objTransporte.store.bind("model", controllerTransporte, "model");
 	
 	form.add(slbTransporte, "Transporte", null, "id_transporte")
+	
+	
 
 
 
@@ -80,15 +83,16 @@ qx.Class.define("elpintao.comp.pedidos.windowPedExt",
 	var btnAceptar = new qx.ui.form.Button("Aceptar");
 	btnAceptar.addListener("execute", function(e){
 		this.fireDataEvent("aceptado", qx.util.Serializer.toNativeObject(controllerForm.createModel(true)));
-		btnCancelar.fireEvent("execute");
+		
+		btnCancelar.execute();
 	}, this);
-	this.add(btnAceptar, {left: 70, top: 100})
+	this.add(btnAceptar, {left: 70, top: 130})
 	
 	var btnCancelar = new qx.ui.form.Button("Cancelar");
 	btnCancelar.addListener("execute", function(e){
 		this.destroy();
 	}, this);
-	this.add(btnCancelar, {left: 270, top: 100})
+	this.add(btnCancelar, {left: 270, top: 130})
 	
 	
 	this.addListenerOnce("activate", function(e){

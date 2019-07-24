@@ -10,8 +10,12 @@ $mysqli->query("SET NAMES 'utf8'");
 
 switch ($_REQUEST['rutina']) {
 case 'imprimir_pedext': {
+	
+	$base = new class_Base;
 
 	$resultado = new stdClass;
+	$resultado->{"Costo"} = 0;
+	$resultado->{"P.lis.+IVA"} = 0;
 
 	$sql = "SELECT pedido_ext.*, transporte.descrip AS transporte, fabrica.descrip AS fabrica, fabrica.desc_fabrica";
 	$sql.= " FROM (pedido_ext INNER JOIN fabrica USING(id_fabrica)) INNER JOIN transporte USING(id_transporte)";
@@ -24,6 +28,19 @@ case 'imprimir_pedext': {
 	$sql.= " FROM ((((pedido_ext_detalle INNER JOIN producto_item USING(id_producto_item)) INNER JOIN producto USING(id_producto)) INNER JOIN fabrica USING(id_fabrica)) INNER JOIN color USING (id_color)) INNER JOIN unidad USING (id_unidad)";
 	$sql.= " WHERE id_pedido_ext='" . $_REQUEST['id_pedido_ext'] . "'";
 	$sql.= " ORDER BY producto.descrip, color, unidad, capacidad";
+	
+	$sql = "SELECT";
+	$sql.= "  pedido_ext_detalle.*";
+	$sql.= ", producto.descrip AS producto";
+	$sql.= ", producto_item.capacidad";
+	$sql.= ", producto_item.cod_interno";
+	$sql.= ", unidad.id_unidad";
+	$sql.= ", unidad.descrip AS unidad";
+	$sql.= ", color.descrip AS color";
+	$sql.= " FROM ((((pedido_ext_detalle INNER JOIN producto_item USING (id_producto_item)) INNER JOIN producto USING(id_producto)) INNER JOIN color USING (id_color)) INNER JOIN unidad USING (id_unidad))";
+	$sql.= " WHERE pedido_ext_detalle.id_pedido_ext=" . $_REQUEST['id_pedido_ext'];
+	$sql.= " ORDER BY producto, color, unidad, capacidad";
+	
 	$rsD = $mysqli->query($sql);
 
  
@@ -48,16 +65,26 @@ case 'imprimir_pedext': {
 
 <?php
 	while ($rowD = $rsD->fetch_object()) {
+		
+		$aux = new stdClass;
+		$aux->id_producto_item = $rowD->id_producto_item;
+		$aux->fecha = $rowR->fecha;
+		$aux = array($aux);
+		
+		$row = $base->method_buscar_historico_precio($aux, null);
+		
+		foreach ($row as $key => $value) {
+			$rowD->{$key} = $value;
+		}
+		
+		
+		$base->functionCalcularImportes($rowD);
+
+
 		$rowD->cantidad = (int) $rowD->cantidad;
-		$rowD->precio_lista = (float) $rowD->precio_lista;
-		$rowD->iva = (float) $rowD->iva;
-		$rowD->desc_producto = (float) $rowD->desc_producto;
 		
-		$rowD->plmasiva = $rowD->precio_lista + ($rowD->precio_lista * $rowD->iva / 100);
 		
-		$rowD->costo = $rowD->plmasiva;
-		$rowD->costo = $rowD->costo - ($rowD->costo * $rowR->desc_fabrica / 100);
-		$rowD->costo = $rowD->costo - ($rowD->costo * $rowD->desc_producto / 100);
+		if (! isset($resultado->{$rowD->unidad})) $resultado->{$rowD->unidad} = 0;
 		
 		$resultado->{"Costo"} = $resultado->{"Costo"} + ($rowD->cantidad * $rowD->costo);
 		$resultado->{"P.lis.+IVA"} = $resultado->{"P.lis.+IVA"} + ($rowD->cantidad * $rowD->plmasiva);

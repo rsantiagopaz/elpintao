@@ -60,7 +60,7 @@ class class_PedidosExt extends class_Base
   	
   	$this->mysqli->query("START TRANSACTION");
   	
-	$sql = "INSERT pedido_ext SET " . $set . ", id_fabrica='" . $p->id_fabrica . "', fecha = NOW(), recibido = FALSE";
+	$sql = "INSERT pedido_ext SET " . $set . ", id_fabrica='" . $p->id_fabrica . "', fecha = '" . $p->fecha . "', recibido = FALSE";
 	$this->mysqli->query($sql);
 	$insert_id = $this->mysqli->insert_id;
 	
@@ -89,6 +89,8 @@ class class_PedidosExt extends class_Base
 	return $resultado;
   }
   
+  
+  
   public function method_leer_internos($params, $error) {
   	$p = $params[0];
   	
@@ -96,15 +98,11 @@ class class_PedidosExt extends class_Base
   	
 	$resultado = array();
 	
-	$sql="SELECT" .
+	$sql= "SELECT" .
 			" fabrica.id_fabrica" .
 			", fabrica.descrip AS fabrica" .
-			", fabrica.desc_fabrica" .
 			", producto.descrip AS producto" .
-			", producto.iva" .
-			", producto.desc_producto" .
 			", producto_item.id_producto_item" .
-			", producto_item.precio_lista" .
 			", producto_item.capacidad" .
 			", producto_item.busqueda" .
 			", unidad.id_unidad" .
@@ -113,62 +111,125 @@ class class_PedidosExt extends class_Base
 		" FROM (((producto_item INNER JOIN producto USING(id_producto)) INNER JOIN fabrica USING(id_fabrica)) INNER JOIN unidad USING(id_unidad)) INNER JOIN color USING(id_color)";
 
 	if ($p->id_fabrica == "1") {
-		$sql.=" WHERE FALSE";
+		$sql.= " WHERE FALSE";
 	} else {
-		$sql.=" WHERE producto_item.activo AND producto.id_fabrica='" . $p->id_fabrica . "'";
+		$sql.= " WHERE producto_item.activo AND producto.id_fabrica='" . $p->id_fabrica . "'";
 	}
 
-	$sql.=" ORDER BY fabrica, producto, color, unidad, capacidad"
-	;
+	$sql.= " ORDER BY fabrica, producto, color, unidad, capacidad";
 	
-	$rsPedidoSuc = $this->mysqli->query($sql);
-	while ($rowPedidoSuc = $rsPedidoSuc->fetch_object()) {
-		$rowPedidoSuc->desc_fabrica = (float) $rowPedidoSuc->desc_fabrica;
-		$rowPedidoSuc->desc_producto = (float) $rowPedidoSuc->desc_producto;
+	$rsProducto_item = $this->mysqli->query($sql);
+	while ($rowProducto_item = $rsProducto_item->fetch_object()) {
+		/*
+		$sql = "SELECT";
+		$sql.= " *";
+		$sql.= " FROM historico_precio";
+		$sql.= " WHERE DATE(fecha)<='" . $p->fecha . "' AND id_producto_item=" . $rowProducto_item->id_producto_item;
+		$sql.= " ORDER BY fecha DESC LIMIT 1";
 		
-		$rowPedidoSuc->seleccionado = (bool) $rowPedidoSuc->seleccionado;
-		$rowPedidoSuc->capacidad = (float) $rowPedidoSuc->capacidad;
-		$rowPedidoSuc->acumulado = 0;
-		$rowPedidoSuc->precio_lista = (float) $rowPedidoSuc->precio_lista;
-		$rowPedidoSuc->iva = (float) $rowPedidoSuc->iva;
+		$rs = $this->mysqli->query($sql);
 		
-		$rowPedidoSuc->plmasiva = $rowPedidoSuc->precio_lista + ($rowPedidoSuc->precio_lista * $rowPedidoSuc->iva / 100);
+		if ($rs->num_rows == 0) {
+			$sql = "SELECT";
+			$sql.= "  producto.iva";
+			$sql.= ", producto.desc_producto";
+			$sql.= ", fabrica.desc_fabrica";
+			$sql.= ", producto_item.precio_lista";
+			$sql.= ", producto_item.remarc_final";
+			$sql.= ", producto_item.remarc_mayorista";
+			$sql.= ", producto_item.desc_final";
+			$sql.= ", producto_item.desc_mayorista";
+			$sql.= ", producto_item.bonif_final";
+			$sql.= ", producto_item.bonif_mayorista";
+			$sql.= ", producto_item.comision_vendedor";
+			$sql.= " FROM (producto_item INNER JOIN producto USING(id_producto)) INNER JOIN fabrica USING(id_fabrica)";
+			$sql.= " WHERE id_producto_item=" . $rowProducto_item->id_producto_item;
+			
+			$rs = $this->mysqli->query($sql);
+		}
+
+		$row = $rs->fetch_object();
 		
-		$rowPedidoSuc->costo = $rowPedidoSuc->plmasiva;
-		$rowPedidoSuc->costo = $rowPedidoSuc->costo - ($rowPedidoSuc->costo * $rowPedidoSuc->desc_fabrica / 100);
-		$rowPedidoSuc->costo = $rowPedidoSuc->costo - ($rowPedidoSuc->costo * $rowPedidoSuc->desc_producto / 100);
+		$row->iva = (float) $row->iva;
+		$row->desc_producto = (float) $row->desc_producto;
+		$row->desc_fabrica = (float) $row->desc_fabrica;
+		$row->precio_lista = (float) $row->precio_lista;
+		$row->remarc_final = (float) $row->remarc_final;
+		$row->remarc_mayorista = (float) $row->remarc_mayorista;
+		$row->desc_final = (float) $row->desc_final;
+		$row->desc_mayorista = (float) $row->desc_mayorista;
+		$row->bonif_final = (float) $row->bonif_final;
+		$row->bonif_mayorista = (float) $row->bonif_mayorista;
+		$row->comision_vendedor = (float) $row->comision_vendedor;
+		*/
 		
 		
-		$rowPedidoSuc->stock = 0;
-		$rowPedidoSuc->stock_suc = 0;
-		$rowPedidoSuc->vendido = 0;
-		$rowPedidoSuc->cantidad = 0;
-		$rowPedidoSuc->detalleStock = array();
-		$rowPedidoSuc->detallePedInt = $this->toJson("SELECT id_pedido_suc_detalle, descrip, cantidad FROM (pedido_suc_detalle INNER JOIN pedido_suc USING(id_pedido_suc)) INNER JOIN sucursal USING(id_sucursal) WHERE id_producto_item = '" . $rowPedidoSuc->id_producto_item . "' AND id_pedido_ext=0 ORDER BY descrip");
-		foreach ($rowPedidoSuc->detallePedInt as $item) {
+		
+		
+		$aux = new stdClass;
+		$aux->id_producto_item = $rowProducto_item->id_producto_item;
+		$aux->fecha = $p->fecha;
+		$aux = array($aux);
+		
+		$row = $this->method_buscar_historico_precio($aux, $error);
+		
+		foreach ($rowProducto_item as $key => $value) {
+			$row->{$key} = $value;
+		}
+		
+		
+		
+
+		
+		$this->functionCalcularImportes($row);
+		
+
+		
+		
+		
+		//$rowPedidoSuc->seleccionado = (bool) $rowPedidoSuc->seleccionado;
+		$row->capacidad = (float) $row->capacidad;
+		$row->acumulado = 0;
+		
+		//$rowPedidoSuc->plmasiva = $rowPedidoSuc->precio_lista + ($rowPedidoSuc->precio_lista * $rowPedidoSuc->iva / 100);
+		
+		//$rowPedidoSuc->costo = $rowPedidoSuc->plmasiva;
+		//$rowPedidoSuc->costo = $rowPedidoSuc->costo - ($rowPedidoSuc->costo * $rowPedidoSuc->desc_fabrica / 100);
+		//$rowPedidoSuc->costo = $rowPedidoSuc->costo - ($rowPedidoSuc->costo * $rowPedidoSuc->desc_producto / 100);
+		
+		
+		$row->stock = 0;
+		$row->stock_suc = 0;
+		$row->vendido = 0;
+		$row->cantidad = 0;
+		$row->detalleStock = array();
+		$row->detallePedInt = $this->toJson("SELECT id_pedido_suc_detalle, descrip, cantidad FROM (pedido_suc_detalle INNER JOIN pedido_suc USING(id_pedido_suc)) INNER JOIN sucursal USING(id_sucursal) WHERE id_producto_item = '" . $row->id_producto_item . "' AND id_pedido_ext=0 ORDER BY descrip");
+		foreach ($row->detallePedInt as $item) {
 			$item->cantidad = (float) $item->cantidad;
-			$rowPedidoSuc->acumulado = $rowPedidoSuc->acumulado + $item->cantidad;
+			$row->acumulado = $row->acumulado + $item->cantidad;
 		}
 
 		
-		$sql="SELECT id_sucursal, descrip, stock FROM stock INNER JOIN sucursal USING(id_sucursal) WHERE sucursal.activo AND id_producto_item = '" . $rowPedidoSuc->id_producto_item . "' ORDER BY descrip";
+		$sql="SELECT id_sucursal, descrip, stock FROM stock INNER JOIN sucursal USING(id_sucursal) WHERE sucursal.activo AND id_producto_item = '" . $row->id_producto_item . "' ORDER BY descrip";
 		$rsStock = $this->mysqli->query($sql);
 		while ($rowStock = $rsStock->fetch_object()) {
 			$rowStock->stock = (float) $rowStock->stock;
-			$rowPedidoSuc->detalleStock[] = $rowStock;
+			$row->detalleStock[] = $rowStock;
 			if ($rowStock->id_sucursal == $this->rowParamet->id_sucursal) {
-				$rowPedidoSuc->stock = $rowStock->stock;
+				$row->stock = $rowStock->stock;
 			} else {
-				$rowPedidoSuc->stock_suc = $rowPedidoSuc->stock_suc + $rowStock->stock;
+				$row->stock_suc = $row->stock_suc + $rowStock->stock;
 			}
 		}
 
 		
-		$resultado[] = $rowPedidoSuc;
+		$resultado[] = $row;
 	}
 
 	return $resultado;
   }
+  
+    
   
   public function method_leer_externos($params, $error) {
 	$p = $params[0];
@@ -176,7 +237,7 @@ class class_PedidosExt extends class_Base
 	set_time_limit(120);
   	
 	$opciones = array("recibido"=>"bool");
-	$sql="SELECT pedido_ext.*, fabrica.descrip AS fabrica, transporte.descrip AS transporte, remito_rec.nro_remito FROM ((pedido_ext INNER JOIN fabrica USING(id_fabrica)) INNER JOIN transporte USING(id_transporte)) LEFT JOIN remito_rec USING(id_remito_rec) WHERE pedido_ext.recibido=" . (($p->recibido) ? "TRUE" : "FALSE") . " ORDER BY fecha DESC";
+	$sql = "SELECT pedido_ext.*, fabrica.descrip AS fabrica, transporte.descrip AS transporte, remito_rec.nro_remito FROM ((pedido_ext INNER JOIN fabrica USING(id_fabrica)) INNER JOIN transporte USING(id_transporte)) LEFT JOIN remito_rec USING(id_remito_rec) WHERE pedido_ext.recibido=" . (($p->recibido) ? "TRUE" : "FALSE") . " ORDER BY fecha DESC";
 	return $this->toJson($this->mysqli->query($sql), $opciones);
   }
   
@@ -187,29 +248,102 @@ class class_PedidosExt extends class_Base
 	$resultado = new stdClass;
 	
 	$sql = "SELECT pedido_ext.*, fabrica.desc_fabrica FROM pedido_ext INNER JOIN fabrica USING(id_fabrica) WHERE pedido_ext.id_pedido_ext=" . $p->id_pedido_ext;
-	$rsPedido = $this->mysqli->query($sql);
-	$regPedido = $rsPedido->fetch_object();
-	$regPedido->recibido = (bool) $regPedido->recibido;
-	$regPedido->desc_fabrica = (float) $regPedido->desc_fabrica;
+	$rsPedido_ext = $this->mysqli->query($sql);
+	$rowPedido_ext = $rsPedido_ext->fetch_object();
+	$rowPedido_ext->recibido = (bool) $rowPedido_ext->recibido;
 	
 	$resultado->detalle = array();
-	$sql = "SELECT pedido_ext_detalle.id_pedido_ext_detalle, pedido_ext_detalle.id_pedido_ext, pedido_ext_detalle.cantidad, producto_item.id_producto_item, producto_item.cod_interno, producto_item.id_unidad, producto_item.precio_lista, producto.descrip AS producto, producto.iva, producto.desc_producto, producto_item.capacidad, color.descrip AS color, unidad.descrip AS unidad";
+	//$sql = "SELECT pedido_ext_detalle.id_pedido_ext_detalle, pedido_ext_detalle.id_pedido_ext, pedido_ext_detalle.cantidad, producto_item.*, producto.descrip AS producto, producto.iva, producto.desc_producto, color.descrip AS color, unidad.descrip AS unidad";
+	$sql = "SELECT";
+	$sql.= "  pedido_ext_detalle.*";
+	$sql.= ", producto.descrip AS producto";
+	$sql.= ", producto_item.capacidad";
+	$sql.= ", unidad.id_unidad";
+	$sql.= ", unidad.descrip AS unidad";
+	$sql.= ", color.descrip AS color";
 	$sql.= " FROM ((((pedido_ext_detalle INNER JOIN producto_item USING (id_producto_item)) INNER JOIN producto USING(id_producto)) INNER JOIN color USING (id_color)) INNER JOIN unidad USING (id_unidad))";
 	$sql.= " WHERE pedido_ext_detalle.id_pedido_ext=" . $p->id_pedido_ext;
 	$sql.= " ORDER BY producto, color, unidad, capacidad";
-	$rs = $this->mysqli->query($sql);
-	while ($row = $rs->fetch_object()) {
-		$row->cantidad = (float) $row->cantidad;
-		$row->capacidad = (float) $row->capacidad;
-		$row->precio_lista = (float) $row->precio_lista;
+	
+	$rsProducto_item = $this->mysqli->query($sql);
+	while ($rowProducto_item = $rsProducto_item->fetch_object()) {
+		/*
+		$sql = "SELECT";
+		$sql.= " *";
+		$sql.= " FROM historico_precio";
+		$sql.= " WHERE DATE(fecha)<='" . $p->fecha . "' AND id_producto_item=" . $rowProducto_item->id_producto_item;
+		$sql.= " ORDER BY fecha DESC LIMIT 1";
+		
+		$rs = $this->mysqli->query($sql);
+		
+		if ($rs->num_rows == 0) {
+			$sql = "SELECT";
+			$sql.= "  producto.iva";
+			$sql.= ", producto.desc_producto";
+			$sql.= ", fabrica.desc_fabrica";
+			$sql.= ", producto_item.precio_lista";
+			$sql.= ", producto_item.remarc_final";
+			$sql.= ", producto_item.remarc_mayorista";
+			$sql.= ", producto_item.desc_final";
+			$sql.= ", producto_item.desc_mayorista";
+			$sql.= ", producto_item.bonif_final";
+			$sql.= ", producto_item.bonif_mayorista";
+			$sql.= ", producto_item.comision_vendedor";
+			$sql.= " FROM (producto_item INNER JOIN producto USING(id_producto)) INNER JOIN fabrica USING(id_fabrica)";
+			$sql.= " WHERE id_producto_item=" . $rowProducto_item->id_producto_item;
+			
+			$rs = $this->mysqli->query($sql);
+		}
+
+		$row = $rs->fetch_object();
+		
 		$row->iva = (float) $row->iva;
 		$row->desc_producto = (float) $row->desc_producto;
+		$row->desc_fabrica = (float) $row->desc_fabrica;
+		$row->precio_lista = (float) $row->precio_lista;
+		$row->remarc_final = (float) $row->remarc_final;
+		$row->remarc_mayorista = (float) $row->remarc_mayorista;
+		$row->desc_final = (float) $row->desc_final;
+		$row->desc_mayorista = (float) $row->desc_mayorista;
+		$row->bonif_final = (float) $row->bonif_final;
+		$row->bonif_mayorista = (float) $row->bonif_mayorista;
+		$row->comision_vendedor = (float) $row->comision_vendedor;
+		*/
 		
+		
+		
+		$aux = new stdClass;
+		$aux->id_producto_item = $rowProducto_item->id_producto_item;
+		$aux->fecha = $p->fecha;
+		$aux = array($aux);
+		
+		$row = $this->method_buscar_historico_precio($aux, $error);
+		
+		foreach ($rowProducto_item as $key => $value) {
+			$row->{$key} = $value;
+		}
+		
+		
+		$this->functionCalcularImportes($row);
+		
+		
+		
+		
+		
+		
+		$row->cantidad = (float) $row->cantidad;
+		$row->capacidad = (float) $row->capacidad;
+		
+		
+		
+		
+		/*
 		$row->plmasiva = $row->precio_lista + ($row->precio_lista * $row->iva / 100);
 		
 		$row->costo = $row->plmasiva;
 		$row->costo = $row->costo - ($row->costo * $regPedido->desc_fabrica / 100);
 		$row->costo = $row->costo - ($row->costo * $row->desc_producto / 100);
+		*/
 		
 		$row->ingresar = 0;
 		$row->sumado = 0;

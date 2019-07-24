@@ -70,6 +70,66 @@ class class_Base_elpintao extends class_Base_general
   }
   
   
+  public function method_buscar_historico_precio($params, $error) {
+	$p = $params[0];
+	
+	$p->fecha = substr($p->fecha, 0, 10);
+	
+	$sql = "SELECT";
+	$sql.= "  iva";
+	$sql.= ", desc_producto";
+	$sql.= ", desc_fabrica";
+	$sql.= ", precio_lista";
+	$sql.= ", remarc_final";
+	$sql.= ", remarc_mayorista";
+	$sql.= ", desc_final";
+	$sql.= ", desc_mayorista";
+	$sql.= ", bonif_final";
+	$sql.= ", bonif_mayorista";
+	$sql.= ", comision_vendedor";
+	$sql.= " FROM historico_precio";
+	$sql.= " WHERE DATE(fecha)<='" . $p->fecha . "' AND id_producto_item=" . $p->id_producto_item;
+	$sql.= " ORDER BY fecha DESC LIMIT 1";
+	
+	$rs = $this->mysqli->query($sql);
+	
+	if ($rs->num_rows == 0) {
+		$sql = "SELECT";
+		$sql.= "  producto.iva";
+		$sql.= ", producto.desc_producto";
+		$sql.= ", fabrica.desc_fabrica";
+		$sql.= ", producto_item.precio_lista";
+		$sql.= ", producto_item.remarc_final";
+		$sql.= ", producto_item.remarc_mayorista";
+		$sql.= ", producto_item.desc_final";
+		$sql.= ", producto_item.desc_mayorista";
+		$sql.= ", producto_item.bonif_final";
+		$sql.= ", producto_item.bonif_mayorista";
+		$sql.= ", producto_item.comision_vendedor";
+		$sql.= " FROM (producto_item INNER JOIN producto USING(id_producto)) INNER JOIN fabrica USING(id_fabrica)";
+		$sql.= " WHERE id_producto_item=" . $p->id_producto_item;
+		
+		$rs = $this->mysqli->query($sql);
+	}
+
+	$row = $rs->fetch_object();
+	
+	$row->iva = (float) $row->iva;
+	$row->desc_producto = (float) $row->desc_producto;
+	$row->desc_fabrica = (float) $row->desc_fabrica;
+	$row->precio_lista = (float) $row->precio_lista;
+	$row->remarc_final = (float) $row->remarc_final;
+	$row->remarc_mayorista = (float) $row->remarc_mayorista;
+	$row->desc_final = (float) $row->desc_final;
+	$row->desc_mayorista = (float) $row->desc_mayorista;
+	$row->bonif_final = (float) $row->bonif_final;
+	$row->bonif_mayorista = (float) $row->bonif_mayorista;
+	$row->comision_vendedor = (float) $row->comision_vendedor;
+	
+	return $row;
+  }
+  
+  
   public function functionCalcularImportes(&$obj) {
 	$obj->plmasiva = $obj->precio_lista + ($obj->precio_lista * $obj->iva / 100);
 	

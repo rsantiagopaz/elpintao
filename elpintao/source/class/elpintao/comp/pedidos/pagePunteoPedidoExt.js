@@ -171,6 +171,11 @@ qx.Class.define("elpintao.comp.pedidos.pagePunteoPedidoExt",
 	tableModelPedido.setColumnSortable(6, false);
 	
 	tableModelPedido.setColumnEditable(5, true);
+	tableModelPedido.addListener("dataChanged", function(e){
+		var rowCount = tableModelPedido.getRowCount();
+		
+		tblPedido.setAdditionalStatusBarText(rowCount + ((rowCount == 1) ? " item" : " items"));
+	});
 	
 	/*
 	tableModelPedido.setSortMethods(0, function(row1, row2) {
@@ -188,7 +193,7 @@ qx.Class.define("elpintao.comp.pedidos.pagePunteoPedidoExt",
 	tblPedido.getSelectionModel().setSelectionMode(qx.ui.table.selection.Model.SINGLE_SELECTION);
 	tblPedido.setShowCellFocusIndicator(true);
 	tblPedido.toggleColumnVisibilityButtonVisible();
-	tblPedido.toggleStatusBarVisible();
+	//tblPedido.toggleStatusBarVisible();
 	//tblPedido.edicion="desplazamiento_vertical";
 	tblPedido.edicion="no";
 	

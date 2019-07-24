@@ -81,7 +81,7 @@ qx.Class.define("elpintao.Application",
       
 	
 	
-	var id_version = 4;
+	var id_version = 1;
 	
 	var rpc = new qx.io.remote.Rpc("services/", "comp.Base");
 	try {
