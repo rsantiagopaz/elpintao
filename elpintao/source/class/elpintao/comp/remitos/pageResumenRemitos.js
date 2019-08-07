@@ -30,33 +30,44 @@ qx.Class.define("elpintao.comp.remitos.pageResumenRemitos",
 		
 
 	var functionCalcularTotales = function(tableModelD, tableModelT) {
-		var rowDataAsMapDetalle, rowDataAsMapTotales;
-		var bandera;
+		var rowDataDetalle, rowDataTotales;
+		var bandera, agregar_arancel, sucursal;
+		var costo;
 		
 		tableModelT.setDataAsMapArray([{descrip: "Costo", total: 0}, {descrip: "P.lis.+IVA", total: 0}], true);
 		
 		for (var i = 0; i < tableModelD.getRowCount(); i++) {
-			rowDataAsMapDetalle = tableModelD.getRowDataAsMap(i);
+			rowDataDetalle = tableModelD.getRowDataAsMap(i);
 			
-			//alert(qx.lang.Json.stringify(rowDataAsMapDetalle, null, 2));
+			agregar_arancel = false;
+
+			if (application.arraySucursales[application.rowParamet.id_sucursal].deposito && rowDataDetalle.id_sucursal_para != "0") {
+				sucursal = application.arraySucursales[rowDataDetalle.id_sucursal_para];
+				if (rowDataDetalle.fecha >= sucursal.fecha_arancel) agregar_arancel = true;
+			}
 			
-			if (rowDataAsMapDetalle.cantidad > 0) {
-				rowDataAsMapTotales = tableModelT.getRowDataAsMap(0);
+			//alert(qx.lang.Json.stringify(rowDataDetalle, null, 2));
+			
+			if (rowDataDetalle.cantidad > 0) {
+				rowDataTotales = tableModelT.getRowDataAsMap(0);
 				
-				tableModelT.setValueById("total", 0, rowDataAsMapTotales.total + (rowDataAsMapDetalle.cantidad * rowDataAsMapDetalle.costo));
-				rowDataAsMapTotales = tableModelT.getRowDataAsMap(1);
-				tableModelT.setValueById("total", 1, rowDataAsMapTotales.total + (rowDataAsMapDetalle.cantidad * rowDataAsMapDetalle.plmasiva));
+				costo = rowDataDetalle.costo;
+				if (agregar_arancel) costo = costo + ((costo * sucursal.arancel) / 100);
+				
+				tableModelT.setValueById("total", 0, rowDataTotales.total + (rowDataDetalle.cantidad * costo));
+				rowDataTotales = tableModelT.getRowDataAsMap(1);
+				tableModelT.setValueById("total", 1, rowDataTotales.total + (rowDataDetalle.cantidad * rowDataDetalle.plmasiva));
 				bandera = true;
 				for (var x = 2; x < tableModelT.getRowCount(); x++) {
-					rowDataAsMapTotales = tableModelT.getRowDataAsMap(x);
-					if (rowDataAsMapDetalle.id_unidad == rowDataAsMapTotales.id_unidad) {
-						tableModelT.setValueById("total", x, tableModelT.getValueById("total", x) + (rowDataAsMapDetalle.cantidad * rowDataAsMapDetalle.capacidad));
+					rowDataTotales = tableModelT.getRowDataAsMap(x);
+					if (rowDataDetalle.id_unidad == rowDataTotales.id_unidad) {
+						tableModelT.setValueById("total", x, tableModelT.getValueById("total", x) + (rowDataDetalle.cantidad * rowDataDetalle.capacidad));
 						bandera = false;
 						break;
 					}
 				}
 				if (bandera) {
-					tableModelT.addRowsAsMapArray([{id_unidad: rowDataAsMapDetalle.id_unidad, descrip: rowDataAsMapDetalle.unidad, total: rowDataAsMapDetalle.cantidad * rowDataAsMapDetalle.capacidad}], null, true);
+					tableModelT.addRowsAsMapArray([{id_unidad: rowDataDetalle.id_unidad, descrip: rowDataDetalle.unidad, total: rowDataDetalle.cantidad * rowDataDetalle.capacidad}], null, true);
 				}
 			}
 		}

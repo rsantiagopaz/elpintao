@@ -104,6 +104,7 @@ class class_Remitos2 extends class_Base
 			
 			$row->nro_remito = $rowRemito->nro_remito;
 			$row->fecha = $rowRemito->fecha;
+			$row->id_sucursal_para = $rowRemito->id_sucursal_para;
 			
 			$resultado[] = $row;
 		}
