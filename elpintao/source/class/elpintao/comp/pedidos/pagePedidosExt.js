@@ -45,7 +45,7 @@ qx.Class.define("elpintao.comp.pedidos.pagePedidosExt",
 		
 		var p = {};
 		p.recibido = btnRecibidos.getValue();
-		var rpc = new qx.io.remote.Rpc("services/", "comp.PedidosExt");
+		var rpc = new componente.general.ramon.io.rpc.Rpc("services/", "comp.PedidosExt");
 		rpc.setTimeout(1000 * 60 * 2);
 		rpc.callAsync(function(resultado, error, id){
 			//alert(qx.lang.Json.stringify(resultado, null, 2));
@@ -294,6 +294,7 @@ qx.Class.define("elpintao.comp.pedidos.pagePedidosExt",
 			var rowData = tableModelPedidoInt.getRowData(tblPedidoInt.getFocusedRow());
 			tableModelDetallePedInt.setDataAsMapArray(rowData.detallePedInt);
 			tableModelDetalleStock.setDataAsMapArray(rowData.detalleStock);
+			tableModelDetallePedExt.setDataAsMapArray(rowData.detallePedExt);
 		}
 		menutblPedidoInt.memorizar([commandEditar]);
 	});
@@ -572,6 +573,32 @@ qx.Class.define("elpintao.comp.pedidos.pagePedidosExt",
 	composite2.add(tblDetalleStock, {left: 230, top: "74%", bottom: 0});
 	composite2.add(new qx.ui.basic.Label("Detalle stock"), {left: 230, top: "71%"});
 	
+	
+	//Tabla
+
+	var tableModelDetallePedExt = new qx.ui.table.model.Simple();
+	tableModelDetallePedExt.setColumns(["Fecha", "Cantidad"], ["fecha", "cantidad"]);
+
+	var custom = {tableColumnModel : function(obj) {
+		return new qx.ui.table.columnmodel.Resize(obj);
+	}};
+	
+	var tblDetallePedExt = new componente.general.ramon.ui.table.Table(tableModelDetallePedExt, custom);
+	//tblTotales.toggleShowCellFocusIndicator();
+	tblDetallePedExt.getSelectionModel().setSelectionMode(qx.ui.table.selection.Model.SINGLE_SELECTION);
+	tblDetallePedExt.setShowCellFocusIndicator(false);
+	tblDetallePedExt.toggleColumnVisibilityButtonVisible();
+	tblDetallePedExt.toggleStatusBarVisible();
+	
+	var tableColumnModelDetallePedExt = tblDetallePedExt.getTableColumnModel();
+	
+	var celleditorDate1 = new qx.ui.table.cellrenderer.Date();
+	celleditorDate1.setDateFormat(new qx.util.format.DateFormat("yyyy-MM-dd"));
+	tableColumnModelDetallePedExt.setDataCellRenderer(0, celleditorDate1);
+	
+	composite2.add(tblDetallePedExt, {left: 470, top: "74%", bottom: 0});
+	composite2.add(new qx.ui.basic.Label("Detalle pedidos ext."), {left: 470, top: "71%"});
+	
 
 	functionCalcularTotales(tableModelPedidoInt, tableModelTotalesInt);
 	
@@ -683,6 +710,14 @@ qx.Class.define("elpintao.comp.pedidos.pagePedidosExt",
 	//tableColumnModelPedido.setColumnWidth(0, 65);
 	//tableColumnModelPedido.setColumnWidth(1, 65);
 	
+	var celleditorDate1 = new qx.ui.table.cellrenderer.Date();
+	celleditorDate1.setDateFormat(new qx.util.format.DateFormat("yyyy-MM-dd"));
+	tableColumnModelPedidoExt.setDataCellRenderer(0, celleditorDate1);
+	
+	var celleditorDate2 = new qx.ui.table.cellrenderer.Date();
+	celleditorDate2.setDateFormat(new qx.util.format.DateFormat("yyyy-MM-dd HH:mm:ss"));
+	tableColumnModelPedidoExt.setDataCellRenderer(6, celleditorDate2);
+	
 
 	var selectionModelPedidoExt = tblPedidoExt.getSelectionModel();
 	selectionModelPedidoExt.setSelectionMode(qx.ui.table.selection.Model.SINGLE_SELECTION);
@@ -740,7 +775,7 @@ qx.Class.define("elpintao.comp.pedidos.pagePedidosExt",
 	//Tabla
 	
 	var tableModelDetalleExt = new qx.ui.table.model.Simple();
-	tableModelDetalleExt.setColumns(["Producto", "Color", "Capacidad", "U", "P.lis.", "P.lis.+IVA", "Cantidad"], ["producto", "color", "capacidad", "unidad", "precio_lista", "plmasiva", "cantidad"]);
+	tableModelDetalleExt.setColumns(["Producto", "Color", "Capacidad", "U", "P.lis.", "P.lis.+IVA", "Cantidad", "estado_condicion"], ["producto", "color", "capacidad", "unidad", "precio_lista", "plmasiva", "cantidad", "estado_condicion"]);
 	tableModelDetalleExt.setColumnSortable(0, false);
 	tableModelDetalleExt.setColumnSortable(1, false);
 	tableModelDetalleExt.setColumnSortable(2, false);
@@ -781,6 +816,13 @@ qx.Class.define("elpintao.comp.pedidos.pagePedidosExt",
 		resizeBehavior.set(4, {width:"7%", minWidth:100});
 		resizeBehavior.set(5, {width:"8%", minWidth:100});
 		resizeBehavior.set(6, {width:"10%", minWidth:100});
+		
+		
+	var cellrendererString = new qx.ui.table.cellrenderer.String();
+	//cellrendererString.addNumericCondition("==", 1, null, "#FF8000", null, null, "estado_condicion");
+	cellrendererString.addNumericCondition("==", 1, null, "#FF0000", null, null, "estado_condicion");
+	cellrendererString.addNumericCondition("==", 2, null, "#119900", null, null, "estado_condicion");
+	tableColumnModelDetalleExt.setDataCellRenderer(0, cellrendererString);
 		
 		
 		var renderer = new qx.ui.table.cellrenderer.Number();
@@ -857,7 +899,7 @@ qx.Class.define("elpintao.comp.pedidos.pagePedidosExt",
 	
 
 	var tableModelDetalleRec = new qx.ui.table.model.Simple();
-	tableModelDetalleRec.setColumns(["Producto", "Color", "Capacidad", "U", "Sumado", "Restado", "Cantidad"], ["producto", "color", "capacidad", "unidad", "sumado", "restado", "cantidad"]);
+	tableModelDetalleRec.setColumns(["Producto", "Color", "Capacidad", "U", "Sumado", "Restado", "Cantidad", "estado_condicion"], ["producto", "color", "capacidad", "unidad", "sumado", "restado", "cantidad", "estado_condicion"]);
 	tableModelDetalleRec.setColumnSortable(0, false);
 	tableModelDetalleRec.setColumnSortable(1, false);
 	tableModelDetalleRec.setColumnSortable(2, false);
@@ -895,6 +937,16 @@ qx.Class.define("elpintao.comp.pedidos.pagePedidosExt",
 		resizeBehavior.set(4, {width:"7%", minWidth:100});
 		resizeBehavior.set(5, {width:"8%", minWidth:100});
 		resizeBehavior.set(6, {width:"10%", minWidth:100});
+		
+		
+	var cellrendererString = new qx.ui.table.cellrenderer.String();
+	//cellrendererString.addNumericCondition("==", 1, null, "#FF8000", null, null, "estado_condicion");
+	cellrendererString.addNumericCondition("==", 1, null, "#FF0000", null, null, "estado_condicion");
+	cellrendererString.addNumericCondition("==", 2, null, "#119900", null, null, "estado_condicion");
+	
+	tableColumnModelDetalleRec.setDataCellRenderer(0, cellrendererString);
+	
+	
 		
 	var selectionModelDetalleRec = tblDetalleRec.getSelectionModel();
 	selectionModelDetalleRec.setSelectionMode(qx.ui.table.selection.Model.SINGLE_SELECTION);

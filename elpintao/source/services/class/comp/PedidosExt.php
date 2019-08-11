@@ -208,6 +208,21 @@ class class_PedidosExt extends class_Base
 			$item->cantidad = (float) $item->cantidad;
 			$row->acumulado = $row->acumulado + $item->cantidad;
 		}
+		
+		
+		$sql = "SELECT";
+		$sql.= "  pedido_ext.fecha";
+		$sql.= ", pedido_ext_detalle.cantidad";
+		$sql.= " FROM pedido_ext INNER JOIN pedido_ext_detalle USING(id_pedido_ext)";
+		$sql.= " WHERE NOT pedido_ext.recibido AND pedido_ext_detalle.id_producto_item=" . $row->id_producto_item;
+		$sql.= " ORDER BY fecha DESC";
+		
+		$opciones = array("cantidad" => "int");
+		$row->detallePedExt = $this->toJson($sql, $opciones);
+		foreach ($row->detallePedExt as $item) {
+			$item->cantidad = (float) $item->cantidad;
+			$row->acumulado = $row->acumulado + $item->cantidad;
+		}
 
 		
 		$sql="SELECT id_sucursal, descrip, stock FROM stock INNER JOIN sucursal USING(id_sucursal) WHERE sucursal.activo AND id_producto_item = '" . $row->id_producto_item . "' ORDER BY descrip";
@@ -354,7 +369,19 @@ class class_PedidosExt extends class_Base
 	
 	
 	$resultado->recibidos = array();
-	$sql = "SELECT pedido_ext_recibido.cantidad, pedido_ext_recibido.sumado, pedido_ext_recibido.restado, producto_item.id_producto_item, producto_item.id_unidad, producto_item.precio_lista, producto.descrip AS producto, producto.iva, producto_item.capacidad, color.descrip AS color, unidad.descrip AS unidad";
+	//$sql = "SELECT pedido_ext_recibido.cantidad, pedido_ext_recibido.sumado, pedido_ext_recibido.restado, producto_item.id_producto_item, producto_item.id_unidad, producto_item.precio_lista, producto.descrip AS producto, producto.iva, producto_item.capacidad, color.descrip AS color, unidad.descrip AS unidad";
+	$sql = "SELECT";
+	$sql.= "  pedido_ext_recibido.cantidad";
+	$sql.= ", pedido_ext_recibido.sumado";
+	$sql.= ", pedido_ext_recibido.restado";
+	$sql.= ", producto_item.id_producto_item";
+	$sql.= ", producto_item.id_unidad";
+	$sql.= ", producto_item.capacidad";
+	$sql.= ", producto_item.precio_lista";
+	$sql.= ", producto.descrip AS producto";
+	$sql.= ", producto.iva";
+	$sql.= ", color.descrip AS color";
+	$sql.= ", unidad.descrip AS unidad";
 	$sql.= " FROM ((((pedido_ext_recibido INNER JOIN producto_item USING (id_producto_item)) INNER JOIN producto USING(id_producto)) INNER JOIN color USING (id_color)) INNER JOIN unidad USING (id_unidad))";
 	$sql.= " WHERE pedido_ext_recibido.id_pedido_ext=" . $p->id_pedido_ext;
 	$sql.= " ORDER BY producto, color, unidad, capacidad";
@@ -366,6 +393,60 @@ class class_PedidosExt extends class_Base
 		$row->cantidad = (float) $row->cantidad;
 		$resultado->recibidos[] = $row;
 	}
+	
+	
+	
+	if ($rowPedido_ext->recibido) {
+		foreach ($resultado->detalle as $itemDet) {
+			
+			$itemDet->estado_condicion = 0;
+			
+			$noencontrado = true;
+			$diferencia = 0;
+			
+			$count = count($resultado->recibidos);
+			for ($i = 0; $i < $count; $i++) {
+				$itemRec = $resultado->recibidos[$i];
+				
+				if ($itemDet->id_producto_item == $itemRec->id_producto_item) {
+					$noencontrado = false;
+					if ($itemDet->cantidad > $itemRec->cantidad) $diferencia = $itemDet->cantidad - $itemRec->cantidad;
+				}
+			}
+			
+			if ($noencontrado) {
+				$itemDet->estado_condicion = 1;
+				$diferencia = $itemDet->cantidad;
+			} else if ($diferencia > 0) $itemDet->estado_condicion = 1;
+			
+			$itemDet->diferencia = $diferencia;
+		}
+		
+		foreach ($resultado->recibidos as $itemRec) {
+			
+			$itemRec->estado_condicion = 0;
+			
+			$noencontrado = true;
+			$diferencia = 0;
+			
+			$count = count($resultado->detalle);
+			for ($i = 0; $i < $count; $i++) {
+				$itemDet = $resultado->detalle[$i];
+				
+				if ($itemRec->id_producto_item == $itemDet->id_producto_item) {
+					$noencontrado = false;
+					if ($itemRec->cantidad > $itemDet->cantidad) $diferencia = $itemRec->cantidad - $itemDet->cantidad;
+				}
+			}
+			
+			if ($noencontrado) {
+				$itemRec->estado_condicion = 2;
+				$diferencia = $itemRec->cantidad;
+			} else if ($diferencia > 0) $itemRec->estado_condicion = 2;
+			
+			$itemRec->diferencia = $diferencia;
+		}
+  	}
 	
 	
 	return $resultado;
