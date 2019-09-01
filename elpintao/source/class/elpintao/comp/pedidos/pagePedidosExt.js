@@ -39,6 +39,7 @@ qx.Class.define("elpintao.comp.pedidos.pagePedidosExt",
 		tblDetalleExt.setFocusedCell();
 		tblDetalleRec.setFocusedCell();
 		
+		tableModelPedidoExt.setDataAsMapArray([], true);
 		tableModelDetalleExt.setDataAsMapArray([], true);
 		tableModelDetalleRec.setDataAsMapArray([], true);
 		functionCalcularTotales(tableModelDetalleExt, tableModelTotalesExt);
@@ -648,11 +649,13 @@ qx.Class.define("elpintao.comp.pedidos.pagePedidosExt",
 	btnRecibirPedExt.addListener("execute", function(e) {
 		var rowData = tableModelPedidoExt.getRowData(tblPedidoExt.getFocusedRow());
 		if (! rowData.recibido) {
+			var dateFormat = new qx.util.format.DateFormat("yyyy-MM-dd");
+			
 			var p = {};
 			p.id_pedido_ext = rowData.id_pedido_ext;
 			p.id_fabrica = rowData.id_fabrica;
 			p.fabrica_descrip = rowData.fabrica;
-			p.label = "Pedido a proveedor: " + rowData.fecha + " - " + rowData.fabrica;
+			p.label = "Pedido a proveedor: " + dateFormat.format(rowData.fecha) + " - " + rowData.fabrica;
 			p.detalle = tableModelDetalleExt.getDataAsMapArray();
 			application.functionPuntearPedidoExt(p);
 		}
@@ -665,10 +668,51 @@ qx.Class.define("elpintao.comp.pedidos.pagePedidosExt",
 		window.open("services/class/comp/Impresion.php?rutina=imprimir_pedext&id_pedido_ext=" + rowData.id_pedido_ext);
 	});
 	
+	var btnGenerarPedido = new qx.ui.menu.Button("Pedido de productos faltantes...");
+	btnGenerarPedido.setEnabled(false);
+	btnGenerarPedido.addListener("execute", function(e) {
+		tblPedidoExt.blur();
+		
+		(new dialog.Confirm({
+	        "message"   : "Desea generar pedido automático de productos faltantes?",
+	        "callback"  : function(e){
+							if (e) {
+								tblPedidoExt.blur();
+								
+								var rowData = tableModelPedidoExt.getRowData(tblPedidoExt.getFocusedRow());
+								
+								var p = {};
+								p.id_pedido_ext = rowData.id_pedido_ext;
+								p.pedido_ext_detalle = [];
+								
+								var pedido_ext_detalle = tableModelDetalleExt.getDataAsMapArray();
+								for (var x in pedido_ext_detalle) {
+									if (pedido_ext_detalle[x].diferencia > 0) p.pedido_ext_detalle.push(pedido_ext_detalle[x]);
+								}
+								
+								var rpc = new qx.io.remote.Rpc("services/", "comp.PedidosExt");
+								rpc.addListener("completed", function(e){
+									var data = e.getData();
+									
+									functionActualizarPedidosExt(data.result);
+								});
+					
+								rpc.callAsyncListeners(true, "generar_pedido_faltante", p);
+							} else {
+								tblPedidoExt.focus();
+							}
+	        			},
+	        "context"   : this,
+	        "image"     : "icon/48/status/dialog-warning.png"
+		})).show();
+	});
+	
+	menutblPedidoExt.add(btnVer);
 	menutblPedidoExt.add(btnRecibirPedExt);
 	menutblPedidoExt.add(btnImprimir);
 	menutblPedidoExt.addSeparator();
-	menutblPedidoExt.add(btnVer);
+	menutblPedidoExt.add(btnGenerarPedido);
+	
 	menutblPedidoExt.memorizar();
 		
 		
@@ -676,7 +720,7 @@ qx.Class.define("elpintao.comp.pedidos.pagePedidosExt",
 	//Tabla
 
 	var tableModelPedidoExt = new qx.ui.table.model.Simple();
-	tableModelPedidoExt.setColumns(["Fecha", "Fábrica", "Teléfono", "E-mail", "Transporte", "Domic.entrega", "Recibido", "Nro.remito"], ["fecha", "fabrica", "telefono", "email", "transporte", "domicilio", "fecha_recibido", "nro_remito"]);
+	tableModelPedidoExt.setColumns(["Fecha", "Fábrica", "Teléfono", "E-mail", "Transporte", "Domic.entrega", "Recibido", "Nro.remito", "Ped.faltante"], ["fecha", "fabrica", "telefono", "email", "transporte", "domicilio", "fecha_recibido", "nro_remito", "faltante"]);
 	tableModelPedidoExt.setColumnSortable(0, false);
 	tableModelPedidoExt.setColumnSortable(1, false);
 	tableModelPedidoExt.setColumnSortable(2, false);
@@ -685,6 +729,7 @@ qx.Class.define("elpintao.comp.pedidos.pagePedidosExt",
 	tableModelPedidoExt.setColumnSortable(5, false);
 	tableModelPedidoExt.setColumnSortable(6, false);
 	tableModelPedidoExt.setColumnSortable(7, false);
+	tableModelPedidoExt.setColumnSortable(8, false);
 	//tableModelPedido.setColumns(["Fecha", "Fábrica"], ["fecha", "id_fabrica"]);
 	//tableModelPedido.setEditable(true);
 	tableModelPedidoExt.addListener("dataChanged", function(e){
@@ -710,6 +755,20 @@ qx.Class.define("elpintao.comp.pedidos.pagePedidosExt",
 	//tableColumnModelPedido.setColumnWidth(0, 65);
 	//tableColumnModelPedido.setColumnWidth(1, 65);
 	
+	/*
+	var resizeBehavior = tableColumnModelPedidoExt.getBehavior();
+	resizeBehavior.set(0, {width:"10%", minWidth:100});
+	resizeBehavior.set(1, {width:"10%", minWidth:100});
+	resizeBehavior.set(2, {width:"10%", minWidth:100});
+	resizeBehavior.set(3, {width:"10%", minWidth:100});
+	resizeBehavior.set(4, {width:"10%", minWidth:100});
+	resizeBehavior.set(5, {width:"10%", minWidth:100});
+	resizeBehavior.set(6, {width:"10%", minWidth:100});
+	resizeBehavior.set(7, {width:"10%", minWidth:100});
+	resizeBehavior.set(8, {width:"10%", minWidth:100});
+	*/
+	
+	
 	var celleditorDate1 = new qx.ui.table.cellrenderer.Date();
 	celleditorDate1.setDateFormat(new qx.util.format.DateFormat("yyyy-MM-dd"));
 	tableColumnModelPedidoExt.setDataCellRenderer(0, celleditorDate1);
@@ -729,6 +788,8 @@ qx.Class.define("elpintao.comp.pedidos.pagePedidosExt",
 			tblDetalleExt.setFocusedCell();
 			tblTotalesExt.setFocusedCell();
 			tblDetalleRec.setFocusedCell();
+			tableModelDetalleExt.setDataAsMapArray([], true);
+			tableModelDetalleRec.setDataAsMapArray([], true);
 			
 			var rowData = tableModelPedidoExt.getRowData(tblPedidoExt.getFocusedRow());
 			
@@ -742,6 +803,7 @@ qx.Class.define("elpintao.comp.pedidos.pagePedidosExt",
 
 			btnImprimir.setEnabled(true);
 			btnRecibirPedExt.setEnabled(! rowData.recibido);
+			btnGenerarPedido.setEnabled(false);
 			
 			var p = {};
 			p.id_pedido_ext = rowData.id_pedido_ext;
@@ -753,6 +815,18 @@ qx.Class.define("elpintao.comp.pedidos.pagePedidosExt",
 
 			abortCallAsyncExt = rpc.callAsync(function(resultado, error, id){
 				if (error == null) {
+					
+					if (rowData.recibido && rowData.id_pedido_ext_faltante == null) {
+						var bandera = false;
+						for (var x in resultado.detalle) {
+							if (resultado.detalle[x].diferencia > 0) {
+								bandera = true;
+								break;
+							}
+						}
+						btnGenerarPedido.setEnabled(bandera);
+					}
+					
 					tableModelDetalleExt.setDataAsMapArray(resultado.detalle, true);
 					tableModelDetalleRec.setDataAsMapArray(resultado.recibidos, true);
 					functionCalcularTotales(tableModelDetalleExt, tableModelTotalesExt);
@@ -766,7 +840,7 @@ qx.Class.define("elpintao.comp.pedidos.pagePedidosExt",
 				abortCallAsyncExt = null;
 			}, "leer_externos_detalle", p);
 		}
-		menutblPedidoExt.memorizar([btnRecibirPedExt, btnImprimir]);
+		menutblPedidoExt.memorizar([btnRecibirPedExt, btnImprimir, btnGenerarPedido]);
 	}, this));
 
 	composite1.add(tblPedidoExt, {left:0, top: 31, right: 0, bottom: "66.66%"});

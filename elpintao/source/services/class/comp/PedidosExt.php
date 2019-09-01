@@ -91,6 +91,47 @@ class class_PedidosExt extends class_Base
   
   
   
+  public function method_generar_pedido_faltante($params, $error) {
+	$p = $params[0];
+	
+	$sql = "SELECT * FROM pedido_ext WHERE id_pedido_ext=" . $p->id_pedido_ext;
+	$rsPE = $this->mysqli->query($sql);
+	$rowPE = $rsPE->fetch_object();
+	
+	$p->model = $rowPE;
+	
+	$p->model->id_pedido_ext = 0;
+	$p->model->id_remito_rec = null;
+	$p->model->recibido = 0;
+	$p->model->fecha_recibido = null;
+	$p->model->id_pedido_ext_faltante = null;
+	
+	
+  	$set = $this->prepararCampos($p->model, "pedido_ext");
+  	
+  	$this->mysqli->query("START TRANSACTION");
+  	
+	$sql = "INSERT pedido_ext SET " . $set;
+	$this->mysqli->query($sql);
+	$insert_id = $this->mysqli->insert_id;
+	
+	
+	$sql = "UPDATE pedido_ext SET id_pedido_ext_faltante=" . $insert_id . " WHERE id_pedido_ext=" . $p->id_pedido_ext;
+	$this->mysqli->query($sql);
+	
+	
+	foreach ($p->pedido_ext_detalle as $rowDet) {
+		$sql = "INSERT pedido_ext_detalle SET id_pedido_ext = '" . $insert_id . "', id_producto_item = '" . $rowDet->id_producto_item . "', cantidad = '" . $rowDet->diferencia . "'";
+		$this->mysqli->query($sql);
+	}
+	
+	$this->mysqli->query("COMMIT");
+	
+	return $p->id_pedido_ext;
+  }
+  
+  
+  
   public function method_leer_internos($params, $error) {
   	$p = $params[0];
   	
@@ -251,8 +292,12 @@ class class_PedidosExt extends class_Base
 	
 	set_time_limit(120);
   	
-	$opciones = array("recibido"=>"bool");
-	$sql = "SELECT pedido_ext.*, fabrica.descrip AS fabrica, transporte.descrip AS transporte, remito_rec.nro_remito FROM ((pedido_ext INNER JOIN fabrica USING(id_fabrica)) INNER JOIN transporte USING(id_transporte)) LEFT JOIN remito_rec USING(id_remito_rec) WHERE pedido_ext.recibido=" . (($p->recibido) ? "TRUE" : "FALSE") . " ORDER BY fecha DESC";
+  	$opciones = new stdClass;
+  	$opciones->functionAux = function (&$row, $key) {
+  		$row->recibido = (bool) $row->recibido;
+  		$row->faltante = (is_null($row->id_pedido_ext_faltante)) ? "" : "Generado";
+  	};
+	$sql = "SELECT pedido_ext.*, fabrica.descrip AS fabrica, transporte.descrip AS transporte, remito_rec.nro_remito FROM ((pedido_ext INNER JOIN fabrica USING(id_fabrica)) INNER JOIN transporte USING(id_transporte)) LEFT JOIN remito_rec USING(id_remito_rec) WHERE pedido_ext.recibido=" . (($p->recibido) ? "TRUE" : "FALSE") . " ORDER BY fecha DESC, id_pedido_ext DESC";
 	return $this->toJson($this->mysqli->query($sql), $opciones);
   }
   

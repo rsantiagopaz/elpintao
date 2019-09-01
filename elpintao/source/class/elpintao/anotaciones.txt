@@ -1,0 +1,5 @@
+
+
+cuantos pedidos automaticos generados se permiten
+
+que pasa si al pedido automatico generado le faltan productos
