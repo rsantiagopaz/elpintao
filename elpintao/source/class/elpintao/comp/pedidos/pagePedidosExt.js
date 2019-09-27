@@ -44,12 +44,17 @@ qx.Class.define("elpintao.comp.pedidos.pagePedidosExt",
 		tableModelDetalleRec.setDataAsMapArray([], true);
 		functionCalcularTotales(tableModelDetalleExt, tableModelTotalesExt);
 		
+		var aux = slbEstado.getModelSelection().getItem(0);
 		var p = {};
-		p.recibido = btnRecibidos.getValue();
+		p.recibido = (aux == "") ? null : aux;
+		p.desde = dtfDesde.getValue();
+		p.hasta = dtfHasta.getValue();
+		p.id_fabrica = slbFabrica.getModelSelection().getItem(0);
+		
 		var rpc = new componente.general.ramon.io.rpc.Rpc("services/", "comp.PedidosExt");
 		rpc.setTimeout(1000 * 60 * 2);
 		rpc.callAsync(function(resultado, error, id){
-			//alert(qx.lang.Json.stringify(resultado, null, 2));
+			alert(qx.lang.Json.stringify(resultado, null, 2));
 			
 			tableModelPedidoExt.setDataAsMapArray(resultado, true);
 			
@@ -619,30 +624,87 @@ qx.Class.define("elpintao.comp.pedidos.pagePedidosExt",
 		
 
 
+
+		
+		
+	var layout = new qx.ui.layout.Grid(6, 6);
+    for (var i = 0; i < 15; i++) {
+    	layout.setColumnAlign(i, "left", "middle");
+    }
+    layout.setRowHeight(0, 24);
+		
+	var composite = new qx.ui.container.Composite(layout);
+	
+	composite.add(new qx.ui.basic.Label("Estado:"), {row: 0, column: 0});
+	
+	var slbEstado = this.slbEstado = new qx.ui.form.SelectBox();
+	slbEstado.setWidth(90);
+	slbEstado.add(new qx.ui.form.ListItem("Pendiente", null, "0"));
+	slbEstado.add(new qx.ui.form.ListItem("Recibido", null, "1"));
+
+	composite.add(slbEstado, {row: 0, column: 1});
+	
+	var aux = new Date;
+	var dtfDesde = this.dtfDesde = new qx.ui.form.DateField();
+	dtfDesde.setWidth(90);
+	var dtfHasta = this.dtfHasta = new qx.ui.form.DateField();
+	dtfHasta.setWidth(90);
+	dtfHasta.setValue(aux);
+	aux.setMonth(aux.getMonth() - 1);
+	dtfDesde.setValue(aux);
+	
+	composite.add(new qx.ui.basic.Label("Desde:"), {row: 0, column: 3});
+	composite.add(dtfDesde, {row: 0, column: 4});
+	composite.add(new qx.ui.basic.Label("Hasta:"), {row: 0, column: 5});
+	composite.add(dtfHasta, {row: 0, column: 6});
+	
+	
+	var rpc = new qx.io.remote.Rpc("services/", "comp.Reparacion");
+	try {
+		var resultado = rpc.callSync("autocompletarSucursal", {texto: ""});
+	} catch (ex) {
+		alert("Sync exception: " + ex);
+	}
+	
+	
+
+	
+	var rpc = new qx.io.remote.Rpc("services/", "comp.Reparacion");
+	try {
+		var resultado = rpc.callSync("autocompletarFabrica", {texto: ""});
+	} catch (ex) {
+		alert("Sync exception: " + ex);
+	}
+	
+	var slbFabrica = this.slbFabrica = new qx.ui.form.SelectBox();
+	slbFabrica.setWidth(200);
+	
+	slbFabrica.add(new qx.ui.form.ListItem("-", null, "0"));
+	for (var x in resultado) {
+		slbFabrica.add(new qx.ui.form.ListItem(resultado[x].label, null, resultado[x].model));
+	}
+	
+	composite.add(new qx.ui.basic.Label("Fábrica:"), {row: 0, column: 11});
+	composite.add(slbFabrica, {row: 0, column: 12});
+	
+	composite1.add(composite, {left: 270, top: 0});
+	
+		
+	
+	var btnFiltrar = new qx.ui.form.Button("Aplicar filtro");
+	btnFiltrar.addListener("execute", function(e){
+		functionActualizarPedidosExt();
+	});
+	
+	composite.add(btnFiltrar, {row: 0, column: 18});
+		
+		
+		
+		
+		
 		
 		
 	var menutblPedidoExt = new componente.general.ramon.ui.menu.Menu();
-	var menubtnVer = new componente.general.ramon.ui.menu.Menu();
-	
-	var btnVer = new qx.ui.menu.Button("Ver", null, null, menubtnVer);
-	
-	var btnPendientes = new qx.ui.menu.RadioButton("Pendientes");
-	btnPendientes.setValue(true);
-	btnPendientes.addListener("execute", function(e){
-		functionActualizarPedidosExt();
-	});
-	var btnRecibidos = new qx.ui.menu.RadioButton("Recibidos");
-	btnRecibidos.addListener("execute", function(e){
-		functionActualizarPedidosExt();
-	});
-	
-	var radiogroup = new qx.ui.form.RadioGroup();
-	radiogroup.add(btnPendientes, btnRecibidos);
-	
-	menubtnVer.add(btnPendientes);
-	menubtnVer.add(btnRecibidos);
-	
-	
 	
 	var btnRecibirPedExt = new qx.ui.menu.Button("Recibir pedido a proveedor...");
 	btnRecibirPedExt.setEnabled(false);
@@ -707,7 +769,6 @@ qx.Class.define("elpintao.comp.pedidos.pagePedidosExt",
 		})).show();
 	});
 	
-	menutblPedidoExt.add(btnVer);
 	menutblPedidoExt.add(btnRecibirPedExt);
 	menutblPedidoExt.add(btnImprimir);
 	menutblPedidoExt.addSeparator();
@@ -790,6 +851,7 @@ qx.Class.define("elpintao.comp.pedidos.pagePedidosExt",
 			tblDetalleRec.setFocusedCell();
 			tableModelDetalleExt.setDataAsMapArray([], true);
 			tableModelDetalleRec.setDataAsMapArray([], true);
+			tableModelTotalesExt.setDataAsMapArray([], true);
 			
 			var rowData = tableModelPedidoExt.getRowData(tblPedidoExt.getFocusedRow());
 			
@@ -843,7 +905,7 @@ qx.Class.define("elpintao.comp.pedidos.pagePedidosExt",
 		menutblPedidoExt.memorizar([btnRecibirPedExt, btnImprimir, btnGenerarPedido]);
 	}, this));
 
-	composite1.add(tblPedidoExt, {left:0, top: 31, right: 0, bottom: "66.66%"});
+	composite1.add(tblPedidoExt, {left:0, top: 31, right: "15.5%", bottom: "66.66%"});
 	
 	
 	//Tabla

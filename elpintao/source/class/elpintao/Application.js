@@ -496,6 +496,37 @@ qx.Class.define("elpintao.Application",
 	mnuCentral.add(btnAplicarAjuste);
 	mnuCentral.addSeparator();
 	
+	var btnMercaderiaVale = new qx.ui.menu.Button("Entregar mercaderia de vale");
+	btnMercaderiaVale.addListener("execute", function(e){
+		setTimeout(function(){
+			var nro_vale = prompt("Ingrese el Nro Completo del Vale de Mercaderia (Suc-Nro)");
+			if (nro_vale != null && confirm("Esta seguro que desea Entregar la Mercaderia del Vale?")) {
+				
+				var p = {};
+				p.nro_vale = nro_vale;
+				
+				var rpc = new qx.io.remote.Rpc(conexion.rpc_elpintao_services, "componente.elpintao.alejandro.ValesMercaderia");
+				rpc.setTimeout(60000 * 5);
+				rpc.addListener("completed", function(e){
+					var data = e.getData();
+					
+					alert("Vale entregado!");
+		
+				}, this);
+				rpc.addListener("failed", function(e){
+					var data = e.getData();
+					
+					alert(data);
+					
+				}, this);
+				
+				rpc.callAsyncListeners(true, "entregarVale", p);
+			}
+		});
+	}, this);
+	mnuCentral.add(btnMercaderiaVale);
+	mnuCentral.addSeparator();
+	
 	
 	var btnCargaStock2 = new qx.ui.menu.Button("Asignar stock");
 	btnCargaStock2.addListener("execute", function(e){
@@ -508,6 +539,16 @@ qx.Class.define("elpintao.Application",
 		});
 	}, this);
 	mnuCentral.add(btnCargaStock2);
+	
+	var btnStockSucursal = new qx.ui.menu.Button("Stock de sucursal...");
+	btnStockSucursal.addListener("execute", function(e){
+		var win = new componente.elpintao.alejandro.StockSucursal();
+		win.setModal(true);
+		doc.add(win);
+		win.center();
+		win.open();
+	}, this);
+	mnuCentral.add(btnStockSucursal);
 	mnuCentral.addSeparator();
 
 	
@@ -601,8 +642,8 @@ qx.Class.define("elpintao.Application",
 	}, this);
 	mnuCentral.add(btnRemitosRecCentral);
 	
-	var btnResumenRemitos = new qx.ui.menu.Button("Resumen de salidas de mercaderia");
-	btnResumenRemitos.addListener("execute", function(e){
+	var btnResumenRemitosCentral = new qx.ui.menu.Button("Resumen de salidas de mercaderia");
+	btnResumenRemitosCentral.addListener("execute", function(e){
 		if (pageResumenRemitos==null) {
 			pageResumenRemitos = new elpintao.comp.remitos.pageResumenRemitos();
 			
@@ -613,7 +654,7 @@ qx.Class.define("elpintao.Application",
 		}
 		tabviewMain.setSelection([pageResumenRemitos])
 	}, this);
-	mnuCentral.add(btnResumenRemitos);
+	mnuCentral.add(btnResumenRemitosCentral);
 	mnuCentral.addSeparator()
 	
 	var btnCuentas = new qx.ui.menu.Button("Cuentas");
@@ -762,6 +803,20 @@ qx.Class.define("elpintao.Application",
 		*/
 	}, this);
 	mnuSucursal.add(btnRemitosRec);
+	
+	var btnResumenRemitos = new qx.ui.menu.Button("Resumen de salidas de mercaderia");
+	btnResumenRemitos.addListener("execute", function(e){
+		if (pageResumenRemitos==null) {
+			pageResumenRemitos = new elpintao.comp.remitos.pageResumenRemitos();
+			
+			pageResumenRemitos.addListenerOnce("close", function(e){
+				pageResumenRemitos = null;
+			});
+			tabviewMain.add(pageResumenRemitos);
+		}
+		tabviewMain.setSelection([pageResumenRemitos])
+	}, this);
+	mnuSucursal.add(btnResumenRemitos);
 	
 	
 	

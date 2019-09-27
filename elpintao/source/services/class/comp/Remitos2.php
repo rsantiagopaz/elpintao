@@ -13,8 +13,8 @@ class class_Remitos2 extends class_Base
   	
   	$resultado = array();
   	
-	$sql = "SELECT DISTINCTROW remito_emi.*, CASE WHEN id_sucursal_para<>0 THEN sucursal.descrip ELSE remito_emi.destino END AS destino_descrip, CASE remito_emi.estado WHEN 'R' THEN 'Registrado' ELSE 'Autorizado' END AS estado_descrip";
-	$sql.= " FROM remito_emi LEFT JOIN sucursal ON remito_emi.id_sucursal_para = sucursal.id_sucursal";
+	$sql = "SELECT DISTINCTROW remito_emi.*, CASE WHEN id_sucursal_para<>0 THEN sucursal.descrip WHEN id_fabrica<>0 THEN fabrica.descrip ELSE remito_emi.destino END AS destino_descrip, CASE remito_emi.estado WHEN 'R' THEN 'Registrado' ELSE 'Autorizado' END AS estado_descrip";
+	$sql.= " FROM remito_emi LEFT JOIN sucursal ON remito_emi.id_sucursal_para = sucursal.id_sucursal LEFT JOIN fabrica USING(id_fabrica)";
 	$sql.= " WHERE TRUE";
 	
 	if ($p->estado == "Registrado") {
@@ -39,11 +39,23 @@ class class_Remitos2 extends class_Base
 	if ($p->id_fabrica > "0") {
 		$sql.= " AND producto.id_fabrica=" . $p->id_fabrica;
 	}
+	*/
+	
+	if (! empty($p->destino)) {
+		$descrip = explode(" ", $p->destino);
+		foreach ($descrip as $palabra) {
+			if (! empty($palabra)) {
+				$sql.= " AND remito_emi.destino LIKE '%" . $palabra . "%'";
+			}
+		}
+	}
 
+	
+	/*
 	if (! empty($p->buscar)) {
 		$descrip = explode(" ", $p->buscar);
 		foreach ($descrip as $palabra) {
-			if (!empty($palabra)) {
+			if (! empty($palabra)) {
 				if (is_numeric($palabra)) {
 					$sql.= " AND producto_item.cod_interno LIKE '" . $palabra . "'";
 				} else if ($palabra[0]=="*") {
@@ -55,6 +67,7 @@ class class_Remitos2 extends class_Base
 		}
 	}
 	*/
+
 	
 	$sql.= " ORDER BY id_remito_emi DESC";
 

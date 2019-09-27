@@ -79,7 +79,7 @@ qx.Class.define("elpintao.comp.remitos.pageResumenRemitos",
 		
 	
 	var layout = new qx.ui.layout.Grid(6, 6);
-    for (var i = 0; i < 15; i++) {
+    for (var i = 0; i < 17; i++) {
     	layout.setColumnAlign(i, "left", "middle");
     }
     layout.setRowHeight(0, 24);
@@ -157,8 +157,8 @@ qx.Class.define("elpintao.comp.remitos.pageResumenRemitos",
 		slbFabrica.add(new qx.ui.form.ListItem(resultado[x].label, null, resultado[x].model));
 	}
 	
-	composite.add(new qx.ui.basic.Label("Fábrica:"), {row: 0, column: 11});
-	composite.add(slbFabrica, {row: 0, column: 12});
+	//composite.add(new qx.ui.basic.Label("Fábrica:"), {row: 0, column: 11});
+	//composite.add(slbFabrica, {row: 0, column: 12});
 	
 	
 	/*
@@ -173,13 +173,24 @@ qx.Class.define("elpintao.comp.remitos.pageResumenRemitos",
 	*/
 	
 
+	var txtDestino = this.txtDestino = new qx.ui.form.TextField("");
+	txtDestino.setWidth(150);
+	txtDestino.addListener("blur", function(e){
+		this.setValue(this.getValue().trim());
+	});
+
+	composite.add(new qx.ui.basic.Label("Para:"), {row: 0, column: 14});
+	composite.add(txtDestino, {row: 0, column: 15});
+	
 	
 	var txtBuscar = this.txtBuscar = new qx.ui.form.TextField("");
-	txtBuscar.setWidth(300);
-	txtBuscar.setLiveUpdate(true);
+	txtBuscar.setWidth(150);
+	txtBuscar.addListener("blur", function(e){
+		this.setValue(this.getValue().trim());
+	});
 
-	composite.add(new qx.ui.basic.Label("Producto:"), {row: 0, column: 14});
-	composite.add(txtBuscar, {row: 0, column: 15});
+	composite.add(new qx.ui.basic.Label("Producto:"), {row: 0, column: 16});
+	composite.add(txtBuscar, {row: 0, column: 17});
 	
 	
 	var btnBuscar = new qx.ui.form.Button("Buscar");
@@ -202,6 +213,7 @@ qx.Class.define("elpintao.comp.remitos.pageResumenRemitos",
 		p.id_sucursal = this.slbSucursal.getModelSelection().getItem(0);
 		p.id_fabrica = this.slbFabrica.getModelSelection().getItem(0);
 		p.buscar = this.txtBuscar.getValue().trim();
+		p.destino = this.txtDestino.getValue().trim();
 		
 		var rpc = new componente.general.ramon.io.rpc.Rpc("services/", "comp.Remitos2");
 		rpc.setTimeout(1000 * 60 * 2);
@@ -213,7 +225,7 @@ qx.Class.define("elpintao.comp.remitos.pageResumenRemitos",
 			imageLoading.destroy();
 		}, "resumen_remitos", p);
 	}, this);
-	composite.add(btnBuscar, {row: 0, column: 16});
+	composite.add(btnBuscar, {row: 0, column: 18});
 	
 	this.add(composite, {left: 0, top: 0});
 	

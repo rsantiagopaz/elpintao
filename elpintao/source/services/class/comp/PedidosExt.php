@@ -291,14 +291,55 @@ class class_PedidosExt extends class_Base
 	$p = $params[0];
 	
 	set_time_limit(120);
+	
+	$resultado = array();
   	
-  	$opciones = new stdClass;
-  	$opciones->functionAux = function (&$row, $key) {
-  		$row->recibido = (bool) $row->recibido;
-  		$row->faltante = (is_null($row->id_pedido_ext_faltante)) ? "" : "Generado";
-  	};
-	$sql = "SELECT pedido_ext.*, fabrica.descrip AS fabrica, transporte.descrip AS transporte, remito_rec.nro_remito FROM ((pedido_ext INNER JOIN fabrica USING(id_fabrica)) INNER JOIN transporte USING(id_transporte)) LEFT JOIN remito_rec USING(id_remito_rec) WHERE pedido_ext.recibido=" . (($p->recibido) ? "TRUE" : "FALSE") . " ORDER BY fecha DESC, id_pedido_ext DESC";
-	return $this->toJson($this->mysqli->query($sql), $opciones);
+	
+	$sql = "SELECT";
+	$sql.= " pedido_ext.*, fabrica.descrip AS fabrica, transporte.descrip AS transporte, remito_rec.nro_remito";
+	$sql.= " FROM ((pedido_ext INNER JOIN fabrica USING(id_fabrica)) INNER JOIN transporte USING(id_transporte)) LEFT JOIN remito_rec USING(id_remito_rec)";
+	$sql.= " WHERE TRUE";
+	
+	if (! is_null($p->recibido)) $sql.= " AND pedido_ext.recibido=" . $p->recibido;
+	if (! is_null($p->desde)) {
+		$sql.= " AND DATE(pedido_ext.fecha) >= '" . substr($p->desde, 0, 10) . "'";
+	}
+	if (! is_null($p->hasta)) {
+		$sql.= " AND DATE(pedido_ext.fecha) <= '" . substr($p->hasta, 0, 10) . "'";
+	}
+	if ($p->id_fabrica > "0") {
+		$sql.= " AND pedido_ext.id_fabrica=" . $p->id_fabrica;
+	}
+	
+	$sql.= " ORDER BY fecha DESC, id_pedido_ext DESC";
+	
+	$rsPedido_ext = $this->mysqli->query($sql);
+	while ($rowPedido_ext = $rsPedido_ext->fetch_object()) {
+  		$rowPedido_ext->recibido = (bool) $rowPedido_ext->recibido;
+  		$rowPedido_ext->faltante = (is_null($rowPedido_ext->id_pedido_ext_faltante)) ? "" : "Generado";
+  		
+  		$rowPedido_ext->costo = 0;
+  		$rowPedido_ext->plmasiva = 0;
+  		
+		
+		
+		$sql = "SELECT";
+		$sql.= " *";
+		$sql.= " FROM pedido_ext_detalle INNER JOIN producto_item USING(id_producto_item) INNER JOIN producto USING(id_producto) INNER JOIN fabrica USING(id_fabrica)";
+		$sql.= " WHERE pedido_ext_detalle.id_pedido_ext=" . $rowPedido_ext->id_pedido_ext;
+		
+		$rsDetalle = $this->mysqli->query($sql);
+		while ($rowDetalle = $rsDetalle->fetch_object()) {
+			$this->functionCalcularImportes($rowDetalle);
+			
+  			$rowPedido_ext->costo+= $rowDetalle->costo;
+  			$rowPedido_ext->plmasiva+= $rowDetalle->plmasiva;
+		}
+
+		$resultado[] = $rowPedido_ext;
+	}
+	
+	return $resultado;
   }
   
   
