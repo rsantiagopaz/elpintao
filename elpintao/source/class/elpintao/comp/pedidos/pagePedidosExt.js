@@ -54,7 +54,7 @@ qx.Class.define("elpintao.comp.pedidos.pagePedidosExt",
 		var rpc = new componente.general.ramon.io.rpc.Rpc("services/", "comp.PedidosExt");
 		rpc.setTimeout(1000 * 60 * 2);
 		rpc.callAsync(function(resultado, error, id){
-			alert(qx.lang.Json.stringify(resultado, null, 2));
+			//alert(qx.lang.Json.stringify(resultado, null, 2));
 			
 			tableModelPedidoExt.setDataAsMapArray(resultado, true);
 			

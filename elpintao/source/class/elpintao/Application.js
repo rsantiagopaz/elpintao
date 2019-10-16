@@ -149,6 +149,7 @@ qx.Class.define("elpintao.Application",
 	var arraySucursales;
 	var arrayDeposito;
 	var contexto = this;
+	var pages = {};
 	
 	
 	
@@ -496,8 +497,23 @@ qx.Class.define("elpintao.Application",
 	mnuCentral.add(btnAplicarAjuste);
 	mnuCentral.addSeparator();
 	
-	var btnMercaderiaVale = new qx.ui.menu.Button("Entregar mercaderia de vale");
-	btnMercaderiaVale.addListener("execute", function(e){
+	
+	var btnValesMercaderia = new qx.ui.menu.Button("Vales de mercadería");
+	btnValesMercaderia.addListener("execute", function(e){
+		if (pages["ValesMercaderia"] == null) {
+			pages["ValesMercaderia"] = new elpintao.comp.varios.pageVales();
+			pages["ValesMercaderia"].addListenerOnce("close", function(e){
+				pages["ValesMercaderia"] = null;
+			});
+			tabviewMain.add(pages["ValesMercaderia"]);
+			tabviewMain.setSelection([pages["ValesMercaderia"]]);
+		} else tabviewMain.setSelection([pages["ValesMercaderia"]]);
+	}, this);
+	mnuCentral.add(btnValesMercaderia);
+	
+	
+	var btnEntregarMercaderiaVale = new qx.ui.menu.Button("Entregar mercaderia de vale");
+	btnEntregarMercaderiaVale.addListener("execute", function(e){
 		setTimeout(function(){
 			var nro_vale = prompt("Ingrese el Nro Completo del Vale de Mercaderia (Suc-Nro)");
 			if (nro_vale != null && confirm("Esta seguro que desea Entregar la Mercaderia del Vale?")) {
@@ -524,7 +540,7 @@ qx.Class.define("elpintao.Application",
 			}
 		});
 	}, this);
-	mnuCentral.add(btnMercaderiaVale);
+	mnuCentral.add(btnEntregarMercaderiaVale);
 	mnuCentral.addSeparator();
 	
 	
