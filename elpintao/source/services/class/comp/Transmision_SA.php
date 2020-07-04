@@ -16,7 +16,16 @@ class class_Transmision_SA extends class_Base
 	$id_sucursal1 = $this->rowParamet->id_sucursal;
   	
 	foreach ($this->arraySucursal as $sucursal) {
-		$mysqli_01 = @mysqli_connect($this->arraySucursal[$id_sucursal1]->urlsql, $this->arraySucursal[$id_sucursal1]->username, $this->arraySucursal[$id_sucursal1]->password, $this->arraySucursal[$id_sucursal1]->base);
+		
+		$urlsql = $this->arraySucursal[$id_sucursal1]->urlsql;
+		$port = null;
+		$pos = strpos($urlsql, ":");
+		if ($pos !== false && $pos >= 0) {
+			$port = (int) substr($urlsql, $pos + 1);
+			$urlsql = substr($urlsql, 0, $pos);
+		}
+		
+		$mysqli_01 = @mysqli_connect($urlsql, $this->arraySucursal[$id_sucursal1]->username, $this->arraySucursal[$id_sucursal1]->password, $this->arraySucursal[$id_sucursal1]->base, $port);
 		if ($mysqli_01) {
 			$mysqli_01->query("SET NAMES 'utf8'");
 			
@@ -29,7 +38,16 @@ class class_Transmision_SA extends class_Base
 				$sql = "SELECT * FROM transmision WHERE id_sucursal=" . $id_sucursal2 . " ORDER BY id_transmision";
 				$rs = $mysqli_01->query($sql);
 				if ($rs->num_rows > 0) {
-					$mysqli_02 = @mysqli_connect($sucursal->urlsql, $sucursal->username, $sucursal->password, $sucursal->base);
+					
+					$urlsql = $sucursal->urlsql;
+					$port = null;
+					$pos = strpos($urlsql, ":");
+					if ($pos !== false && $pos >= 0) {
+						$port = (int) substr($urlsql, $pos + 1);
+						$urlsql = substr($urlsql, 0, $pos);
+					}
+					
+					$mysqli_02 = @mysqli_connect($urlsql, $sucursal->username, $sucursal->password, $sucursal->base, $port);
 					if ($mysqli_02) {
 						try {
 							$mysqli_02->query("SET NAMES 'utf8'");
@@ -107,7 +125,7 @@ class class_Transmision_SA extends class_Base
 						$mysqli_02->close();
 						
 					} else {
-						$sql = "INSERT transmision_error SET id_sucursal=" . $id_sucursal2 . ", tipo='actualizacion', hora='" . date("H:i:s") . "', descrip='conexión remota', detalle='" . $this->mysqli->real_escape_string($php_errormsg) . "'";
+						$sql = "INSERT transmision_error SET id_sucursal=" . $id_sucursal2 . ", tipo='actualizacion', hora='" . date("H:i:s") . "', descrip='conexión remota', detalle='" . $this->mysqli->real_escape_string(mysqli_connect_error()) . "'";
 						$this->mysqli->query($sql);
 					}
 				}
@@ -122,7 +140,7 @@ class class_Transmision_SA extends class_Base
 			$mysqli_01->close();
 
 		} else {
-			$sql = "INSERT transmision_error SET id_sucursal=" . $id_sucursal1 . ", tipo='actualizacion', hora='" . date("H:i:s") . "', descrip='conexión local', detalle='" . $this->mysqli->real_escape_string($php_errormsg) . "'";
+			$sql = "INSERT transmision_error SET id_sucursal=" . $id_sucursal1 . ", tipo='actualizacion', hora='" . date("H:i:s") . "', descrip='conexión local', detalle='" . $this->mysqli->real_escape_string(mysqli_connect_error()) . "'";
 			$this->mysqli->query($sql);
 		}
 	}

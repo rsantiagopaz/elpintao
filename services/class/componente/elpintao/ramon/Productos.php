@@ -148,7 +148,8 @@ class class_Productos extends class_Base_elpintao
   public function method_aplicar_porcentaje_recursivo($params, $error) {
   	$p = $params[0];
   	
-  	$nick = ((is_null($_SESSION['usuario'])) ? "NULL" : $_SESSION['usuario']->nick);
+  	//$nick = ((is_null($_SESSION['usuario'])) ? "NULL" : $_SESSION['usuario']->nick);
+  	$nick = $_SESSION['conexion']->login->nick;
 
 	if ($p->aplicar == "pcfcd") {
 		$sql = "SELECT producto.iva, producto.desc_producto, producto_item.*, fabrica.desc_fabrica FROM (producto INNER JOIN producto_item USING(id_producto)) INNER JOIN fabrica USING(id_fabrica) WHERE producto.activo AND producto.id_arbol=" . $p->id_arbol . (is_null($p->id_fabrica) ? "" : " AND producto.id_fabrica=" . $p->id_fabrica);
@@ -282,7 +283,8 @@ class class_Productos extends class_Base_elpintao
   	set_time_limit(0);
   	
   	$fecha = date("Y-m-d H:i:s");
-  	$nick = ((is_null($_SESSION['usuario'])) ? "NULL" : $_SESSION['usuario']->nick);
+  	//$nick = ((is_null($_SESSION['usuario'])) ? "NULL" : $_SESSION['usuario']->nick);
+  	$nick = $_SESSION['conexion']->login->nick;
   	
     $this->mysqli->query("START TRANSACTION");
     
@@ -636,7 +638,8 @@ class class_Productos extends class_Base_elpintao
   	$resultado = array();
   	
   	$fecha = date("Y-m-d H:i:s");
-  	$nick = ((is_null($_SESSION['usuario'])) ? "NULL" : $_SESSION['usuario']->nick);
+  	//$nick = ((is_null($_SESSION['usuario'])) ? "NULL" : $_SESSION['usuario']->nick);
+  	$nick = $_SESSION['conexion']->login->nick;
   	
 	$model = $p->model;
 	$items = $p->items;
@@ -782,7 +785,8 @@ class class_Productos extends class_Base_elpintao
   	$p = $params[0];
   	
   	$fecha = date("Y-m-d H:i:s");
-  	$nick = ((is_null($_SESSION['usuario'])) ? "NULL" : $_SESSION['usuario']->nick);
+  	//$nick = ((is_null($_SESSION['usuario'])) ? "NULL" : $_SESSION['usuario']->nick);
+  	$nick = $_SESSION['conexion']->login->nick;
 	
 	$this->mysqli->query("START TRANSACTION");
 	

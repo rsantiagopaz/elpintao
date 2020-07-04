@@ -142,23 +142,6 @@ qx.Class.define("elpintao.comp.remitos.pageResumenRemitos",
 	
 
 	
-	var rpc = new qx.io.remote.Rpc("services/", "comp.Reparacion");
-	try {
-		var resultado = rpc.callSync("autocompletarFabrica", {texto: ""});
-	} catch (ex) {
-		alert("Sync exception: " + ex);
-	}
-	
-	var slbFabrica = this.slbFabrica = new qx.ui.form.SelectBox();
-	slbFabrica.setWidth(200);
-	
-	slbFabrica.add(new qx.ui.form.ListItem("-", null, "0"));
-	for (var x in resultado) {
-		slbFabrica.add(new qx.ui.form.ListItem(resultado[x].label, null, resultado[x].model));
-	}
-	
-	//composite.add(new qx.ui.basic.Label("Fábrica:"), {row: 0, column: 11});
-	//composite.add(slbFabrica, {row: 0, column: 12});
 	
 	
 	/*
@@ -179,8 +162,29 @@ qx.Class.define("elpintao.comp.remitos.pageResumenRemitos",
 		this.setValue(this.getValue().trim());
 	});
 
-	composite.add(new qx.ui.basic.Label("Para:"), {row: 0, column: 14});
-	composite.add(txtDestino, {row: 0, column: 15});
+	composite.add(new qx.ui.basic.Label("Para:"), {row: 0, column: 11});
+	composite.add(txtDestino, {row: 0, column: 12});
+	
+	
+	
+	var rpc = new qx.io.remote.Rpc("services/", "comp.Reparacion");
+	try {
+		var resultado = rpc.callSync("autocompletarFabrica", {texto: ""});
+	} catch (ex) {
+		alert("Sync exception: " + ex);
+	}
+	
+	var slbFabrica = this.slbFabrica = new qx.ui.form.SelectBox();
+	slbFabrica.setWidth(200);
+	
+	slbFabrica.add(new qx.ui.form.ListItem("-", null, "0"));
+	for (var x in resultado) {
+		slbFabrica.add(new qx.ui.form.ListItem(resultado[x].label, null, resultado[x].model));
+	}
+	
+	composite.add(new qx.ui.basic.Label("Fábrica:"), {row: 0, column: 14});
+	composite.add(slbFabrica, {row: 0, column: 15});
+	
 	
 	
 	var txtBuscar = this.txtBuscar = new qx.ui.form.TextField("");
@@ -218,6 +222,9 @@ qx.Class.define("elpintao.comp.remitos.pageResumenRemitos",
 		var rpc = new componente.general.ramon.io.rpc.Rpc("services/", "comp.Remitos2");
 		rpc.setTimeout(1000 * 60 * 2);
 		rpc.callAsync(function(resultado, error, id) {
+			//alert(qx.lang.Json.stringify(resultado, null, 2));
+			//alert(qx.lang.Json.stringify(error, null, 2));
+			
 			tableModelDetalle.setDataAsMapArray(resultado, true);
 			
 			functionCalcularTotales(tableModelDetalle, tableModelTotgen);
@@ -242,16 +249,20 @@ qx.Class.define("elpintao.comp.remitos.pageResumenRemitos",
 	//Tabla
 
 	var tableModelDetalle = new qx.ui.table.model.Simple();
-	tableModelDetalle.setColumns(["Nro.remito", "Fecha", "Fábrica", "Producto", "Capacidad", "U", "Color", "Cantidad"], ["nro_remito", "fecha", "fabrica", "producto", "capacidad", "unidad", "color", "cantidad"]);
+	tableModelDetalle.setColumns(["Nro.remito", "Para", "Fecha", "Fábrica", "Producto", "Capacidad", "U", "Color", "Cantidad"], ["nro_remito", "destino_descrip", "fecha", "fabrica", "producto", "capacidad", "unidad", "color", "cantidad"]);
 	tableModelDetalle.setColumnSortable(0, false);
 	tableModelDetalle.setColumnSortable(1, false);
 	tableModelDetalle.setColumnSortable(2, false);
 	tableModelDetalle.setColumnSortable(3, false);
 	tableModelDetalle.setColumnSortable(4, false);
 	tableModelDetalle.setColumnSortable(5, false);
+	tableModelDetalle.setColumnSortable(6, false);
+	tableModelDetalle.setColumnSortable(7, false);
+	tableModelDetalle.setColumnSortable(8, false);
 	tableModelDetalle.addListener("dataChanged", function(e){
 		var rowCount = tableModelDetalle.getRowCount();
-		if (rowCount > 0) tblDetalle.setAdditionalStatusBarText(rowCount + " item/s"); else tblDetalle.setAdditionalStatusBarText(" ");
+		
+		tblDetalle.setAdditionalStatusBarText(rowCount + ((rowCount == 1) ? " item" : " items"));
 	});
 	
 	//tableModelDetalle.setEditable(true);
@@ -273,7 +284,7 @@ qx.Class.define("elpintao.comp.remitos.pageResumenRemitos",
 	
 	var celleditorDate = new qx.ui.table.cellrenderer.Date();
 	celleditorDate.setDateFormat(new qx.util.format.DateFormat("yyyy-MM-dd HH:mm"));
-	tableColumnModelDetalle.setDataCellRenderer(1, celleditorDate);
+	tableColumnModelDetalle.setDataCellRenderer(2, celleditorDate);
 	
 
 
@@ -281,13 +292,15 @@ qx.Class.define("elpintao.comp.remitos.pageResumenRemitos",
 
 		var resizeBehavior = tableColumnModelDetalle.getBehavior();
 		resizeBehavior.set(0, {width:"9%", minWidth:100});
-		resizeBehavior.set(1, {width:"8%", minWidth:100});
-		resizeBehavior.set(2, {width:"13%", minWidth:100});
-		resizeBehavior.set(3, {width:"39%", minWidth:100});
-		resizeBehavior.set(4, {width:"7%", minWidth:100});
-		resizeBehavior.set(5, {width:"3%", minWidth:100});
-		resizeBehavior.set(6, {width:"15%", minWidth:100});
-		resizeBehavior.set(7, {width:"6%", minWidth:100});
+		resizeBehavior.set(1, {width:"12%", minWidth:100});
+		resizeBehavior.set(2, {width:"8%", minWidth:100});
+		resizeBehavior.set(3, {width:"13%", minWidth:100});
+		resizeBehavior.set(4, {width:"30%", minWidth:100});
+		resizeBehavior.set(5, {width:"7%", minWidth:100});
+		resizeBehavior.set(6, {width:"3%", minWidth:100});
+		resizeBehavior.set(7, {width:"12%", minWidth:100});
+		resizeBehavior.set(8, {width:"6%", minWidth:100});
+		
 
 		
 	

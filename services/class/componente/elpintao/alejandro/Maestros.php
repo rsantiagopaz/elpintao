@@ -138,7 +138,15 @@ class class_Maestros extends class_Base {
 		// 		}
 		$db = $this->link2;
 		if ($p->base) {
-			$this->link2 = new mysqli($p->url, $p->username, $p->password, $p->base);
+			$urlsql = $p->url;
+			$port = null;
+			$pos = strpos($urlsql, ":");
+			if ($pos !== false && $pos >= 0) {
+				$port = (int) substr($urlsql, $pos + 1);
+				$urlsql = substr($urlsql, 0, $pos);
+			}
+			
+			$this->link2 = new mysqli($urlsql, $p->username, $p->password, $p->base, $port);
 			$this->link2->query("SET NAMES 'utf8'");
 		}
 

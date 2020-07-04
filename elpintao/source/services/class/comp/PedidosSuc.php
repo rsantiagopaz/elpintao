@@ -26,7 +26,7 @@ class class_PedidosSuc extends class_Base
   	
 	foreach ($p->detalle as $detalle) {
 		
-		$sql = "INSERT log SET descrip='Pedidos de sucursal respondido', texto='" . json_encode($detalle) . "', fecha='" . $fecha . "'";
+		$sql = "INSERT log SET descrip='Pedidos de sucursal respondido', texto='" . json_encode($detalle) . "', fecha='" . $fecha . "', nick='" . $_SESSION['conexion']->login->nick . "'";
 		$this->mysqli->query($sql);
 		
 		foreach ($detalle->stock as $stock) {
@@ -97,6 +97,10 @@ class class_PedidosSuc extends class_Base
 				if ($rowStock->id_sucursal == $p->id_sucursal) {
 					$rowDetalle->stock_suc = $rowStock->stock;
 				} else {
+					if ($rowStock->id_sucursal == $this->rowParamet->id_sucursal) {
+						$rowDetalle->stock_dep = $rowStock->stock;
+					}
+					
 					$rowStock->enviar = 0;
 					$rowDetalle->stock[] = $rowStock;
 				}
@@ -130,6 +134,7 @@ class class_PedidosSuc extends class_Base
   	$resultado = new stdClass;
   	$resultado->stock = array();
   	$resultado->stock_suc = 0;
+  	$resultado->stock_dep = 0;
   	
 	$sql="SELECT sucursal.id_sucursal, sucursal.descrip AS sucursal_descrip, stock FROM sucursal INNER JOIN stock USING(id_sucursal) WHERE sucursal.activo AND id_producto_item='" . $p->id_producto_item . "' ORDER BY sucursal_descrip";
 	$rsStock = $this->mysqli->query($sql);
@@ -139,6 +144,10 @@ class class_PedidosSuc extends class_Base
 		if ($rowStock->id_sucursal == $p->id_sucursal) {
 			$resultado->stock_suc = $rowStock->stock;
 		} else {
+			if ($rowStock->id_sucursal == $this->rowParamet->id_sucursal) {
+				$resultado->stock_dep = $rowStock->stock;
+			}
+					
 			$rowStock->enviar = 0;
 			$resultado->stock[] = $rowStock;
 		}

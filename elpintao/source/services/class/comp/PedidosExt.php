@@ -4,6 +4,34 @@ require_once("Base.php");
 
 class class_PedidosExt extends class_Base
 {
+
+
+  public function method_agregar_items($params, $error) {
+  	$p = $params[0];
+
+  	$this->mysqli->query("START TRANSACTION");
+	
+	foreach ($p->items as $item) {
+		if ($item->cantidad > 0) {
+			$sql = "SELECT * FROM pedido_ext_detalle WHERE id_pedido_ext=" . $p->id_pedido_ext . " AND id_producto_item=" . $item->id_producto_item;
+			$rs = $this->mysqli->query($sql);
+			if ($rs->num_rows == 0) {
+				$sql = "INSERT pedido_ext_detalle SET id_pedido_ext = '" . $p->id_pedido_ext . "', id_producto_item = '" . $item->id_producto_item . "', cantidad = '" . $item->cantidad . "'";
+				$this->mysqli->query($sql);
+			}
+		}
+	}
+	
+	$this->mysqli->query("COMMIT");
+  }
+  
+  
+  public function method_eliminar_item($params, $error) {
+  	$p = $params[0];
+
+	$sql = "DELETE FROM pedido_ext_detalle WHERE id_pedido_ext=" . $p->id_pedido_ext . " AND id_producto_item=" . $p->id_producto_item;
+	$this->mysqli->query($sql);
+  }
   
   
   public function method_autocompletarFabrica($params, $error) {

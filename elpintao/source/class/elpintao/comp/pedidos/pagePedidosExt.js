@@ -31,6 +31,9 @@ qx.Class.define("elpintao.comp.pedidos.pagePedidosExt",
 	numberformatMonto.setMaximumFractionDigits(2);
 	numberformatMonto.setMinimumFractionDigits(2);
 	
+	var rowDataPedidoExt;
+	var rowDataDetalleExt;
+	
 	
 	var functionActualizarPedidosExt = this.functionActualizarPedidosExt = function(id_pedido_ext){
 		tblPedidoExt.resetSelection();
@@ -43,6 +46,8 @@ qx.Class.define("elpintao.comp.pedidos.pagePedidosExt",
 		tableModelDetalleExt.setDataAsMapArray([], true);
 		tableModelDetalleRec.setDataAsMapArray([], true);
 		functionCalcularTotales(tableModelDetalleExt, tableModelTotalesExt);
+		
+		menutblDetalleExt.memorizarEnabled([btnAgregarDetalleExt, btnEliminarDetalleExt], false);
 		
 		var aux = slbEstado.getModelSelection().getItem(0);
 		var p = {};
@@ -175,14 +180,7 @@ qx.Class.define("elpintao.comp.pedidos.pagePedidosExt",
 	
 	//Menu de contexto
 	
-/*
-	var commandNuevoDetalle = new qx.ui.command.Command("Insert");
-	commandNuevoDetalle.addListener("execute", function(){
-		windowProducto.id_fabrica = slbFabrica.getModelSelection().getItem(0).get("id_fabrica");
-		windowProducto.center();
-		windowProducto.open();
-	});
-*/	
+
 	var commandEditar = new qx.ui.command.Command("F2");
 	commandEditar.setEnabled(false);
 	commandEditar.addListener("execute", function(e) {
@@ -473,40 +471,6 @@ qx.Class.define("elpintao.comp.pedidos.pagePedidosExt",
 	//composite2.add(chkPedidos, {right: 0 , top: 7});
 	
 	
-	var windowProducto = new elpintao.comp.pedidos.windowProducto("Agregar items");
-	windowProducto.setModal(true);
-	windowProducto.addListener("aceptado", function(e){
-		var tableModel = e.getData();
-		var rowData;
-		var rowBuscado;
-		for (var x = 0; x < tableModel.getRowCount(); x++) {
-			rowData = tableModel.getRowData(x);
-			if (rowData.cantidad > 0) {
-				rowBuscado = tblPedidoInt.buscar("id_producto_item", rowData.id_producto_item, true, 9);
-				if (rowBuscado == null) {
-					rowData.detalle = [];
-					tableModelPedidoInt.addRowsAsMapArray([rowData], null, true);
-					tblPedidoInt.buscar("id_producto_item", rowData.id_producto_item, true, 9);
-				} else {
-					rowBuscado.cantidad = rowBuscado.cantidad + rowData.cantidad;
-					tableModelPedidoInt.setRowsAsMapArray([rowBuscado], tblPedidoInt.getFocusedRow(), true, false);
-				}
-				functionCalcularTotales(tableModelPedidoInt, tableModelTotalesInt);
-				btnGenerarPedExt.setEnabled(tableModelTotalesInt.getRowCount() > 2);
-				menutblPedidoInt.memorizar([btnGenerarPedExt]);
-			}
-		}
-		tblPedidoInt.focus();
-	}, this);
-	
-	windowProducto.addListener("disappear", function(e){
-		tblPedidoInt.focus();
-	});
-	
-	application.getRoot().add(windowProducto);
-	
-	
-	
 	
 	
 	
@@ -723,11 +687,21 @@ qx.Class.define("elpintao.comp.pedidos.pagePedidosExt",
 		}
 	});
 	
-	var btnImprimir = new qx.ui.menu.Button("Imprimir");
+	var btnImprimir = new qx.ui.menu.Button("Imprimir...");
 	btnImprimir.setEnabled(false);
 	btnImprimir.addListener("execute", function(e) {
 		var rowData = tableModelPedidoExt.getRowData(tblPedidoExt.getFocusedRow());
 		window.open("services/class/comp/Impresion.php?rutina=imprimir_pedext&id_pedido_ext=" + rowData.id_pedido_ext);
+	});
+	
+	var btnExportarDetalle = new qx.ui.menu.Button("Exportar...");
+	btnExportarDetalle.setEnabled(false);
+	btnExportarDetalle.addListener("execute", function(e) {
+		var aux = componente.elpintao.alejandro.Ow.getDatosTabla(tblDetalleExt);
+		for (var x in aux) {
+			delete aux[x].estado_condicion
+		}
+		componente.elpintao.alejandro.Ow.JSONaExcel(aux, "Detalle de Pedido a Proveedor", true);
 	});
 	
 	var btnGenerarPedido = new qx.ui.menu.Button("Pedido de productos faltantes...");
@@ -771,6 +745,7 @@ qx.Class.define("elpintao.comp.pedidos.pagePedidosExt",
 	
 	menutblPedidoExt.add(btnRecibirPedExt);
 	menutblPedidoExt.add(btnImprimir);
+	menutblPedidoExt.add(btnExportarDetalle);
 	menutblPedidoExt.addSeparator();
 	menutblPedidoExt.add(btnGenerarPedido);
 	
@@ -845,6 +820,7 @@ qx.Class.define("elpintao.comp.pedidos.pagePedidosExt",
 		if (selectionModelPedidoExt.isSelectionEmpty()) {
 			btnRecibirPedExt.setEnabled(false);
 			btnImprimir.setEnabled(false);
+			btnExportarDetalle.setEnabled(false);
 		} else {
 			tblDetalleExt.setFocusedCell();
 			tblTotalesExt.setFocusedCell();
@@ -853,7 +829,7 @@ qx.Class.define("elpintao.comp.pedidos.pagePedidosExt",
 			tableModelDetalleRec.setDataAsMapArray([], true);
 			tableModelTotalesExt.setDataAsMapArray([], true);
 			
-			var rowData = tableModelPedidoExt.getRowData(tblPedidoExt.getFocusedRow());
+			rowDataPedidoExt = tableModelPedidoExt.getRowData(tblPedidoExt.getFocusedRow());
 			
 			if (imageLoadingExt == null) {
 				var bounds = this.getBounds();
@@ -864,11 +840,14 @@ qx.Class.define("elpintao.comp.pedidos.pagePedidosExt",
 			}
 
 			btnImprimir.setEnabled(true);
-			btnRecibirPedExt.setEnabled(! rowData.recibido);
+			btnExportarDetalle.setEnabled(true);
+			btnRecibirPedExt.setEnabled(! rowDataPedidoExt.recibido);
 			btnGenerarPedido.setEnabled(false);
+			menutblDetalleExt.memorizarEnabled([btnAgregarDetalleExt], ! rowDataPedidoExt.recibido);
+			menutblDetalleExt.memorizarEnabled([btnEliminarDetalleExt], false);
 			
 			var p = {};
-			p.id_pedido_ext = rowData.id_pedido_ext;
+			p.id_pedido_ext = rowDataPedidoExt.id_pedido_ext;
 			
 			var rpc = new qx.io.remote.Rpc("services/", "comp.PedidosExt");
 			rpc.setTimeout(1000 * 60 * 2);
@@ -878,7 +857,7 @@ qx.Class.define("elpintao.comp.pedidos.pagePedidosExt",
 			abortCallAsyncExt = rpc.callAsync(function(resultado, error, id){
 				if (error == null) {
 					
-					if (rowData.recibido && rowData.id_pedido_ext_faltante == null) {
+					if (rowDataPedidoExt.recibido && rowDataPedidoExt.id_pedido_ext_faltante == null) {
 						var bandera = false;
 						for (var x in resultado.detalle) {
 							if (resultado.detalle[x].diferencia > 0) {
@@ -902,10 +881,93 @@ qx.Class.define("elpintao.comp.pedidos.pagePedidosExt",
 				abortCallAsyncExt = null;
 			}, "leer_externos_detalle", p);
 		}
-		menutblPedidoExt.memorizar([btnRecibirPedExt, btnImprimir, btnGenerarPedido]);
+		menutblPedidoExt.memorizar([btnRecibirPedExt, btnImprimir, btnExportarDetalle, btnGenerarPedido]);
 	}, this));
 
 	composite1.add(tblPedidoExt, {left:0, top: 31, right: "15.5%", bottom: "66.66%"});
+	
+	
+
+	
+	
+	
+	
+	
+	var windowProducto = new elpintao.comp.pedidos.windowProducto("Agregar ítems detalle", true);
+	windowProducto.addListener("aceptado", function(e){
+		var tableModel = e.getData();
+		var rowData;
+		var items = [];
+		for (var x = 0; x < tableModel.getRowCount(); x++) {
+			rowData = tableModel.getRowData(x);
+			if (rowData.cantidad > 0) items.push({id_producto_item: rowData.id_producto_item, cantidad: rowData.cantidad});
+		}
+		if (items.length > 0) {
+
+			var p = {};
+			p.id_pedido_ext = rowDataPedidoExt.id_pedido_ext;
+			p.items = items;
+	
+			var rpc = new qx.io.remote.Rpc("services/", "comp.PedidosExt");
+			rpc.addListener("completed", function(e){
+				var data = e.getData();
+
+				functionActualizarPedidosExt(rowDataPedidoExt.id_pedido_ext);
+			});
+	
+			rpc.callAsyncListeners(true, "agregar_items", p);
+		}
+	}, this);
+	
+	windowProducto.addListener("disappear", function(e){
+		tblPedidoExt.focus();
+	});
+	
+	windowProducto.setModal(true);
+	application.getRoot().add(windowProducto);
+	
+	
+	
+	
+	//Menu de contexto
+	
+	var menutblDetalleExt = new componente.general.ramon.ui.menu.Menu();
+	
+	var btnAgregarDetalleExt = new qx.ui.menu.Button("Agregar...");
+	btnAgregarDetalleExt.setEnabled(false);
+	btnAgregarDetalleExt.addListener("execute", function(e){
+		rowDataPedidoExt = tableModelPedidoExt.getRowData(tblPedidoExt.getFocusedRow());
+		windowProducto.id_fabrica = rowDataPedidoExt.id_fabrica;
+		windowProducto.center();
+		windowProducto.open();
+	});
+	
+	var btnEliminarDetalleExt = new qx.ui.menu.Button("Eliminar...");
+	btnEliminarDetalleExt.setEnabled(false);
+	btnEliminarDetalleExt.addListener("execute", function(e){
+		rowDataDetalleExt
+		
+		dialog.Dialog.confirm("Desea eliminar el item seleccionado?", function(e){
+			if (e) {
+				var p = {};
+				p.id_pedido_ext = rowDataPedidoExt.id_pedido_ext;
+				p.id_producto_item = rowDataDetalleExt.id_producto_item;
+
+				var rpc = new qx.io.remote.Rpc("services/", "comp.PedidosExt");
+				rpc.addListener("completed", function(e){
+					var data = e.getData();
+	
+					tblPedidoExt.focus();
+				});
+		
+				rpc.callAsyncListeners(true, "eliminar_item", p);
+			}
+		});
+	});
+
+	menutblDetalleExt.add(btnAgregarDetalleExt);
+	menutblDetalleExt.add(btnEliminarDetalleExt);
+	menutblDetalleExt.memorizar();
 	
 	
 	//Tabla
@@ -937,6 +999,7 @@ qx.Class.define("elpintao.comp.pedidos.pagePedidosExt",
 	tblDetalleExt.setShowCellFocusIndicator(false);
 	tblDetalleExt.toggleColumnVisibilityButtonVisible();
 	//tblDetalleExt.toggleStatusBarVisible();
+	tblDetalleExt.setContextMenu(menutblDetalleExt);
 	
 	var tableColumnModelDetalleExt = tblDetalleExt.getTableColumnModel();
 	//tableColumnModelDetalle.setColumnVisible(7, false);
@@ -972,9 +1035,13 @@ qx.Class.define("elpintao.comp.pedidos.pagePedidosExt",
 	selectionModelDetalleExt.setSelectionMode(qx.ui.table.selection.Model.SINGLE_SELECTION);
 	selectionModelDetalleExt.addListener("changeSelection", function(e){
 		if (! selectionModelDetalleExt.isSelectionEmpty()) {
-			var rowData = tableModelDetalleExt.getRowData(tblDetalleExt.getFocusedRow());
+			rowDataDetalleExt = tableModelDetalleExt.getRowData(tblDetalleExt.getFocusedRow());
 			
-			tblDetalleRec.buscar("id_producto_item", rowData.id_producto_item);
+			
+			btnEliminarDetalleExt.setEnabled(! rowDataPedidoExt.recibido);
+			menutblDetalleExt.memorizar([btnEliminarDetalleExt]);
+			
+			tblDetalleRec.buscar("id_producto_item", rowDataDetalleExt.id_producto_item);
 		}
 	});
 	

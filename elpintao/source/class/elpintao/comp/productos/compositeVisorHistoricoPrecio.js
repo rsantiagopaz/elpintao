@@ -35,6 +35,8 @@ qx.Class.define("elpintao.comp.productos.compositeVisorHistoricoPrecio",
 			alert("Sync exception: " + ex);
 		}
 		
+		console.log(resultado);
+		
 		for (var y in resultado) {
 			rowHistorico = resultado[y];
 			rowHistorico.fecha = rowHistorico.fecha.substr(0, 16);

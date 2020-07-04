@@ -9,7 +9,15 @@ class class_Stock
 	$resultado->id_sucursal = $p->id_sucursal;
 	$resultado->producto_item = array();
 
-	$mysqli = new mysqli($p->urlsql, $p->username, $p->password, $p->base);
+	$urlsql = $p->urlsql;
+	$port = null;
+	$pos = strpos($urlsql, ":");
+	if ($pos !== false && $pos >= 0) {
+		$port = (int) substr($urlsql, $pos + 1);
+		$urlsql = substr($urlsql, 0, $pos);
+	}
+
+	$mysqli = new mysqli($urlsql, $p->username, $p->password, $p->base, $port);
 	$mysqli->query("SET NAMES 'utf8'");
 	
 	$sql = "SELECT producto.id_producto, producto_item.id_producto_item, stock.stock FROM (producto INNER JOIN producto_item USING(id_producto)) INNER JOIN stock USING(id_producto_item) WHERE producto_item.id_producto=" . $p->id_producto . " AND stock.id_sucursal=" . $p->id_sucursal;
@@ -33,7 +41,15 @@ class class_Stock
   public function method_escribir_stock($params, $error) {
 	$p = $params[0];
 	
-	$mysqli = new mysqli($p->urlsql, $p->username, $p->password, $p->base);
+	$urlsql = $p->urlsql;
+	$port = null;
+	$pos = strpos($urlsql, ":");
+	if ($pos !== false && $pos >= 0) {
+		$port = (int) substr($urlsql, $pos + 1);
+		$urlsql = substr($urlsql, 0, $pos);
+	}
+
+	$mysqli = new mysqli($urlsql, $p->username, $p->password, $p->base, $port);
 	$mysqli->query("SET NAMES 'utf8'");
 	
 	$sql = "UPDATE stock SET stock=" . $p->stock . ", transmitir=TRUE WHERE id_producto_item=" . $p->id_producto_item . " AND id_sucursal=" . $p->id_sucursal;
@@ -47,7 +63,15 @@ class class_Stock
 	$resultado = new stdClass;
 	$resultado->producto_item = array();
 	
-	$mysqli = new mysqli($p->urlsql, $p->username, $p->password, $p->base);
+	$urlsql = $p->urlsql;
+	$port = null;
+	$pos = strpos($urlsql, ":");
+	if ($pos !== false && $pos >= 0) {
+		$port = (int) substr($urlsql, $pos + 1);
+		$urlsql = substr($urlsql, 0, $pos);
+	}
+
+	$mysqli = new mysqli($urlsql, $p->username, $p->password, $p->base, $port);
 	$mysqli->query("SET NAMES 'utf8'");
 	
 	$sql = "SELECT";

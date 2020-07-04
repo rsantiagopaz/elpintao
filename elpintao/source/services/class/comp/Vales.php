@@ -8,8 +8,28 @@ class class_Vales extends class_Base
 
   public function method_leer_vales($params, $error) {
   	$p = $params[0];
+  	
+
+	$sql = "SELECT";
+	$sql.= " valesmercaderia.*, sucursal.descrip AS sucursal_descrip";
+	$sql.= " FROM valesmercaderia INNER JOIN sucursal ON valesmercaderia.id_sucursal_retira = sucursal.id_sucursal";
+	$sql.= " WHERE TRUE";
 	
-	$sql = "SELECT valesmercaderia.*, sucursal.descrip AS sucursal_descrip FROM valesmercaderia INNER JOIN sucursal ON valesmercaderia.id_sucursal_retira=sucursal.id_sucursal WHERE DATE(fyh)='" . substr($p->desde, 0, 10) . "'";
+	if (! is_null($p->desde)) {
+		$sql.= " AND DATE(fyh) >= '" . substr($p->desde, 0, 10) . "'";
+	} else if (! is_null($p->hasta)) {
+		$sql.= " AND DATE(fyh) <= '" . substr($p->hasta, 0, 10) . "'";
+	}
+	
+	if ($p->id_sucursal > "0") {
+		if ($p->genera) {
+			$sql.= " AND id_sucursal_genera=" . $p->id_sucursal;
+		} else {
+			$sql.= " AND id_sucursal_retira=" . $p->id_sucursal;
+		}
+	}
+	
+	$sql.= " ORDER BY fyh DESC";
 	
 	return $this->toJson($sql);
 	

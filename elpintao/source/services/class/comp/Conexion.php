@@ -15,6 +15,7 @@ $conexion->require_general_services = "/xampp/htdocs/openworks-qx/5.x/general/se
 
 
 
+
 /*
 $conexion = new stdClass;
 $conexion->servidor = "localhost";

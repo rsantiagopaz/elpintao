@@ -73,7 +73,7 @@ qx.Class.define("elpintao.Application",
 	
 	var conexion = this.conexion = resultado;
       
-	if (conexion.ocupada && ! qx.core.Environment.get("qx.debug")) {
+	if (conexion.ocupada && (! qx.core.Environment.get("qx.debug"))) {
 		while (true) {
 			alert("ATENCIÓN: Otra sesión de la aplicación ya fue abierta." + String.fromCharCode(13) + String.fromCharCode(13) + "Cierre el navegador e intente de nuevo." + String.fromCharCode(13) + String.fromCharCode(13) + " ");
 		}
@@ -81,7 +81,7 @@ qx.Class.define("elpintao.Application",
       
 	
 	
-	var id_version = 1;
+	var id_version = 5;
 	
 	var rpc = new qx.io.remote.Rpc("services/", "comp.Base");
 	try {
@@ -871,7 +871,6 @@ qx.Class.define("elpintao.Application",
 	toolbarMain.add(mnubtnSesion);
 	
 	toolbarMain.addSpacer();
-	
 	
 	var btnMensajes = this.btnMensajes = new qx.ui.toolbar.Button("Sucursal: " + this.arraySucursales[this.rowParamet.id_sucursal].descrip + " - Usuario: " + this.conexion.login.nick);
 	btnMensajes.addListener("execute", function(e){

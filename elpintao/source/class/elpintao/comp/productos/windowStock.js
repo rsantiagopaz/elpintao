@@ -35,6 +35,9 @@ qx.Class.define("elpintao.comp.productos.windowStock",
 	
 	var functionBuscarDescrip = function() {
 		var texto = txtBuscar.getValue().trim();
+		
+		tbl.setFocusedCell();
+		tableModel.setDataAsMapArray([], true);
 
 		if (texto.length >= 3) {
 			var p = {};
@@ -46,9 +49,6 @@ qx.Class.define("elpintao.comp.productos.windowStock",
 				tableModel.setDataAsMapArray(resultado, true);
 				if (resultado.length > 0) tbl.setFocusedCell(6, 0, true); else tbl.setFocusedCell();
 			}, "buscar_productos", p);
-		} else {
-			tbl.setFocusedCell();
-			tableModel.setDataAsMapArray([], true);			
 		}
 	}
 	

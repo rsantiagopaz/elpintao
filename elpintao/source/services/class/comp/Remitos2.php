@@ -116,6 +116,7 @@ class class_Remitos2 extends class_Base
 			$this->functionCalcularImportes($row);
 			
 			$row->nro_remito = $rowRemito->nro_remito;
+			$row->destino_descrip = $rowRemito->destino_descrip;
 			$row->fecha = $rowRemito->fecha;
 			$row->id_sucursal_para = $rowRemito->id_sucursal_para;
 			

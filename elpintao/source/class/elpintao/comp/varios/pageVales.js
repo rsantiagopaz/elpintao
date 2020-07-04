@@ -14,7 +14,7 @@ qx.Class.define("elpintao.comp.varios.pageVales",
 		
 	this.addListenerOnce("appear", function(e){
 		dtfDesde.focus();
-		btnBuscar.execute();
+		btnFiltrar.execute();
 	});
 	
 
@@ -26,7 +26,7 @@ qx.Class.define("elpintao.comp.varios.pageVales",
 	numberformatMonto.setMinimumFractionDigits(2);
 	
 	
-	
+	var rowDataVale;
 		
 		
 	
@@ -37,28 +37,73 @@ qx.Class.define("elpintao.comp.varios.pageVales",
     layout.setRowHeight(0, 24);
     
 	var composite = new qx.ui.container.Composite(layout);
+	this.add(composite, {left: 0, top: 0});
 	
 	
 	
 	var aux = new Date;
 	var dtfDesde = this.dtfDesde = new qx.ui.form.DateField();
 	dtfDesde.setWidth(90);
+	var dtfHasta = this.dtfHasta = new qx.ui.form.DateField();
+	dtfHasta.setWidth(90);
+	dtfHasta.setValue(aux);
+	aux.setMonth(aux.getMonth() - 1);
 	dtfDesde.setValue(aux);
 	
-	composite.add(new qx.ui.basic.Label("Fecha:"), {row: 0, column: 3});
+	composite.add(new qx.ui.basic.Label("Desde:"), {row: 0, column: 3});
 	composite.add(dtfDesde, {row: 0, column: 4});
+	composite.add(new qx.ui.basic.Label("Hasta:"), {row: 0, column: 5});
+	composite.add(dtfHasta, {row: 0, column: 6});
 	
 	
-	var btnBuscar = new qx.ui.form.Button("Buscar");
-	btnBuscar.addListener("execute", function(e){
-		tableModelProducto.setDataAsMapArray([], true);
+	var rpc = new qx.io.remote.Rpc("services/", "comp.Reparacion");
+	try {
+		var resultado = rpc.callSync("autocompletarSucursal", {texto: ""});
+	} catch (ex) {
+		alert("Sync exception: " + ex);
+	}
+	
+	var slbSucursal = this.slbSucursal = new qx.ui.form.SelectBox();
+	slbSucursal.setWidth(120);
+	
+	slbSucursal.add(new qx.ui.form.ListItem("-", null, "0"));
+	for (var x in resultado) {
+		aux = new qx.ui.form.ListItem(resultado[x].label, null, resultado[x].model);
+		slbSucursal.add(aux);
+		if (resultado[x].model == application.rowParamet.id_sucursal) slbSucursal.setSelection([aux]);
+	}
+	
+	composite.add(new qx.ui.basic.Label("Sucursal:"), {row: 0, column: 8});
+	composite.add(slbSucursal, {row: 0, column: 9});
+	
+	
+	
+	var slbGenera = new qx.ui.form.SelectBox();
+	slbGenera.add(new qx.ui.form.ListItem("Genera", null, true));
+	slbGenera.add(new qx.ui.form.ListItem("Retira", null, false));
+	composite.add(slbGenera, {row: 0, column: 11});
+	
+	
+	
+	
+	var btnFiltrar = new qx.ui.form.Button("Aplicar filtro");
+	btnFiltrar.addListener("execute", function(e){
 		tblProducto.setFocusedCell();
+		tableModelProducto.setDataAsMapArray([], true);
 		
-		tableModelDetalle.setDataAsMapArray([], true);
 		tblDetalle.setFocusedCell();
+		tableModelDetalle.setDataAsMapArray([], true);
+		
+		btnAnular.setEnabled(false);
+		menu.memorizar([btnAnular]);
 		
 		var p = {};
 		p.desde = dtfDesde.getValue();
+		p.hasta = dtfHasta.getValue();
+		p.id_sucursal = slbSucursal.getSelection()[0].getModel();
+		p.genera = slbGenera.getSelection()[0].getModel();
+		
+		//alert(qx.lang.Json.stringify(p, null, 2));
 		
 		var rpc = new componente.general.ramon.io.rpc.Rpc("services/", "comp.Vales");
 		rpc.callAsync(function(resultado, error, id) {
@@ -68,31 +113,71 @@ qx.Class.define("elpintao.comp.varios.pageVales",
 			tableModelProducto.setDataAsMapArray(resultado, true);
 
 		}, "leer_vales", p);
-	});
-	composite.add(btnBuscar, {row: 0, column: 6});
+	}, this);
 	
-	this.add(composite, {left: 0, top: 0});
-	
-		
+	composite.add(btnFiltrar, {row: 0, column: 18});
 	
 	
 		
 		
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	var menu = new componente.general.ramon.ui.menu.Menu();
 
+	var btnAnular = new qx.ui.menu.Button("Entregar...");
+	btnAnular.setEnabled(false);
+	btnAnular.addListener("execute", function(e){
+		setTimeout(function(){
+			var nro_vale = prompt("Ingrese el Nro Completo del Vale de Mercaderia (Suc-Nro)", rowDataVale.nro_vale);
+			if (nro_vale != null && confirm("Esta seguro que desea Entregar la Mercaderia del Vale?")) {
+				
+				var p = {};
+				p.nro_vale = nro_vale;
+				
+				var rpc = new qx.io.remote.Rpc(application.conexion.rpc_elpintao_services, "componente.elpintao.alejandro.ValesMercaderia");
+				rpc.setTimeout(60000 * 5);
+				rpc.addListener("completed", function(e){
+					var data = e.getData();
+					
+					alert("Vale entregado!");
 		
-		
+				}, this);
+				rpc.addListener("failed", function(e){
+					var data = e.getData();
+					
+					alert(data);
+					
+				}, this);
+				
+				rpc.callAsyncListeners(true, "entregarVale", p);
+			}
+		});
+	});
+	
+	menu.add(btnAnular);
+	menu.memorizar();
+	
+	
 		
 		
 	//Tabla
 
 	var tableModelProducto = new qx.ui.table.model.Simple();
 	tableModelProducto.setColumns(["Nro.Vale", "Factura", "Cliente", "Donde retira", "Fecha", "Estado"], ["nro_vale", "factura", "cliente", "sucursal_descrip", "fyh", "estado"]);
-	tableModelProducto.setColumnSortable(0, false);
-	tableModelProducto.setColumnSortable(1, false);
-	tableModelProducto.setColumnSortable(2, false);
-	tableModelProducto.setColumnSortable(3, false);
-	tableModelProducto.setColumnSortable(4, false);
-	tableModelProducto.setColumnSortable(5, false);
+	//tableModelProducto.setColumnSortable(0, false);
+	//tableModelProducto.setColumnSortable(1, false);
+	//tableModelProducto.setColumnSortable(2, false);
+	//tableModelProducto.setColumnSortable(3, false);
+	//tableModelProducto.setColumnSortable(4, false);
+	//tableModelProducto.setColumnSortable(5, false);
 	tableModelProducto.addListener("dataChanged", function(e){
 		var rowCount = tableModelProducto.getRowCount();
 		
@@ -112,6 +197,7 @@ qx.Class.define("elpintao.comp.varios.pageVales",
 	tblProducto.setShowCellFocusIndicator(false);
 	tblProducto.toggleColumnVisibilityButtonVisible();
 	//tblProducto.toggleStatusBarVisible();
+	tblProducto.setContextMenu(menu);
 	
 	var tableColumnModelProducto = tblProducto.getTableColumnModel();
 	//tableColumnModelProducto.setColumnVisible(7, false);
@@ -148,12 +234,15 @@ qx.Class.define("elpintao.comp.varios.pageVales",
 	selectionModelProducto.addListener("changeSelection", function(e){
 		if (! selectionModelProducto.isSelectionEmpty()) {
 			var focusedRow = tblProducto.getFocusedRow();
-			var rowData = tableModelProducto.getRowDataAsMap(focusedRow);
+			rowDataVale = tableModelProducto.getRowDataAsMap(focusedRow);
 			
 			tblDetalle.setFocusedCell();
 			
+			btnAnular.setEnabled(true);
+			menu.memorizar([btnAnular]);
+			
 			var p = {};
-			p.id_valemercaderia = rowData.id_valemercaderia;
+			p.id_valemercaderia = rowDataVale.id_valemercaderia;
 
 			var rpc = new componente.general.ramon.io.rpc.Rpc("services/", "comp.Vales");
 			rpc.callAsync(function(resultado, error, id) {
@@ -250,7 +339,6 @@ qx.Class.define("elpintao.comp.varios.pageVales",
 	
 	
 	dtfDesde.setTabIndex(2);
-	btnBuscar.setTabIndex(7);
 	tblProducto.setTabIndex(8);
 	
 	

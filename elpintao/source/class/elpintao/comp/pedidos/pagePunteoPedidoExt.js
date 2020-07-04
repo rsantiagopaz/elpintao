@@ -106,6 +106,8 @@ qx.Class.define("elpintao.comp.pedidos.pagePunteoPedidoExt",
 					bandera = true;
 				}
 			}
+			
+			//alert(qx.lang.Json.stringify(p, null, 2));
 	
 			if (bandera) {
 				(new dialog.Confirm({

@@ -311,7 +311,7 @@ qx.Class.define("elpintao.comp.deposito.pagePedidosSuc",
 
 	
 	
-	
+	/*
 	var commandEnviar = new qx.ui.command.Command("Enter");
 	commandEnviar.setEnabled(false);
 	commandEnviar.addListener("execute", function(e) {
@@ -327,6 +327,14 @@ qx.Class.define("elpintao.comp.deposito.pagePedidosSuc",
 		
 		//popup.placeToPoint({left: 550, top: 350});
 		popup.show();
+	});
+	*/
+	
+	var commandEnviar = new qx.ui.command.Command("F2");
+	commandEnviar.setEnabled(false);
+	commandEnviar.addListener("execute", function(e) {
+		tblAcumulado.setFocusedCell(8, tblAcumulado.getFocusedRow(), true)
+		tblAcumulado.startEditing();
 	});
 	
 	var commandAgregar = new qx.ui.command.Command("Insert");
@@ -349,7 +357,7 @@ qx.Class.define("elpintao.comp.deposito.pagePedidosSuc",
 	
 	var menutblAcumulado = new componente.general.ramon.ui.menu.Menu();
 
-	var btnEnviar = new qx.ui.menu.Button("Asignar envíos...", null, commandEnviar);
+	var btnEnviar = new qx.ui.menu.Button("Editar", null, commandEnviar);
 	var btnAgregar = new qx.ui.menu.Button("Agregar ítems adicionales...", null, commandAgregar);
 	var btnEliminar = new qx.ui.menu.Button("Eliminar ítem adicional", null, commandEliminar);
 	var btnImprimir2 = new qx.ui.menu.Button("Imprimir");
@@ -405,7 +413,7 @@ qx.Class.define("elpintao.comp.deposito.pagePedidosSuc",
 					}
 				}
 				
-				//alert(qx.lang.Json.stringify(p, null, 2));
+				alert(qx.lang.Json.stringify(p, null, 2));
 				
 				var rpc = new qx.io.remote.Rpc("services/", "comp.PedidosSuc");
 				try {
@@ -436,14 +444,14 @@ qx.Class.define("elpintao.comp.deposito.pagePedidosSuc",
 	//Tabla
 
 	var tableModelAcumulado = new qx.ui.table.model.Simple();
-	tableModelAcumulado.setColumns(["Fábrica", "Producto", "Capacidad", "U", "Color", "Stock suc.", "Cantidad", "Enviar"], ["fabrica", "producto", "capacidad", "unidad", "color", "stock_suc", "cantidad", "enviar"]);
+	tableModelAcumulado.setColumns(["Fábrica", "Producto", "Capacidad", "U", "Color", "Stock suc.", "Stock dep.", "Cant.ped.", "Enviar"], ["fabrica", "producto", "capacidad", "unidad", "color", "stock_suc", "stock_dep", "cantidad", "enviar"]);
 	tableModelAcumulado.addListener("dataChanged", function(e){
 		var rowCount = tableModelAcumulado.getRowCount();
 		if (rowCount > 0) tblAcumulado.setAdditionalStatusBarText(rowCount + " item/s - Envios asignados: " + enviosAsignados); else tblAcumulado.setAdditionalStatusBarText(" ");
 	});
 	
 	//tableModelDetalle.setEditable(true);
-	//tableModelDetalle.setColumnEditable(4, true);
+	tableModelAcumulado.setColumnEditable(8, true);
 
 	var custom = {tableColumnModel : function(obj) {
 		return new qx.ui.table.columnmodel.Resize(obj);
@@ -452,13 +460,31 @@ qx.Class.define("elpintao.comp.deposito.pagePedidosSuc",
 	var tblAcumulado = new componente.general.ramon.ui.table.Table(tableModelAcumulado, custom);
 	tblAcumulado.getSelectionModel().setSelectionMode(qx.ui.table.selection.Model.SINGLE_SELECTION);
 	//tblDetalle.toggleColumnVisibilityButtonVisible();
-	tblAcumulado.setShowCellFocusIndicator(false);
+	//tblAcumulado.setShowCellFocusIndicator(false);
 	tblAcumulado.toggleColumnVisibilityButtonVisible();
 	//tblAcumulado.toggleStatusBarVisible();
 	tblAcumulado.setAdditionalStatusBarText(" ");
 	
 	tblAcumulado.addListener("cellDbltap", function(e){
 		commandEnviar.execute();
+	});
+	tblAcumulado.addListener("dataEdited", function(e){
+		var data = e.getData();
+		var value = data.value;
+		
+		if (isNaN(value) || value < 0) value = data.oldValue;
+		value = parseInt(String(value));
+		
+		for (var x in rowDataAcumulado.stock) {
+			if (rowDataAcumulado.stock[x].id_sucursal == application.rowParamet.id_sucursal) {
+				rowDataAcumulado.stock[x].enviar = value;
+			}
+		}
+		
+		tableModelAcumulado.setValueById("enviar", data.row, value);
+		tableModelSucursales.setDataAsMapArray(rowDataAcumulado.stock, true);
+		
+		functionValidarEnvio();
 	});
 	
 	var tableColumnModelAcumulado = tblAcumulado.getTableColumnModel();
@@ -474,14 +500,15 @@ qx.Class.define("elpintao.comp.deposito.pagePedidosSuc",
       // Obtain the behavior object to manipulate
 
 		var resizeBehavior = tableColumnModelAcumulado.getBehavior();
-		resizeBehavior.set(0, {width:"9%", minWidth:100});
+		resizeBehavior.set(0, {width:"10%", minWidth:100});
 		resizeBehavior.set(1, {width:"42%", minWidth:100});
 		resizeBehavior.set(2, {width:"9%", minWidth:100});
 		resizeBehavior.set(3, {width:"4%", minWidth:100});
 		resizeBehavior.set(4, {width:"15%", minWidth:100});
-		resizeBehavior.set(5, {width:"7%", minWidth:100});
-		resizeBehavior.set(6, {width:"7%", minWidth:100});
-		resizeBehavior.set(7, {width:"7%", minWidth:100});
+		resizeBehavior.set(5, {width:"5%", minWidth:100});
+		resizeBehavior.set(6, {width:"5%", minWidth:100});
+		resizeBehavior.set(7, {width:"5%", minWidth:100});
+		resizeBehavior.set(8, {width:"5%", minWidth:100});
 
 		
 	
@@ -590,6 +617,7 @@ qx.Class.define("elpintao.comp.deposito.pagePedidosSuc",
 					rowData.producto = '<font color="#339900">' + rowData.producto + '</font>';
 					rowData.stock = resultado.stock;
 					rowData.stock_suc = resultado.stock_suc;
+					rowData.stock_dep = resultado.stock_dep;
 					rowData.adicional = true;
 					
 					for (var y in rowData.stock) {
@@ -604,6 +632,8 @@ qx.Class.define("elpintao.comp.deposito.pagePedidosSuc",
 					
 					tableModelAcumulado.addRowsAsMapArray([rowData], null, true);
 					tblAcumulado.setFocusedCell(0, tableModelAcumulado.getRowCount() - 1, true)
+					
+					functionValidarEnvio();
 				}
 			}
 		}
