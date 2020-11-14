@@ -829,6 +829,7 @@ qx.Class.define("elpintao.comp.pedidos.pagePedidosExt",
 			
 			var p = {};
 			p.id_pedido_ext = rowDataPedidoExt.id_pedido_ext;
+			p.fecha = rowDataPedidoExt.fecha;
 			
 			var rpc = new componente.general.ramon.io.rpc.Rpc("services/", "comp.PedidosExt");
 			rpc.setTimeout(1000 * 60 * 2);
