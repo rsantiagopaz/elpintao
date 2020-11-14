@@ -82,7 +82,7 @@ qx.Class.define("elpintao.comp.remitos.windowAutorizaRemito",
 			p.model.autoriza = lstAutoriza.getSelection()[0].getModel();
 			if (!lstTransporta.isSelectionEmpty()) p.model.transporta = lstTransporta.getSelection()[0].getModel();
 
-			var rpc = new qx.io.remote.Rpc("services/", "comp.Remitos");
+			var rpc = new componente.general.ramon.io.rpc.Rpc("services/", "comp.Remitos");
 			rpc.setTimeout(60000 * 1);
 			rpc.callAsync(function(resultado, error, id) {
 				if (resultado.error.length > 0) {

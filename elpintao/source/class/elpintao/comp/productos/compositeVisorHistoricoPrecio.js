@@ -28,17 +28,16 @@ qx.Class.define("elpintao.comp.productos.compositeVisorHistoricoPrecio",
 		var rowHistorico, rowNuevo;
 		var rowAnterior = {desc_fabrica: null, desc_producto: null, iva: null, precio_lista: null, remarc_final: null, desc_final: null, bonif_final: null, remarc_mayorista: null, desc_mayorista: null, bonif_mayorista: null, comision_vendedor: null};
 		
-		var rpc = new qx.io.remote.Rpc(application.conexion.rpc_elpintao_services, "componente.elpintao.ramon.Historico_precio");
+		var rpc = new componente.general.ramon.io.rpc.Rpc("services/", "comp.Historico_precio");
 		try {
 			var resultado = rpc.callSync("leer_historico", {id_producto_item: rowItem.id_producto_item});
 		} catch (ex) {
 			alert("Sync exception: " + ex);
 		}
 		
-		console.log(resultado);
-		
 		for (var y in resultado) {
 			rowHistorico = resultado[y];
+			/*
 			rowHistorico.fecha = rowHistorico.fecha.substr(0, 16);
 			
 			year = parseFloat(rowHistorico.fecha.substr(0, 4));
@@ -48,8 +47,10 @@ qx.Class.define("elpintao.comp.productos.compositeVisorHistoricoPrecio",
 			min = parseFloat(rowHistorico.fecha.substr(14, 2));
 			
 			rowHistorico.fecha_objeto = new Date(year, month, date, hour, min);
+			*/
+			rowHistorico.fecha_objeto = rowHistorico.fecha;
 			
-			rowNuevo = {fecha: rowHistorico.fecha};
+			rowNuevo = {fecha: rowHistorico.fecha, nick: rowHistorico.nick};
 			if (rowHistorico.desc_fabrica == rowAnterior.desc_fabrica) rowNuevo.desc_fabrica = null; else rowNuevo.desc_fabrica = rowAnterior.desc_fabrica = rowHistorico.desc_fabrica;
 			if (rowHistorico.desc_producto == rowAnterior.desc_producto) rowNuevo.desc_producto = null; else rowNuevo.desc_producto = rowAnterior.desc_producto = rowHistorico.desc_producto;
 			if (rowHistorico.iva == rowAnterior.iva) rowNuevo.iva = null; else rowNuevo.iva = rowAnterior.iva = rowHistorico.iva;
@@ -344,6 +345,10 @@ qx.Class.define("elpintao.comp.productos.compositeVisorHistoricoPrecio",
 		resizeBehavior.set(11, {width:"7.5%", minWidth:100});
 		resizeBehavior.set(12, {width:"7.5%", minWidth:100});
 		
+		
+		var cellrendererDate = new qx.ui.table.cellrenderer.Date();
+		cellrendererDate.setDateFormat(new qx.util.format.DateFormat("yyyy-MM-dd HH:mm:ss"));
+		tableColumnModelDatos.setDataCellRenderer(0, cellrendererDate);
 		
 		var renderer = new qx.ui.table.cellrenderer.Number();
 		renderer.setNumberFormat(numberformatMonto);

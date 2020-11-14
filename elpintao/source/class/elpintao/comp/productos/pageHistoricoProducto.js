@@ -69,7 +69,7 @@ qx.Class.define("elpintao.comp.productos.pageHistoricoProducto",
 	
 	
 	
-	var rpc = new qx.io.remote.Rpc("services/", "comp.Reparacion");
+	var rpc = new componente.general.ramon.io.rpc.Rpc("services/", "comp.Reparacion");
 	try {
 		var resultado = rpc.callSync("autocompletarFabrica", {texto: ""});
 	} catch (ex) {

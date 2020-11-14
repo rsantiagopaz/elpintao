@@ -80,22 +80,15 @@ qx.Class.define("componente.elpintao.ramon.productos.windowAplicarAjustes",
 			btnAceptar.setEnabled(false);
 			btnCancelar.setEnabled(false);
 			
-			var bounds = application.getRoot().getBounds();
-			var imageLoading = new qx.ui.basic.Image("elpintao/loading66.gif");
-			imageLoading.setBackgroundColor("#FFFFFF");
-			imageLoading.setDecorator("main");
-			application.getRoot().add(imageLoading, {left: parseInt(bounds.width / 2 - 33), top: parseInt(bounds.height / 2 - 33)});
-			
 			p.id_arbol = id_arbol;
 			p.id_fabrica = (chkFabrica.getValue() ? slbFabrica.getSelection().getItem(0).get("id_fabrica") : null);
 			
 			//alert(qx.lang.Json.stringify(p, null, 2));
 			//return;
 			
-			var rpc = new qx.io.remote.Rpc(application.conexion.rpc_elpintao_services, "componente.elpintao.ramon.Productos");
+			var rpc = new componente.general.ramon.io.rpc.Rpc("services/", "comp.Productos");
 			rpc.setTimeout(1000 * 60);
 			rpc.callAsync(qx.lang.Function.bind(function(resultado, error, id){
-				imageLoading.destroy();
 				this.fireDataEvent("aceptado", resultado);
 				this.destroy();
 			}, this), "aplicar_porcentaje", p);

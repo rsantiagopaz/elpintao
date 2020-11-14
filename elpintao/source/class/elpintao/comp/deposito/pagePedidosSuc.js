@@ -36,7 +36,7 @@ qx.Class.define("elpintao.comp.deposito.pagePedidosSuc",
 	
 	var slbSucursal = new qx.ui.form.SelectBox();
 	slbSucursal.addListener("changeSelection", function(e){
-		var rpc = new qx.io.remote.Rpc("services/", "comp.PedidosSuc");
+		var rpc = new componente.general.ramon.io.rpc.Rpc("services/", "comp.PedidosSuc");
 		rpc.callAsync(function(resultado, error, id) {
 			tblPedido.setFocusedCell();
 			tableModelAcumulado.setDataAsMapArray([], true);
@@ -169,7 +169,7 @@ qx.Class.define("elpintao.comp.deposito.pagePedidosSuc",
 									p.id_sucursal = rowData.id_sucursal;
 									p.id_pedido_int = rowData.id_pedido_int;
 									
-									var rpc = new qx.io.remote.Rpc("services/", "comp.PedidosSuc");
+									var rpc = new componente.general.ramon.io.rpc.Rpc("services/", "comp.PedidosSuc");
 									try {
 										var resultado = rpc.callSync("anular_pedido", p);
 									} catch (ex) {
@@ -371,7 +371,7 @@ qx.Class.define("elpintao.comp.deposito.pagePedidosSuc",
 			indice = indice + rowDataAsMap.fabrica + rowDataAsMap.color + rowDataAsMap.unidad + qx.lang.String.pad(String(rowDataAsMap.capacidad), 11, " ");
 			p = {key: indice, value: rowDataAsMap};
 			
-			var rpc = new qx.io.remote.Rpc("services/", "comp.PedidosSuc");
+			var rpc = new componente.general.ramon.io.rpc.Rpc("services/", "comp.PedidosSuc");
 			try {
 				var resultado = rpc.callSync("cargar_pi_gral", p);
 			} catch (ex) {
@@ -415,7 +415,7 @@ qx.Class.define("elpintao.comp.deposito.pagePedidosSuc",
 				
 				alert(qx.lang.Json.stringify(p, null, 2));
 				
-				var rpc = new qx.io.remote.Rpc("services/", "comp.PedidosSuc");
+				var rpc = new componente.general.ramon.io.rpc.Rpc("services/", "comp.PedidosSuc");
 				try {
 					var resultado = rpc.callSync("grabar_remitos", p);
 				} catch (ex) {
@@ -607,7 +607,7 @@ qx.Class.define("elpintao.comp.deposito.pagePedidosSuc",
 				rowBuscado = tblAcumulado.buscar("id_producto_item", rowData.id_producto_item);
 				if (rowBuscado == null) {
 					var p = {id_sucursal: slbSucursal.getModelSelection().getItem(0), id_producto_item: rowData.id_producto_item};
-					var rpc = new qx.io.remote.Rpc("services/", "comp.PedidosSuc");
+					var rpc = new componente.general.ramon.io.rpc.Rpc("services/", "comp.PedidosSuc");
 					try {
 						var resultado = rpc.callSync("leer_stock", p);
 					} catch (ex) {

@@ -752,7 +752,7 @@
 		//alert(qx.lang.Json.stringify(p, null, 2));
 		//alert(qx.lang.Json.stringify(p.producto_item, null, 2));
 		
-		var rpc = new qx.io.remote.Rpc(application.conexion.rpc_elpintao_services, "componente.elpintao.ramon.Productos");
+		var rpc = new componente.general.ramon.io.rpc.Rpc("services/", "comp.Productos");
 		rpc.setTimeout(1000 * 60 * 2);
 		rpc.callAsync(qx.lang.Function.bind(function(resultado, error, id) {
 			if (error != null) {
@@ -790,7 +790,7 @@
 		
 		var p = {};
 		p.id_producto = id_producto;
-		var rpc = new qx.io.remote.Rpc(application.conexion.rpc_elpintao_services, "componente.elpintao.ramon.Productos");
+		var rpc = new componente.general.ramon.io.rpc.Rpc("services/", "comp.Productos");
 		try {
 			var resultado = rpc.callSync("leer_precios", p);
 		} catch (ex) {

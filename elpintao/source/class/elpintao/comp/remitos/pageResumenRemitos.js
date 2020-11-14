@@ -111,7 +111,7 @@ qx.Class.define("elpintao.comp.remitos.pageResumenRemitos",
 	composite.add(dtfHasta, {row: 0, column: 6});
 	
 	
-	var rpc = new qx.io.remote.Rpc("services/", "comp.Reparacion");
+	var rpc = new componente.general.ramon.io.rpc.Rpc("services/", "comp.Reparacion");
 	try {
 		var resultado = rpc.callSync("autocompletarSucursal", {texto: ""});
 	} catch (ex) {
@@ -167,7 +167,7 @@ qx.Class.define("elpintao.comp.remitos.pageResumenRemitos",
 	
 	
 	
-	var rpc = new qx.io.remote.Rpc("services/", "comp.Reparacion");
+	var rpc = new componente.general.ramon.io.rpc.Rpc("services/", "comp.Reparacion");
 	try {
 		var resultado = rpc.callSync("autocompletarFabrica", {texto: ""});
 	} catch (ex) {
@@ -199,11 +199,6 @@ qx.Class.define("elpintao.comp.remitos.pageResumenRemitos",
 	
 	var btnBuscar = new qx.ui.form.Button("Buscar");
 	btnBuscar.addListener("execute", function(e){
-		var bounds = application.getRoot().getBounds();
-		var imageLoading = new qx.ui.basic.Image("elpintao/loading66.gif");
-		imageLoading.setBackgroundColor("#FFFFFF");
-		imageLoading.setDecorator("main");
-		application.getRoot().add(imageLoading, {left: parseInt(bounds.width / 2 - 33), top: parseInt(bounds.height / 2 - 33)});
 		
 		tableModelDetalle.setDataAsMapArray([], true);
 		tableModelTotgen.setDataAsMapArray([], true);
@@ -229,7 +224,6 @@ qx.Class.define("elpintao.comp.remitos.pageResumenRemitos",
 			
 			functionCalcularTotales(tableModelDetalle, tableModelTotgen);
 			
-			imageLoading.destroy();
 		}, "resumen_remitos", p);
 	}, this);
 	composite.add(btnBuscar, {row: 0, column: 18});

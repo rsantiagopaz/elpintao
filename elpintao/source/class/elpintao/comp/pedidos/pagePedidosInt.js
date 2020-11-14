@@ -55,7 +55,7 @@ qx.Class.define("elpintao.comp.pedidos.pagePedidosInt",
 			p.id_fabrica = win.slbFabrica.getModelSelection().getItem(0).get("id_fabrica");
 			p.detalle = win.tableModelDetalle.getDataAsMapArray();
 			
-			var rpc = new qx.io.remote.Rpc("services/", "comp.PedidosInt");
+			var rpc = new componente.general.ramon.io.rpc.Rpc("services/", "comp.PedidosInt");
 			try {
 				var resultado = rpc.callSync("alta_pedido", p);
 			} catch (ex) {
@@ -142,7 +142,7 @@ qx.Class.define("elpintao.comp.pedidos.pagePedidosInt",
 			var p = {};
 			p.id_pedido_int = rowData.id_pedido_int;
 			
-			var rpc = new qx.io.remote.Rpc("services/", "comp.PedidosInt");
+			var rpc = new componente.general.ramon.io.rpc.Rpc("services/", "comp.PedidosInt");
 			rpc.callAsync(function(resultado, error, id){
 				tableModelInforma.setDataAsMapArray(resultado.remitos, true);
 				tableModelDetalle.setDataAsMapArray(resultado.detalle, true);
@@ -262,7 +262,7 @@ qx.Class.define("elpintao.comp.pedidos.pagePedidosInt",
 
 	
 	
-	var rpc = new qx.io.remote.Rpc("services/", "comp.PedidosInt");
+	var rpc = new componente.general.ramon.io.rpc.Rpc("services/", "comp.PedidosInt");
 	try {
 		var resultado = rpc.callSync("leer_pedido");
 	} catch (ex) {

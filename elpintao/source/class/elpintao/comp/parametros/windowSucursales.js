@@ -23,6 +23,7 @@ qx.Class.define("elpintao.comp.parametros.windowSucursales",
 		
 	
 	var commandAgregar = new qx.ui.command.Command("Insert");
+	commandAgregar.setEnabled(false);
 	commandAgregar.addListener("execute", function(e){
 		/*
 		btnAceptar.setEnabled(true);
@@ -144,7 +145,7 @@ qx.Class.define("elpintao.comp.parametros.windowSucursales",
 			if (enviar) {
 				var p = {};
 				p.cambios = cambios;
-				var rpc = new qx.io.remote.Rpc("services/", "comp.Parametros");
+				var rpc = new componente.general.ramon.io.rpc.Rpc("services/", "comp.Parametros");
 				try {
 					var resultado = rpc.callSync("escribir_sucursales", p);
 				} catch (ex) {
@@ -166,7 +167,7 @@ qx.Class.define("elpintao.comp.parametros.windowSucursales",
 		
 
 		
-		var rpc = new qx.io.remote.Rpc(application.conexion.rpc_elpintao_services, "componente.elpintao.ramon.Base_elpintao");
+		var rpc = new componente.general.ramon.io.rpc.Rpc("services/", "comp.Base_elpintao");
 		try {
 			var resultado = rpc.callSync("leer_sucursales");
 		} catch (ex) {

@@ -150,7 +150,7 @@ qx.Class.define("elpintao.comp.parametros.windowUsuarios",
 			if (enviar) {
 				var p = {};
 				p.cambios = cambios;
-				var rpc = new qx.io.remote.Rpc("services/", "comp.Parametros");
+				var rpc = new componente.general.ramon.io.rpc.Rpc("services/", "comp.Parametros");
 				try {
 					var resultado = rpc.callSync("escribir_usuario", p);
 				} catch (ex) {

@@ -185,7 +185,7 @@
 			p.id_producto_item = rowData.id_producto_item;
 			p.stock = data.value;
 			
-			var rpc = new qx.io.remote.Rpc("http://pintao:1qaz2wsx@" + application.arraySucursales[p.id_sucursal].url + "/elpintao/services/", "componente.elpintao.ramon.Stock");
+			var rpc = new componente.general.ramon.io.rpc.Rpc("http://pintao:1qaz2wsx@" + application.arraySucursales[p.id_sucursal].url + "/elpintao/services/", "componente.elpintao.ramon.Stock");
 			rpc.setCrossDomain(true);
 			rpc.callAsync(function(resultado, error, id) {
 				if (error != null) {
@@ -238,12 +238,6 @@
 		tblDatos.setFocusedCell();
 		tblDatos.setEnabled(false);
 
-		var bounds = this.getBounds();
-		var imageLoading = new qx.ui.basic.Image("elpintao/loading66.gif");
-		imageLoading.setBackgroundColor("#FFFFFF");
-		imageLoading.setDecorator("main");
-		this.add(imageLoading, {left: parseInt(bounds.width / 2 - 33), top: parseInt(bounds.height / 2 - 33)});
-		
 		for (var z in model.producto_item) {
 			model.producto_item[z].stsuc = 0;
 			model.producto_item[z].stock = 0;
@@ -262,8 +256,8 @@
 			p.password = application.arraySucursales[x].password;
 			p.base = application.arraySucursales[x].base;
 			
-			var rpc = new qx.io.remote.Rpc("http://pintao:1qaz2wsx@" + application.arraySucursales[x].url + "/elpintao/services/", "componente.elpintao.ramon.Stock");
-			//var rpc = new qx.io.remote.Rpc("http://root@" + application.arraySucursales[x].url + "/services/", "componente.elpintao.ramon.Stock");
+			var rpc = new componente.general.ramon.io.rpc.Rpc("http://pintao:1qaz2wsx@" + application.arraySucursales[x].url + "/elpintao/services/", "componente.elpintao.ramon.Stock");
+			//var rpc = new componente.general.ramon.io.rpc.Rpc("http://root@" + application.arraySucursales[x].url + "/services/", "componente.elpintao.ramon.Stock");
 			rpc.setCrossDomain(true);
 			rpc.callAsync(function(resultado, error, id) {
 				//alert(qx.lang.Json.stringify(resultado, null, 2));
@@ -296,7 +290,6 @@
 				}
 				
 				if (arraySucursalesLength == contador) {
-					imageLoading.destroy();
 					tblDatos.setEnabled(true);
 					slbSucursal.setEnabled(true);
 					slbSucursal.focus();
@@ -323,7 +316,7 @@
 		p.password = application.arraySucursales[application.rowParamet.id_sucursal].password;
 		p.base = application.arraySucursales[application.rowParamet.id_sucursal].base;
 		
-		var rpc = new qx.io.remote.Rpc(application.conexion.rpc_elpintao_services, "componente.elpintao.ramon.Stock");
+		var rpc = new componente.general.ramon.io.rpc.Rpc("services/", "comp.Stock");
 		try {
 			var resultado = rpc.callSync("leer_productos", p);
 		} catch (ex) {

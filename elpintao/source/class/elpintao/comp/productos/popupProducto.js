@@ -52,7 +52,7 @@ qx.Class.define("elpintao.comp.productos.popupProducto",
 		} else {
 			var p = {};
 			p.descrip = texto;
-			var rpc = new qx.io.remote.Rpc(application.conexion.rpc_elpintao_services, "componente.elpintao.ramon.Productos");
+			var rpc = new componente.general.ramon.io.rpc.Rpc("services/", "comp.Productos");
 			try {
 				var resultado = rpc.callSync("buscar_productos", p);
 			} catch (ex) {

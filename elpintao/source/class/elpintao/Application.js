@@ -64,49 +64,45 @@ qx.Class.define("elpintao.Application",
 	
       
       
-	var rpc = new qx.io.remote.Rpc("services/", "comp.Conexion2");
-	try {
-		var resultado = rpc.callSync("leer_conexion");
-	} catch (ex) {
-		alert("Sync exception: " + ex);
-	}
-	
-	var conexion = this.conexion = resultado;
-      
-	if (conexion.ocupada && (! qx.core.Environment.get("qx.debug"))) {
-		while (true) {
-			alert("ATENCIÓN: Otra sesión de la aplicación ya fue abierta." + String.fromCharCode(13) + String.fromCharCode(13) + "Cierre el navegador e intente de nuevo." + String.fromCharCode(13) + String.fromCharCode(13) + " ");
-		}
-	}
-      
-	
-	
 	var id_version = 5;
 	
-	var rpc = new qx.io.remote.Rpc("services/", "comp.Base");
+	
+	
+	componente.general.ramon.io.rpc.Rpc.sesion_terminada = function() {
+		dialog.Dialog.warning("Sesión terminada.<br/>Debe ingresar datos de autenticación.", function(e){location.reload(true);});
+	}
+	
+	var rpc = new componente.general.ramon.io.rpc.Rpc("services/", "comp.Inicial");
 	try {
-		var resultado = rpc.callSync("leer_version");
+		var resultado = rpc.callSync("leer_inicial");
 	} catch (ex) {
 		alert("Sync exception: " + ex);
 	}
 	
+
+	
 	if (id_version == resultado.id_version) {
-		qx.event.Timer.once(function(){
-			var win = new elpintao.comp.varios.windowLogin();
-			win.addListener("aceptado", function(e){
-				var data = e.getData();
-				
-				this.conexion.login = data;
-				
-				qx.event.Timer.once(function(){
-					this.initApp();
-				}, this, 20);
-			}, this);
-			win.setModal(true);
-			doc.add(win);
-			win.center();
-			win.open();
-		}, this, 20);
+		if (resultado.login) {
+			this.login = resultado.login;
+			this.initApp();
+		} else {
+			qx.event.Timer.once(function(){
+				var win = new elpintao.comp.varios.windowLogin();
+				win.addListener("aceptado", function(e){
+					var data = e.getData();
+					
+					this.login = data;
+					
+					qx.event.Timer.once(function(){
+						this.initApp();
+					}, this, 20);
+				}, this);
+				win.setModal(true);
+				doc.add(win);
+				win.center();
+				win.open();
+			}, this, 20);
+		}
 		
 	} else {
 		alert("Presione F5 para actualizar aplicación. Si el problema persiste comunicarse con servicio técnico.");
@@ -254,12 +250,9 @@ qx.Class.define("elpintao.Application",
 	
 	
 	
-	var conexion = this.conexion;
 	
 	
-	
-	
-	var rpc = new qx.io.remote.Rpc(conexion.rpc_elpintao_services, "componente.elpintao.ramon.Base_elpintao");
+	var rpc = new componente.general.ramon.io.rpc.Rpc("services/", "comp.Base_elpintao");
 	try {
 		var resultado = rpc.callSync("leer_paramet");
 	} catch (ex) {
@@ -269,7 +262,7 @@ qx.Class.define("elpintao.Application",
 	
 	
 	
-	var rpc = new componente.general.ramon.io.rpc.Rpc(conexion.rpc_elpintao_services, "componente.elpintao.ramon.Base_elpintao");
+	var rpc = new componente.general.ramon.io.rpc.Rpc("services/", "comp.Base_elpintao");
 	try {
 		var resultado = rpc.callSync("leer_sucursales");
 	} catch (ex) {
@@ -278,7 +271,7 @@ qx.Class.define("elpintao.Application",
 	this.arraySucursales = resultado;
 	
 	
-	var rpc = new componente.general.ramon.io.rpc.Rpc(conexion.rpc_elpintao_services, "componente.elpintao.ramon.Base_elpintao");
+	var rpc = new componente.general.ramon.io.rpc.Rpc("services/", "comp.Base_elpintao");
 	try {
 		var resultado = rpc.callSync("leer_depositos");
 	} catch (ex) {
@@ -359,7 +352,7 @@ qx.Class.define("elpintao.Application",
 			objTransporte.indice[model.getItem(i).get("descrip")] = model.getItem(i);
 		}
 	});
-	objTransporte.store.setUrl(conexion.rpc_elpintao_services + "class/componente/elpintao/ramon/Stores.php?rutina=leer_transporte");
+	objTransporte.store.setUrl("services/class/comp/Stores.php?rutina=leer_transporte");
 	
 	var objUsuario = this.objUsuario = {};
 	objUsuario.store = new qx.data.store.Json();
@@ -371,14 +364,15 @@ qx.Class.define("elpintao.Application",
 			objUsuario.indice[model.getItem(i).get("nick")] = model.getItem(i);
 		}
 	});
-	objUsuario.store.setUrl(conexion.rpc_elpintao_services + "class/componente/elpintao/ramon/Stores.php?rutina=leer_usuario");
+	objUsuario.store.setUrl("services/class/comp/Stores.php?rutina=leer_usuario");
 	
 	
 	
 	
 	var timerTransmision = this.timerTransmision = new qx.event.Timer(30000 * 1);
 	timerTransmision.addListener("interval", qx.lang.Function.bind(function(e){
-		var rpc = new qx.io.remote.Rpc("services/", "comp.Transmision_SA");
+		var rpc = new componente.general.ramon.io.rpc.Rpc("services/", "comp.Transmision_SA");
+		rpc.mostrarLoading = false;
 		rpc.setTimeout(60000 * 5);
 		rpc.callAsync(function(resultado, error, id) {
 			for (var x in resultado) {
@@ -395,17 +389,6 @@ qx.Class.define("elpintao.Application",
 				}
 			}
 		}, "leer_transmision_error");
-		
-		
-		var rpc2 = new qx.io.remote.Rpc("services/", "comp.Conexion2");
-		rpc2.addListener("complete", function(e){
-			var data = e.getData();
-			
-			conexion = this.conexion = data;
-		}, this)
-		
-		rpc2.callAsyncListeners(true, "leer_conexion");
-		
 	}, this));
 	timerTransmision.start();
 	
@@ -413,6 +396,9 @@ qx.Class.define("elpintao.Application",
 	
 	var contenedorMain = new qx.ui.container.Composite(new qx.ui.layout.Grow());
 	var tabviewMain = this._tabviewMain = new qx.ui.tabview.TabView();
+	tabviewMain.addListenerOnce("appear", function(){
+		componente.general.ramon.io.rpc.Rpc.image_loading = new componente.general.ramon.ui.image.Loading("elpintao/loading66.gif");
+	});
 	
 	contenedorMain.add(tabviewMain);
 	
@@ -431,11 +417,11 @@ qx.Class.define("elpintao.Application",
 	var mnuCentral = new qx.ui.menu.Menu();
 	var btnProductos = new qx.ui.menu.Button("Productos");
 	btnProductos.addListener("execute", function(e){
-		if (this.conexion.login.id_arbol == null) {
+		if (this.login.id_arbol == null) {
 			dialog.Dialog.error("El usuario no cuenta con los permisos necesarios");
 		} else {
 			if (pageProductos==null) {
-				pageProductos = new elpintao.comp.productos.pageProductos(this.conexion.login);
+				pageProductos = new elpintao.comp.productos.pageProductos(this.login);
 				//pageProductos = new elpintao.comp.productos.pageProductos({id_arbol: 1});
 				pageProductos.addListenerOnce("close", function(e){
 					pageProductos = null;
@@ -521,7 +507,7 @@ qx.Class.define("elpintao.Application",
 				var p = {};
 				p.nro_vale = nro_vale;
 				
-				var rpc = new qx.io.remote.Rpc(conexion.rpc_elpintao_services, "componente.elpintao.alejandro.ValesMercaderia");
+				var rpc = new componente.general.ramon.io.rpc.Rpc("services/", "comp.alejandro.ValesMercaderia");
 				rpc.setTimeout(60000 * 5);
 				rpc.addListener("completed", function(e){
 					var data = e.getData();
@@ -578,7 +564,7 @@ qx.Class.define("elpintao.Application",
 				imageLoading.setDecorator("main");
 				doc.add(imageLoading, {left: parseInt(bounds.width / 2 - 33), top: parseInt(bounds.height / 2 - 33)});
 				
-				var rpc = new qx.io.remote.Rpc("services/", "comp.Reparacion");
+				var rpc = new componente.general.ramon.io.rpc.Rpc("services/", "comp.Reparacion");
 				rpc.setTimeout(60000 * 60 * 6);
 				rpc.callAsync(function(resultado, error, id) {
 					
@@ -840,7 +826,21 @@ qx.Class.define("elpintao.Application",
     
       var btnCerrar = new qx.ui.menu.Button("Cerrar");
       btnCerrar.addListener("execute", function(e){
-        location.reload(true);
+		var rpc = new componente.general.ramon.io.rpc.Rpc("services/", "comp.Inicial");
+		rpc.addListener("completed", function(e){
+			var data = e.getData();
+			
+			location.reload(true);
+	
+		}, this);
+		rpc.addListener("failed", function(e){
+			var data = e.getData();
+			
+			alert(data);
+			
+		}, this);
+		
+		rpc.callAsyncListeners(true, "cerrar_sesion");
       });
       mnuSesion.add(btnCerrar);
 
@@ -872,7 +872,7 @@ qx.Class.define("elpintao.Application",
 	
 	toolbarMain.addSpacer();
 	
-	var btnMensajes = this.btnMensajes = new qx.ui.toolbar.Button("Sucursal: " + this.arraySucursales[this.rowParamet.id_sucursal].descrip + " - Usuario: " + this.conexion.login.nick);
+	var btnMensajes = this.btnMensajes = new qx.ui.toolbar.Button("Sucursal: " + this.arraySucursales[this.rowParamet.id_sucursal].descrip + " - Usuario: " + this.login.nick);
 	btnMensajes.addListener("execute", function(e){
 		if (windowMensajes.isVisible()) {
 			windowMensajes.getLayoutParent().getWindowManager().bringToFront(windowMensajes);
@@ -935,24 +935,24 @@ qx.Class.define("elpintao.Application",
 
 	
 	
-	btnProductos.setEnabled(this.conexion.login.perfil["101"] != null);
-	btnAplicarAjuste.setEnabled(this.conexion.login.perfil["102"] != null);
-	btnCargaStock2.setEnabled(this.conexion.login.perfil["103"] != null);
-	btnReparar.setEnabled(this.conexion.login.perfil["104"] != null);
-	btnPedidosExt.setEnabled(this.conexion.login.perfil["105"] != null);
-	btnPedidosSuc.setEnabled(this.conexion.login.perfil["106"] != null);
-	btnRemitosEmiCentral.setEnabled(this.conexion.login.perfil["107"] != null);
-	btnRemitosRecCentral.setEnabled(this.conexion.login.perfil["108"] != null);
-	btnCuentas.setEnabled(this.conexion.login.perfil["109"] != null);
-	btnSucursales.setEnabled(this.conexion.login.perfil["110"] != null);
-	btnUsuarios.setEnabled(this.conexion.login.perfil["111"] != null);
-	btnFabricas.setEnabled(this.conexion.login.perfil["112"] != null);
+	btnProductos.setEnabled(this.login.perfil["101"] != null);
+	btnAplicarAjuste.setEnabled(this.login.perfil["102"] != null);
+	btnCargaStock2.setEnabled(this.login.perfil["103"] != null);
+	btnReparar.setEnabled(this.login.perfil["104"] != null);
+	btnPedidosExt.setEnabled(this.login.perfil["105"] != null);
+	btnPedidosSuc.setEnabled(this.login.perfil["106"] != null);
+	btnRemitosEmiCentral.setEnabled(this.login.perfil["107"] != null);
+	btnRemitosRecCentral.setEnabled(this.login.perfil["108"] != null);
+	btnCuentas.setEnabled(this.login.perfil["109"] != null);
+	btnSucursales.setEnabled(this.login.perfil["110"] != null);
+	btnUsuarios.setEnabled(this.login.perfil["111"] != null);
+	btnFabricas.setEnabled(this.login.perfil["112"] != null);
 	
 	
-	btnCargaStock.setEnabled(this.conexion.login.perfil["201"] != null);
-	btnPedidos.setEnabled(this.conexion.login.perfil["202"] != null);
-	btnRemitosEmi.setEnabled(this.conexion.login.perfil["203"] != null);
-	btnRemitosRec.setEnabled(this.conexion.login.perfil["204"] != null);
+	btnCargaStock.setEnabled(this.login.perfil["201"] != null);
+	btnPedidos.setEnabled(this.login.perfil["202"] != null);
+	btnRemitosEmi.setEnabled(this.login.perfil["203"] != null);
+	btnRemitosRec.setEnabled(this.login.perfil["204"] != null);
 	
 	}
   }

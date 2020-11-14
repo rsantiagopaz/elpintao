@@ -70,7 +70,7 @@ qx.Class.define("componente.elpintao.ramon.parametros.windowFabrica",
 			var p = {};
 			p.model = qx.util.Serializer.toNativeObject(controllerForm.getModel());
 			
-			var rpc = new componente.general.ramon.io.rpc.Rpc(application.conexion.rpc_elpintao_services, "componente.elpintao.ramon.Parametros");
+			var rpc = new componente.general.ramon.io.rpc.Rpc("services/", "comp.Parametros");
 			rpc.addListener("completed", function(e){
 				var data = e.getData();
 	

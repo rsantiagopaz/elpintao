@@ -1,8 +1,8 @@
 <?php
 
-require_once("Base.php");
+require_once("Base_elpintao_sin_sesion.php");
 
-class class_Transmision_SA extends class_Base
+class class_Transmision_SA extends class_Base_elpintao_sin_sesion
 {
   
   
@@ -160,10 +160,10 @@ class class_Transmision_SA extends class_Base
 		while ($row = $rs->fetch_object()) {
 			foreach ($this->arrayDeposito as $deposito) {
 				if ($deposito->id_sucursal != $id_sucursal) {
-					$sql="UPDATE stock SET stock = '" . $row->stock . "' WHERE id_sucursal='" . $id_sucursal . "' AND id_producto_item='" . $row->id_producto_item . "'";
+					$sql = "UPDATE stock SET stock = '" . $row->stock . "' WHERE id_sucursal='" . $id_sucursal . "' AND id_producto_item='" . $row->id_producto_item . "'";
 					$this->transmitir($sql, $deposito->id_sucursal, "Transmisión stock");
 					
-					$sql="UPDATE stock SET transmitir = FALSE WHERE id_sucursal=" . $id_sucursal . " AND id_producto_item='" . $row->id_producto_item . "'";
+					$sql = "UPDATE stock SET transmitir = FALSE WHERE id_sucursal=" . $id_sucursal . " AND id_producto_item='" . $row->id_producto_item . "'";
 					$this->mysqli->query($sql);
 				}
 			}

@@ -501,7 +501,7 @@ qx.Class.define("componente.elpintao.ramon.productos.windowProducto",
 				//alert(qx.lang.Json.stringify(p, null, 2));
 				//return
 				
-				var rpc = new qx.io.remote.Rpc(application.conexion.rpc_elpintao_services, "componente.elpintao.ramon.Productos");
+				var rpc = new componente.general.ramon.io.rpc.Rpc("services/", "comp.Productos");
 				try {
 					var resultado = rpc.callSync("alta_modifica_producto", p);
 				} catch (ex) {
@@ -556,7 +556,7 @@ qx.Class.define("componente.elpintao.ramon.productos.windowProducto",
 		
 		var p = {};
 		p.id_producto = id_producto;
-		var rpc = new qx.io.remote.Rpc(application.conexion.rpc_elpintao_services, "componente.elpintao.ramon.Productos");
+		var rpc = new componente.general.ramon.io.rpc.Rpc("services/", "comp.Productos");
 		try {
 			var resultado = rpc.callSync("leer_producto", p);
 		} catch (ex) {

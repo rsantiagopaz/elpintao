@@ -41,7 +41,7 @@ qx.Class.define("elpintao.comp.remitos.windowRemito",
 	
 
 	
-	var rpc = new qx.io.remote.Rpc("services/", "comp.Reparacion");
+	var rpc = new componente.general.ramon.io.rpc.Rpc("services/", "comp.Reparacion");
 	try {
 		var resultado = rpc.callSync("autocompletarFabrica", {texto: ""});
 	} catch (ex) {
@@ -271,7 +271,7 @@ qx.Class.define("elpintao.comp.remitos.windowRemito",
 		p.emitir = emitir;
 		p.id_remito = (emitir) ? rowRemito.id_remito_emi : rowRemito.id_remito_rec ;
 		
-		var rpc = new qx.io.remote.Rpc("services/", "comp.Remitos");
+		var rpc = new componente.general.ramon.io.rpc.Rpc("services/", "comp.Remitos");
 		try {
 			var resultado = rpc.callSync("leer_remitos_detalle", p);
 		} catch (ex) {
@@ -334,7 +334,7 @@ qx.Class.define("elpintao.comp.remitos.windowRemito",
 			
 			//alert(qx.lang.Json.stringify(p, null, 2));
 			
-			var rpc = new qx.io.remote.Rpc("services/", "comp.Remitos");
+			var rpc = new componente.general.ramon.io.rpc.Rpc("services/", "comp.Remitos");
 			try {
 				var resultado = rpc.callSync(((emitir) ? "alta_modifica_remito_emi" : "alta_modifica_remito_rec"), p);
 			} catch (ex) {

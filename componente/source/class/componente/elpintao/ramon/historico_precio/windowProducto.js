@@ -39,7 +39,7 @@ qx.Class.define("componente.elpintao.ramon.historico_precio.windowProducto",
         }
         // start a new listener to update the controller
 		timerId = timer.start(function() {
-			rpcBuscar = new qx.io.remote.Rpc(application.conexion.rpc_elpintao_services, "componente.elpintao.ramon.Historico_precio");
+			rpcBuscar = new componente.general.ramon.io.rpc.Rpc("services/", "comp.Historico_precio");
 			rpcBuscar.addListener("completed", function(e){
 				var resultado = e.getData().result;
 				tableModel.setDataAsMapArray(resultado, true);

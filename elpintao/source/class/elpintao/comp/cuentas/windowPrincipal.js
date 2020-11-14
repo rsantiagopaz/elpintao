@@ -48,7 +48,7 @@ slbSucursal.addListener("changeSelection", function(e){
 	
 	var p = {};
 	p.id_sucursal = e.getData()[0].getModel();
-	var rpc = new qx.io.remote.Rpc("services/", "comp.Cuentas");
+	var rpc = new componente.general.ramon.io.rpc.Rpc("services/", "comp.Cuentas");
 	rpc.callAsync(function(resultado, error, id){
 		tableModel.setDataAsMapArray(resultado, true);
 		vtUbicacion.setModel(null);
@@ -88,7 +88,7 @@ this.add(slbSucursal, {left: 60, top: 0});
 			p.id_cuenta = "0";
 			p.descrip = win.txt.getValue();
 			
-			var rpc = new qx.io.remote.Rpc("services/", "comp.Cuentas");
+			var rpc = new componente.general.ramon.io.rpc.Rpc("services/", "comp.Cuentas");
 			try {
 				var resultado = rpc.callSync("alta_modifica_cuenta", p);
 			} catch (ex) {
@@ -112,7 +112,7 @@ this.add(slbSucursal, {left: 60, top: 0});
 			p.id_cuenta = rowDataActual.id_cuenta;
 			p.descrip = win.txt.getValue();
 			
-			var rpc = new qx.io.remote.Rpc("services/", "comp.Cuentas");
+			var rpc = new componente.general.ramon.io.rpc.Rpc("services/", "comp.Cuentas");
 			try {
 				var resultado = rpc.callSync("alta_modifica_cuenta", p);
 			} catch (ex) {
@@ -137,7 +137,7 @@ this.add(slbSucursal, {left: 60, top: 0});
 		var p = {};
 		p.id_sucursal_cuenta = rowData.id_sucursal_cuenta;
 		p.marcado = rowData.marcado;
-		var rpc = new qx.io.remote.Rpc("services/", "comp.Cuentas");
+		var rpc = new componente.general.ramon.io.rpc.Rpc("services/", "comp.Cuentas");
 		try {
 			var resultado = rpc.callSync("escribir_sucursal_cuenta", p);
 		} catch (ex) {
@@ -155,7 +155,7 @@ this.add(slbSucursal, {left: 60, top: 0});
 				var p = {};
 				p.id_cuenta = rowDataActual.id_cuenta;
 				
-				var rpc = new qx.io.remote.Rpc("services/", "comp.Cuentas");
+				var rpc = new componente.general.ramon.io.rpc.Rpc("services/", "comp.Cuentas");
 				try {
 					var resultado = rpc.callSync("eliminar_cuenta", p);
 				} catch (ex) {
@@ -226,7 +226,7 @@ selectionModel.addListener("changeSelection", function(){
 		p.id_sucursal = slbSucursal.getSelection()[0].getModel();
 		p.id_cuenta = rowDataActual.id_cuenta;
 		
-		var rpc = new qx.io.remote.Rpc("services/", "comp.Cuentas");
+		var rpc = new componente.general.ramon.io.rpc.Rpc("services/", "comp.Cuentas");
 		try {
 			var resultado = rpc.callSync("leer_tipos_gastos", p);
 		} catch (ex) {
@@ -274,7 +274,7 @@ tbl.addListener("cellDbltap", function(e){
 			p.id_padre = nodoActual.get("id_tipo_gasto");
 			p.descrip = win.txt.getValue();
 			
-			var rpc = new qx.io.remote.Rpc("services/", "comp.Cuentas");
+			var rpc = new componente.general.ramon.io.rpc.Rpc("services/", "comp.Cuentas");
 			try {
 				var resultado = rpc.callSync("alta_modifica_tipo_gasto", p);
 			} catch (ex) {
@@ -300,7 +300,7 @@ tbl.addListener("cellDbltap", function(e){
 			p.id_tipo_gasto = nodoActual.get("id_tipo_gasto");
 			p.descrip = win.txt.getValue();
 			
-			var rpc = new qx.io.remote.Rpc("services/", "comp.Cuentas");
+			var rpc = new componente.general.ramon.io.rpc.Rpc("services/", "comp.Cuentas");
 			try {
 				var resultado = rpc.callSync("alta_modifica_tipo_gasto", p);
 			} catch (ex) {
@@ -330,7 +330,7 @@ var functionPrepare = function(nodo, parent) {
 		p.id_cuenta_tipo_gasto = this.get("id_cuenta_tipo_gasto");
 		p.marcado = e.getData();
 		//alert(qx.lang.Json.stringify(p, null, 2));
-		var rpc = new qx.io.remote.Rpc("services/", "comp.Cuentas");
+		var rpc = new componente.general.ramon.io.rpc.Rpc("services/", "comp.Cuentas");
 		try {
 			var resultado = rpc.callSync("escribir_cuenta_tipo_gasto", p);
 		} catch (ex) {
@@ -426,7 +426,7 @@ this.add(vtUbicacion, {left: "50.5%", top: 30, right: 0, bottom: 0});
 	
 	
 	
-var rpc = new qx.io.remote.Rpc("services/", "comp.Cuentas");
+var rpc = new componente.general.ramon.io.rpc.Rpc("services/", "comp.Cuentas");
 try {
 	var resultado = rpc.callSync("leer_sucursales");
 } catch (ex) {

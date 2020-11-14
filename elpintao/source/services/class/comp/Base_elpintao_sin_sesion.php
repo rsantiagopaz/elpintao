@@ -1,11 +1,8 @@
 <?php
 
-// if (session_status() != PHP_SESSION_ACTIVE) session_start();
-@session_start();
+require_once("Base_general.php");
 
-require_once($_SESSION['conexion']->require_general_services . "class/componente/general/ramon/" . "Base_general.php");
-
-class class_Base_elpintao extends class_Base_general
+class class_Base_elpintao_sin_sesion extends class_Base_general
 {
 	protected $mysqli;
 	protected $rowParamet;
@@ -13,6 +10,9 @@ class class_Base_elpintao extends class_Base_general
 	protected $arrayDeposito;
 	
 	function __construct() {
+		
+		require("Conexion.php");
+		
 		$aux = new mysqli_driver;
 		$aux->report_mode = MYSQLI_REPORT_ERROR;
 		//$aux->report_mode = MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT;
@@ -20,14 +20,12 @@ class class_Base_elpintao extends class_Base_general
 		
 		date_default_timezone_set("America/Argentina/Buenos_Aires");
 		
-		if (! is_null($_SESSION['conexion']->servidor)) {
-			$this->mysqli = new mysqli($_SESSION['conexion']->servidor, $_SESSION['conexion']->usuario, $_SESSION['conexion']->password, $_SESSION['conexion']->database);
-			$this->mysqli->query("SET NAMES 'utf8'");
-		
-			$this->method_leer_paramet(null, null);
-			$this->method_leer_sucursales(null, null);
-			$this->method_leer_depositos(null, null);
-		}
+		$this->mysqli = new mysqli($conexion->servidor, $conexion->usuario, $conexion->password, $conexion->database);
+		$this->mysqli->query("SET NAMES 'utf8'");
+	
+		$this->method_leer_paramet(null, null);
+		$this->method_leer_sucursales(null, null);
+		$this->method_leer_depositos(null, null);
 	}
 	
 	

@@ -59,7 +59,7 @@ qx.Class.define("elpintao.comp.mensajes.windowMensajes",
 			if (e) {
 				var p = {id_mensaje: list.getModelSelection().getItem(0).get("id_mensaje")};
 
-				var rpc = new qx.io.remote.Rpc(application.conexion.rpc_elpintao_services, "componente.elpintao.ramon.Productos");
+				var rpc = new componente.general.ramon.io.rpc.Rpc("services/", "comp.Productos");
 				try {
 					var resultado = rpc.callSync("eliminar_mensaje", p);
 				} catch (ex) {
@@ -108,12 +108,12 @@ qx.Class.define("elpintao.comp.mensajes.windowMensajes",
 
 
   // fetch some data from Twitter
-  var url = application.conexion.rpc_elpintao_services + "class/componente/elpintao/ramon/Stores.php?rutina=leer_mensaje";
+  var url = "services/class/comp/Stores.php?rutina=leer_mensaje";
   var store = new qx.data.store.Json();
   store.addListener("loaded", function(e){
   	var data = e.getData();
   	if (data.getLength() > 0) {
-  		application.btnMensajes.setLabel("Sucursal: " + application.arraySucursales[application.rowParamet.id_sucursal].descrip + ", Usuario: " + application.conexion.login.nick + " - Mensajes (" + data.getLength() + ")");
+  		application.btnMensajes.setLabel("Sucursal: " + application.arraySucursales[application.rowParamet.id_sucursal].descrip + ", Usuario: " + application.login.nick + " - Mensajes (" + data.getLength() + ")");
 	  	if (data.getItem(0).get("mostrar")) {
 			if (this.isVisible()) {
 				this.getLayoutParent().getWindowManager().bringToFront(this);
@@ -123,7 +123,7 @@ qx.Class.define("elpintao.comp.mensajes.windowMensajes",
 				this.open();
 			}
 	  	}
-  	} else application.btnMensajes.setLabel("Sucursal: " + application.arraySucursales[application.rowParamet.id_sucursal].descrip + ", Usuario: " + application.conexion.login.nick + " - Mensajes");
+  	} else application.btnMensajes.setLabel("Sucursal: " + application.arraySucursales[application.rowParamet.id_sucursal].descrip + ", Usuario: " + application.login.nick + " - Mensajes");
   	
   	list.setSelectionMode("single");
   	list.setSelectionMode("one");

@@ -7,21 +7,21 @@ class class_Base
 	protected $arraySucursal;
 
 	function __construct() {
-		require('conexion.php');
+		require('../conexion.php');
 
 		/*
-		$this->link1 = mysql_connect("$servidor", "$usuario", "$password");
-		mysql_select_db("$base", $this->link1);
+		$this->link1 = mysql_connect("$conexion->servidor", "$conexion->usuario", "$conexion->password");
+		mysql_select_db("$conexion->database", $this->link1);
 		mysql_query("SET NAMES 'utf8'", $this->link1);
 		*/
 
-		$this->link1 = new mysqli($servidor, $usuario, $password, $base);
+		$this->link1 = new mysqli($conexion->servidor, $conexion->usuario, $conexion->password, $conexion->database);
 		$this->link1->query("SET NAMES 'utf8'");
 
-		$this->db = new mysqli($servidor, $usuario, $password, $base);
+		$this->db = new mysqli($conexion->servidor, $conexion->usuario, $conexion->password, $conexion->database);
 		$this->db->query("SET NAMES 'utf8'");
 
-		$this->link2 = new mysqli($servidor, $usuario, $password, $base);
+		$this->link2 = new mysqli($conexion->servidor, $conexion->usuario, $conexion->password, $conexion->database);
 		$this->link2->query("SET NAMES 'utf8'");
 
 		$this->method_leer_paramet(null, null);
@@ -30,7 +30,7 @@ class class_Base
 
 	public static function getConfiguraciones () {
 		require('conexion.php');
-		$db = new mysqli($servidor, $usuario, $password, $base);
+		$db = new mysqli($conexion->servidor, $conexion->usuario, $conexion->password, $conexion->database);
 		$db->query("SET NAMES 'utf8'");
 
 		$q = $db->query("
@@ -57,7 +57,7 @@ class class_Base
 
   public function method_leer_paramet($params, $error) {
   	require('conexion.php');
-  	$db = new mysqli($servidor, $usuario, $password, $base);
+  	$db = new mysqli($conexion->servidor, $conexion->usuario, $conexion->password, $conexion->database);
   	$db->query("SET NAMES 'utf8'");
 
 	$sql="SELECT * FROM paramet";

@@ -42,7 +42,7 @@ qx.Class.define("elpintao.comp.pedidos.windowProducto",
 			if (texto!="") {
 				var p = {};
 				p.cod_barra = texto;
-				var rpc = new qx.io.remote.Rpc(application.conexion.rpc_elpintao_services, "componente.elpintao.ramon.Productos");
+				var rpc = new componente.general.ramon.io.rpc.Rpc("services/", "comp.Productos");
 				rpc.callAsync(function(resultado, error, id){
 					tableModel.setDataAsMapArray(resultado, true);
 					if (resultado.length > 0) tbl.setFocusedCell(8, 0, true); else tbl.setFocusedCell();
@@ -55,7 +55,7 @@ qx.Class.define("elpintao.comp.pedidos.windowProducto",
 			var p = {};
 			p.id_fabrica = id_fabrica;
 			p.descrip = texto;
-			var rpc = new qx.io.remote.Rpc(application.conexion.rpc_elpintao_services, "componente.elpintao.ramon.Productos");
+			var rpc = new componente.general.ramon.io.rpc.Rpc("services/", "comp.Productos");
 			rpc.callAsync(function(resultado, error, id){
 				tableModel.setDataAsMapArray(resultado, true);
 				if (resultado.length > 0) tbl.setFocusedCell(8, 0, true); else tbl.setFocusedCell();

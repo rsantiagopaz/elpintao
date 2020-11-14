@@ -15,12 +15,6 @@ qx.Class.define("elpintao.comp.remitos.pageRemitos",
 	this.addListenerOnce("appear", function(e){
 		tblRemito.focus();
 	});
-	
-	this.addListenerOnce("close", function(e){
-		this.imageLoadingRemito.destroy();
-		this.imageLoadingDetalle.destroy();
-	}, this);
-	
 
 
 	var application = qx.core.Init.getApplication();
@@ -30,23 +24,6 @@ qx.Class.define("elpintao.comp.remitos.pageRemitos",
 	numberformatMonto.setMaximumFractionDigits(2);
 	numberformatMonto.setMinimumFractionDigits(2);
 	
-	
-	
-	var bounds = application.getRoot().getBounds();
-	
-	var imageLoadingRemito = this.imageLoadingRemito = new qx.ui.basic.Image("elpintao/loading66.gif");
-	imageLoadingRemito.setVisibility("hidden");
-	imageLoadingRemito.setBackgroundColor("#FFFFFF");
-	imageLoadingRemito.setDecorator("main");
-	application.getRoot().add(imageLoadingRemito, {left: parseInt(bounds.width / 2 - 33), top: parseInt(bounds.height / 2 - 33)});
-	
-	var imageLoadingDetalle = this.imageLoadingDetalle = new qx.ui.basic.Image("elpintao/loading66.gif");
-	imageLoadingDetalle.setVisibility("hidden");
-	imageLoadingDetalle.setBackgroundColor("#FFFFFF");
-	imageLoadingDetalle.setDecorator("main");
-	application.getRoot().add(imageLoadingDetalle, {left: parseInt(bounds.width / 2 - 33), top: parseInt(bounds.height / 2 - 33)});
-	
-
 	
 	
 	
@@ -74,7 +51,6 @@ qx.Class.define("elpintao.comp.remitos.pageRemitos",
 			
         // start a new listener to update the controller
 		this.timerId = timer.start(function(userData, timerId) {
-			imageLoadingRemito.setVisibility("visible");
 			
 			var p = {};
 			p.estado = this.slbEstado.getModelSelection().getItem(0);
@@ -102,11 +78,6 @@ qx.Class.define("elpintao.comp.remitos.pageRemitos",
 					
 					tblRemito.focus();
 				}
-				
-				imageLoadingRemito.setVisibility("hidden");
-			});
-			this.rpc.addListener("failed", function(e){
-				imageLoadingRemito.setVisibility("hidden");
 			});
 			
 			if (emitir) {
@@ -175,7 +146,7 @@ qx.Class.define("elpintao.comp.remitos.pageRemitos",
 	
 	
 	
-	var rpc = new qx.io.remote.Rpc("services/", "comp.Reparacion");
+	var rpc = new componente.general.ramon.io.rpc.Rpc("services/", "comp.Reparacion");
 	try {
 		var resultado = rpc.callSync("autocompletarFabrica", {texto: ""});
 	} catch (ex) {
@@ -218,7 +189,7 @@ qx.Class.define("elpintao.comp.remitos.pageRemitos",
 	composite.add(dtfHasta, {row: 0, column: 6});
 	
 	
-	var rpc = new qx.io.remote.Rpc("services/", "comp.Reparacion");
+	var rpc = new componente.general.ramon.io.rpc.Rpc("services/", "comp.Reparacion");
 	try {
 		var resultado = rpc.callSync("autocompletarSucursal", {texto: ""});
 	} catch (ex) {
@@ -249,7 +220,7 @@ qx.Class.define("elpintao.comp.remitos.pageRemitos",
 	
 
 	
-	var rpc = new qx.io.remote.Rpc("services/", "comp.Reparacion");
+	var rpc = new componente.general.ramon.io.rpc.Rpc("services/", "comp.Reparacion");
 	try {
 		var resultado = rpc.callSync("autocompletarFabrica", {texto: ""});
 	} catch (ex) {
@@ -439,7 +410,6 @@ qx.Class.define("elpintao.comp.remitos.pageRemitos",
 		        }
 
 				this.timerId = timer.start(function(userData, timerId) {
-					imageLoadingDetalle.setVisibility("visible");
 					
 					rowDataRemito = tableModel.getRowData(tblRemito.getFocusedRow());
 					tblDetalle.setFocusedCell();
@@ -457,7 +427,7 @@ qx.Class.define("elpintao.comp.remitos.pageRemitos",
 					p.id_fabrica = slbFabrica.getModelSelection().getItem(0);
 					p.buscar = txtBuscar.getValue().trim();
 					
-					this.rpc = new qx.io.remote.Rpc("services/", "comp.Remitos");
+					this.rpc = new componente.general.ramon.io.rpc.Rpc("services/", "comp.Remitos");
 					this.rpc.setTimeout(1000 * 60 * 2);
 					this.opaqueCallRef = this.rpc.callAsync(qx.lang.Function.bind(function(resultado, error, id){
 						//alert(qx.lang.Json.stringify(resultado, null, 2));
@@ -468,7 +438,6 @@ qx.Class.define("elpintao.comp.remitos.pageRemitos",
 						
 						functionCalcularTotales(tableModelDetalle, tableModelTotales);
 						
-						imageLoadingDetalle.setVisibility("hidden");
 					}, this), "leer_remitos_detalle", p);
 				}, null, this, null, 200);
 			}

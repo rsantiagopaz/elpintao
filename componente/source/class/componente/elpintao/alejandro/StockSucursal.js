@@ -9,7 +9,7 @@ construct : function () {
 
 	var application = qx.core.Init.getApplication();
 
-	var rpc = new qx.io.remote.Rpc(application.conexion.rpc_elpintao_services, "componente.elpintao.alejandro.Maestros");
+	var rpc = new componente.general.ramon.io.rpc.Rpc("services/", "comp.alejandro.Maestros");
 //	var sucursales = rpc.callSync("getSucursales", this._resActivacion);
 	var custom = {tableColumnModel : function(obj) {
 		return new qx.ui.table.columnmodel.Resize(obj);
@@ -185,7 +185,7 @@ construct : function () {
 			var p = {};
 			p.descrip = texto;
 
-			var rpc = new qx.io.remote.Rpc(application.conexion.rpc_elpintao_services, "componente.elpintao.alejandro.Maestros");
+			var rpc = new componente.general.ramon.io.rpc.Rpc("services/", "comp.alejandro.Maestros");
 
 			var app = this;
 			rpc.callAsync(function (res, ex, id) {
@@ -220,7 +220,7 @@ construct : function () {
 //		p.sucs = new Array();
 //		p.sucs.push(this._cmbSucursal.getValue());
 
-//		var rpcSuc = new qx.io.remote.Rpc("services/", "elpintao.Maestros");
+//		var rpcSuc = new componente.general.ramon.io.rpc.Rpc("services/", "elpintao.Maestros");
 //		var suc = rpcSuc.callSync("getUbicacionesSuc", p);
 
 		var modo = this._modo;
@@ -237,8 +237,8 @@ construct : function () {
 		p.fabricas = this._lstFabricas.getCombo().getModelSelection().toArray().toString();
 
 		var app = this;
-//		var rpcDiaria = new qx.io.remote.Rpc("http://" + suc[0][modo + "username"] + ":" + suc[0][modo + "password"] + "@" + suc[0][modo + "url"] + "/remote/services/", "elpintao.Ventas");
-		var rpcDiaria = new qx.io.remote.Rpc(application.conexion.rpc_elpintao_services, "componente.elpintao.alejandro.Maestros");
+//		var rpcDiaria = new componente.general.ramon.io.rpc.Rpc("http://" + suc[0][modo + "username"] + ":" + suc[0][modo + "password"] + "@" + suc[0][modo + "url"] + "/remote/services/", "elpintao.Ventas");
+		var rpcDiaria = new componente.general.ramon.io.rpc.Rpc("services/", "comp.alejandro.Maestros");
 		rpcDiaria.setCrossDomain(true);
 		//rpcDiaria.setTimeout(10000);
 		var total_cantidad = 0;

@@ -114,7 +114,7 @@ qx.Class.define("elpintao.comp.pedidos.pagePunteoPedidoExt",
 					"message"     : "Desea guardar el pedido recibido?",
 					"callback"    : qx.lang.Function.bind(function(e){
 										if (e) {
-											var rpc = new qx.io.remote.Rpc("services/", "comp.PedidosExt");
+											var rpc = new componente.general.ramon.io.rpc.Rpc("services/", "comp.PedidosExt");
 											try {
 												var resultado = rpc.callSync("recibir_pedido", p);
 											} catch (ex) {
@@ -132,7 +132,7 @@ qx.Class.define("elpintao.comp.pedidos.pagePunteoPedidoExt",
 				
 				
 				/*
-				var rpc = new qx.io.remote.Rpc("services/", "comp.PedidosExt");
+				var rpc = new componente.general.ramon.io.rpc.Rpc("services/", "comp.PedidosExt");
 				try {
 					var resultado = rpc.callSync("recibir_pedido", p);
 				} catch (ex) {

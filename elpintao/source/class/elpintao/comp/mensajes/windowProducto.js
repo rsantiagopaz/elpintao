@@ -131,7 +131,7 @@ qx.Class.define("elpintao.comp.mensajes.windowProducto",
 		var p = {};
 		p.model = {id_usuario_de: 0, usuario_de: "Usuario", id_usuario_para: 0, usuario_para: "", asunto: "Pedido de alta de productos"};
 		p.tabla = tableModel.getDataAsMapArray();
-		var rpc = new qx.io.remote.Rpc(application.conexion.rpc_elpintao_services, "componente.elpintao.ramon.Productos");
+		var rpc = new componente.general.ramon.io.rpc.Rpc("services/", "comp.Productos");
 		try {
 			var resultado = rpc.callSync("anotar_producto", p);
 		} catch (ex) {

@@ -1,10 +1,13 @@
 <?php
-//session_start();
+
+session_start();
+
+require_once("Conexion.php");
 require_once("Base.php");
 
 set_time_limit(0);
 
-$mysqli = new mysqli($_SESSION['conexion']->servidor, $_SESSION['conexion']->usuario, $_SESSION['conexion']->password, $_SESSION['conexion']->database);
+$mysqli = new mysqli($conexion->servidor, $conexion->usuario, $conexion->password, $conexion->database);
 $mysqli->query("SET NAMES 'utf8'");
 
 

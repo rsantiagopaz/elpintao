@@ -26,7 +26,7 @@ qx.Class.define("elpintao.comp.parametros.windowUnirFabrica",
 	var form = new qx.ui.form.Form();
 	
 	
-	var rpc = new qx.io.remote.Rpc("services/", "comp.Reparacion");
+	var rpc = new componente.general.ramon.io.rpc.Rpc("services/", "comp.Reparacion");
 	try {
 		var resultado = rpc.callSync("autocompletarFabrica", {texto: ""});
 	} catch (ex) {
@@ -56,7 +56,7 @@ qx.Class.define("elpintao.comp.parametros.windowUnirFabrica",
         }
         // start a new listener to update the controller
 		this.timerId = timer.start(function(userData, timerId) {
-			this.rpc = new qx.io.remote.Rpc("services/", "comp.Reparacion");
+			this.rpc = new componente.general.ramon.io.rpc.Rpc("services/", "comp.Reparacion");
 			this.rpc.addListener("completed", function(e){
 				var resultado = e.getData().result;
 				
@@ -111,7 +111,7 @@ qx.Class.define("elpintao.comp.parametros.windowUnirFabrica",
         }
         // start a new listener to update the controller
 		this.timerId = timer.start(function(userData, timerId) {
-			this.rpc = new qx.io.remote.Rpc("services/", "comp.Reparacion");
+			this.rpc = new componente.general.ramon.io.rpc.Rpc("services/", "comp.Reparacion");
 			this.rpc.addListener("completed", function(e){
 				var resultado = e.getData().result;
 				
@@ -169,7 +169,7 @@ qx.Class.define("elpintao.comp.parametros.windowUnirFabrica",
 	        }
 	        // start a new listener to update the controller
 			this.timerId = timer.start(function(userData, timerId) {
-				this.rpc = new qx.io.remote.Rpc("services/", "comp.Reparacion");
+				this.rpc = new componente.general.ramon.io.rpc.Rpc("services/", "comp.Reparacion");
 				this.rpc.addListener("completed", function(e){
 					var resultado = e.getData().result;
 					
@@ -217,7 +217,7 @@ qx.Class.define("elpintao.comp.parametros.windowUnirFabrica",
 	        }
 	        // start a new listener to update the controller
 			this.timerId = timer.start(function(userData, timerId) {
-				this.rpc = new qx.io.remote.Rpc("services/", "comp.Reparacion");
+				this.rpc = new componente.general.ramon.io.rpc.Rpc("services/", "comp.Reparacion");
 				this.rpc.addListener("completed", function(e){
 					var resultado = e.getData().result;
 					
@@ -357,7 +357,7 @@ qx.Class.define("elpintao.comp.parametros.windowUnirFabrica",
 					p.id_fabrica_origen = model.id_fabrica_origen;
 					p.id_fabrica_destino = model.id_fabrica_destino;
 					
-					var rpc = new qx.io.remote.Rpc("services/", "comp.Reparacion");
+					var rpc = new componente.general.ramon.io.rpc.Rpc("services/", "comp.Reparacion");
 					try {
 						//var resultado = rpc.callSync("buscar_productos");
 					} catch (ex) {
@@ -380,7 +380,7 @@ qx.Class.define("elpintao.comp.parametros.windowUnirFabrica",
 										p.id_fabrica_origen = slbOrigen.getModelSelection().getItem(0);
 										p.id_fabrica_destino = slbDestino.getModelSelection().getItem(0);
 										
-										var rpc = new qx.io.remote.Rpc("services/", "comp.Reparacion");
+										var rpc = new componente.general.ramon.io.rpc.Rpc("services/", "comp.Reparacion");
 										try {
 											var resultado = rpc.callSync("unir_fabrica", p);
 										} catch (ex) {

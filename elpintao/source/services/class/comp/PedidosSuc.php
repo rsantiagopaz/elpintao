@@ -26,7 +26,7 @@ class class_PedidosSuc extends class_Base
   	
 	foreach ($p->detalle as $detalle) {
 		
-		$sql = "INSERT log SET descrip='Pedidos de sucursal respondido', texto='" . json_encode($detalle) . "', fecha='" . $fecha . "', nick='" . $_SESSION['conexion']->login->nick . "'";
+		$sql = "INSERT log SET descrip='Pedidos de sucursal respondido', texto='" . json_encode($detalle) . "', fecha='" . $fecha . "', nick='" . $_SESSION[$this->id_login]->nick . "'";
 		$this->mysqli->query($sql);
 		
 		foreach ($detalle->stock as $stock) {

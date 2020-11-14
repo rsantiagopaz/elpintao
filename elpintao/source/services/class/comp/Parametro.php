@@ -1,17 +1,17 @@
 <?php
 
-session_start();
-
 class class_Parametro
 {
 	protected $mysqli;
 	
 	function __construct() {
 		
+		require_once("Conexion.php");
+		
 		$aux = new mysqli_driver;
 		$aux->report_mode = MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT;
 		
-		$this->mysqli = new mysqli($_SESSION['conexion']->servidor, $_SESSION['conexion']->usuario, $_SESSION['conexion']->password, $_SESSION['conexion']->database);
+		$this->mysqli = new mysqli($conexion->servidor, $conexion->usuario, $conexion->password, $conexion->database);
 		$this->mysqli->query("SET NAMES 'utf8'");
 	}
   

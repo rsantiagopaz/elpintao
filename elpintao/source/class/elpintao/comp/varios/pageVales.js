@@ -56,7 +56,7 @@ qx.Class.define("elpintao.comp.varios.pageVales",
 	composite.add(dtfHasta, {row: 0, column: 6});
 	
 	
-	var rpc = new qx.io.remote.Rpc("services/", "comp.Reparacion");
+	var rpc = new componente.general.ramon.io.rpc.Rpc("services/", "comp.Reparacion");
 	try {
 		var resultado = rpc.callSync("autocompletarSucursal", {texto: ""});
 	} catch (ex) {
@@ -142,7 +142,7 @@ qx.Class.define("elpintao.comp.varios.pageVales",
 				var p = {};
 				p.nro_vale = nro_vale;
 				
-				var rpc = new qx.io.remote.Rpc(application.conexion.rpc_elpintao_services, "componente.elpintao.alejandro.ValesMercaderia");
+				var rpc = new componente.general.ramon.io.rpc.Rpc("services/", "comp.alejandro.ValesMercaderia");
 				rpc.setTimeout(60000 * 5);
 				rpc.addListener("completed", function(e){
 					var data = e.getData();

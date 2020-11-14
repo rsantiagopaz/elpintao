@@ -19,7 +19,7 @@ qx.Class.define("componente.elpintao.ramon.parametros.menubuttonOrdenamiento",
 	
 	var functionGrabarIndices = function(model) {
 		var p = model;
-		var rpc = new qx.io.remote.Rpc(application.conexion.rpc_elpintao_services, "componente.elpintao.ramon.Ordenamiento");
+		var rpc = new componente.general.ramon.io.rpc.Rpc("services/", "comp.Ordenamiento");
 		try {
 			var resultado = rpc.callSync("grabar_indices", p);
 		} catch (ex) {
@@ -156,7 +156,7 @@ qx.Class.define("componente.elpintao.ramon.parametros.menubuttonOrdenamiento",
 		var model = {id_ordenamiento: 0, tag: tag, indice: lstFormula.getChildren().length, descrip: label, formula: auxFormula};
 		var p = {};
 		p.model = model;
-		var rpc = new qx.io.remote.Rpc(application.conexion.rpc_elpintao_services, "componente.elpintao.ramon.Ordenamiento");
+		var rpc = new componente.general.ramon.io.rpc.Rpc("services/", "comp.Ordenamiento");
 		try {
 			var resultado = rpc.callSync("agregar_item", p);
 		} catch (ex) {
@@ -251,7 +251,7 @@ qx.Class.define("componente.elpintao.ramon.parametros.menubuttonOrdenamiento",
 		
 		var p = {};
 		p.id_ordenamiento = selection.getModel().id_ordenamiento;
-		var rpc = new qx.io.remote.Rpc(application.conexion.rpc_elpintao_services, "componente.elpintao.ramon.Ordenamiento");
+		var rpc = new componente.general.ramon.io.rpc.Rpc("services/", "comp.Ordenamiento");
 		try {
 			var resultado = rpc.callSync("eliminar_item", p);
 		} catch (ex) {
@@ -307,7 +307,7 @@ qx.Class.define("componente.elpintao.ramon.parametros.menubuttonOrdenamiento",
 	
 	var p = {};
 	p.tag = tag;
-	var rpc = new qx.io.remote.Rpc(application.conexion.rpc_elpintao_services, "componente.elpintao.ramon.Ordenamiento");
+	var rpc = new componente.general.ramon.io.rpc.Rpc("services/", "comp.Ordenamiento");
 	try {
 		var resultado = rpc.callSync("leer_items", p);
 	} catch (ex) {

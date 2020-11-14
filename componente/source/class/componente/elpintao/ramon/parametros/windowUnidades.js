@@ -135,7 +135,7 @@ qx.Class.define("componente.elpintao.ramon.parametros.windowUnidades",
 			if (enviar) {
 				var p = {};
 				p.cambios = cambios;
-				var rpc = new qx.io.remote.Rpc(application.conexion.rpc_elpintao_services, "componente.elpintao.ramon.Parametros");
+				var rpc = new componente.general.ramon.io.rpc.Rpc("services/", "comp.Parametros");
 				try {
 					var resultado = rpc.callSync("escribir_unidad", p);
 				} catch (ex) {

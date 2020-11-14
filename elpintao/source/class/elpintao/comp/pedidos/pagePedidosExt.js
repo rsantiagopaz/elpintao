@@ -21,12 +21,10 @@ qx.Class.define("elpintao.comp.pedidos.pagePedidosExt",
 	var contexto = this;
 	var id_fabrica = "1";
 	var internos = [];
-	//var rpcInt = new qx.io.remote.Rpc("services/", "comp.PedidosExt");
+	//var rpcInt = new componente.general.ramon.io.rpc.Rpc("services/", "comp.PedidosExt");
 	var rpcInt = new componente.general.ramon.io.rpc.Rpc("services/", "comp.PedidosExt");
 	var abortCallAsyncExt = null;
 	var abortCallAsyncInt = null;
-	var imageLoadingExt = null;
-	var imageLoadingInt = null;
 	var numberformatMonto = new qx.util.format.NumberFormat("es");
 	numberformatMonto.setMaximumFractionDigits(2);
 	numberformatMonto.setMinimumFractionDigits(2);
@@ -71,13 +69,6 @@ qx.Class.define("elpintao.comp.pedidos.pagePedidosExt",
 	
 	
 	var functionActualizarPedidosInt = qx.lang.Function.bind(function(){
-		if (imageLoadingInt == null) {
-			var bounds = this.getBounds();
-			imageLoadingInt = new qx.ui.basic.Image("elpintao/loading66.gif");
-			imageLoadingInt.setBackgroundColor("#FFFFFF");
-			imageLoadingInt.setDecorator("main");
-			this.add(imageLoadingInt, {left: parseInt(bounds.width / 2 - 33), top: parseInt(bounds.height / 2 - 33)});
-		}
 		
 		tblPedidoInt.resetSelection();
 		tblPedidoInt.setFocusedCell();
@@ -101,9 +92,7 @@ qx.Class.define("elpintao.comp.pedidos.pagePedidosExt",
 					internos = resultado;
 					tableModelPedidoInt.setDataAsMapArray(internos, true);
 					functionCalcularTotales(tableModelPedidoInt, tableModelTotalesInt);
-					
-					imageLoadingInt.destroy();
-					imageLoadingInt = null;
+
 				} else {
 					//alert(qx.lang.Json.stringify(error, null, 2));
 				}
@@ -206,7 +195,7 @@ qx.Class.define("elpintao.comp.pedidos.pagePedidosExt",
 			
 			//alert(qx.lang.Json.stringify(p, null, 2));
 	
-			//var rpc = new qx.io.remote.Rpc("services/", "comp.PedidosExt");
+			//var rpc = new componente.general.ramon.io.rpc.Rpc("services/", "comp.PedidosExt");
 			var rpc = new componente.general.ramon.io.rpc.Rpc("services/", "comp.PedidosExt");
 			try {
 				var resultado = rpc.callSync("alta_pedido_ext", p);
@@ -623,7 +612,7 @@ qx.Class.define("elpintao.comp.pedidos.pagePedidosExt",
 	composite.add(dtfHasta, {row: 0, column: 6});
 	
 	
-	var rpc = new qx.io.remote.Rpc("services/", "comp.Reparacion");
+	var rpc = new componente.general.ramon.io.rpc.Rpc("services/", "comp.Reparacion");
 	try {
 		var resultado = rpc.callSync("autocompletarSucursal", {texto: ""});
 	} catch (ex) {
@@ -633,7 +622,7 @@ qx.Class.define("elpintao.comp.pedidos.pagePedidosExt",
 	
 
 	
-	var rpc = new qx.io.remote.Rpc("services/", "comp.Reparacion");
+	var rpc = new componente.general.ramon.io.rpc.Rpc("services/", "comp.Reparacion");
 	try {
 		var resultado = rpc.callSync("autocompletarFabrica", {texto: ""});
 	} catch (ex) {
@@ -726,7 +715,7 @@ qx.Class.define("elpintao.comp.pedidos.pagePedidosExt",
 									if (pedido_ext_detalle[x].diferencia > 0) p.pedido_ext_detalle.push(pedido_ext_detalle[x]);
 								}
 								
-								var rpc = new qx.io.remote.Rpc("services/", "comp.PedidosExt");
+								var rpc = new componente.general.ramon.io.rpc.Rpc("services/", "comp.PedidosExt");
 								rpc.addListener("completed", function(e){
 									var data = e.getData();
 									
@@ -831,14 +820,6 @@ qx.Class.define("elpintao.comp.pedidos.pagePedidosExt",
 			
 			rowDataPedidoExt = tableModelPedidoExt.getRowData(tblPedidoExt.getFocusedRow());
 			
-			if (imageLoadingExt == null) {
-				var bounds = this.getBounds();
-				imageLoadingExt = new qx.ui.basic.Image("elpintao/loading66.gif");
-				imageLoadingExt.setBackgroundColor("#FFFFFF");
-				imageLoadingExt.setDecorator("main");
-				this.add(imageLoadingExt, {left: parseInt(bounds.width / 2 - 33), top: parseInt(bounds.height / 2 - 33)});
-			}
-
 			btnImprimir.setEnabled(true);
 			btnExportarDetalle.setEnabled(true);
 			btnRecibirPedExt.setEnabled(! rowDataPedidoExt.recibido);
@@ -849,7 +830,7 @@ qx.Class.define("elpintao.comp.pedidos.pagePedidosExt",
 			var p = {};
 			p.id_pedido_ext = rowDataPedidoExt.id_pedido_ext;
 			
-			var rpc = new qx.io.remote.Rpc("services/", "comp.PedidosExt");
+			var rpc = new componente.general.ramon.io.rpc.Rpc("services/", "comp.PedidosExt");
 			rpc.setTimeout(1000 * 60 * 2);
 			
 			if (abortCallAsyncExt != null) rpc.abort(abortCallAsyncExt);
@@ -871,9 +852,7 @@ qx.Class.define("elpintao.comp.pedidos.pagePedidosExt",
 					tableModelDetalleExt.setDataAsMapArray(resultado.detalle, true);
 					tableModelDetalleRec.setDataAsMapArray(resultado.recibidos, true);
 					functionCalcularTotales(tableModelDetalleExt, tableModelTotalesExt);
-					
-					imageLoadingExt.destroy();
-					imageLoadingExt = null;
+
 				} else {
 					//alert(qx.lang.Json.stringify(error, null, 2));
 				}
@@ -908,7 +887,7 @@ qx.Class.define("elpintao.comp.pedidos.pagePedidosExt",
 			p.id_pedido_ext = rowDataPedidoExt.id_pedido_ext;
 			p.items = items;
 	
-			var rpc = new qx.io.remote.Rpc("services/", "comp.PedidosExt");
+			var rpc = new componente.general.ramon.io.rpc.Rpc("services/", "comp.PedidosExt");
 			rpc.addListener("completed", function(e){
 				var data = e.getData();
 
@@ -953,7 +932,7 @@ qx.Class.define("elpintao.comp.pedidos.pagePedidosExt",
 				p.id_pedido_ext = rowDataPedidoExt.id_pedido_ext;
 				p.id_producto_item = rowDataDetalleExt.id_producto_item;
 
-				var rpc = new qx.io.remote.Rpc("services/", "comp.PedidosExt");
+				var rpc = new componente.general.ramon.io.rpc.Rpc("services/", "comp.PedidosExt");
 				rpc.addListener("completed", function(e){
 					var data = e.getData();
 	

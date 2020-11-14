@@ -17,7 +17,7 @@ qx.Class.define("componente.elpintao.ramon.Rutinas",
 							objFabrica.indice[model.getItem(i).get("descrip")] = model.getItem(i);
 						}
 					});
-					objFabrica.store.setUrl(application.conexion.rpc_elpintao_services + "class/componente/elpintao/ramon/Stores.php?rutina=leer_fabrica");
+					objFabrica.store.setUrl("services/class/comp/Stores.php?rutina=leer_fabrica");
 					
 				} else if (parametro[x] == "objMoneda" && ! application.objMoneda) {
 					var objMoneda = application.objMoneda = {};
@@ -30,7 +30,7 @@ qx.Class.define("componente.elpintao.ramon.Rutinas",
 							objMoneda.indice[model.getItem(i).get("descrip")] = model.getItem(i);
 						}
 					});
-					objMoneda.store.setUrl(application.conexion.rpc_elpintao_services + "class/componente/elpintao/ramon/Stores.php?rutina=leer_moneda");
+					objMoneda.store.setUrl("services/class/comp/Stores.php?rutina=leer_moneda");
 					
 				} else if (parametro[x] == "objColor" && ! application.objColor) {
 					var objColor = application.objColor = {};
@@ -43,7 +43,7 @@ qx.Class.define("componente.elpintao.ramon.Rutinas",
 							objColor.indice[model.getItem(i).get("descrip")] = model.getItem(i);
 						}
 					});
-					objColor.store.setUrl(application.conexion.rpc_elpintao_services + "class/componente/elpintao/ramon/Stores.php?rutina=leer_color");
+					objColor.store.setUrl("services/class/comp/Stores.php?rutina=leer_color");
 					
 				} else if (parametro[x] == "objUnidad" && ! application.objUnidad) {
 					var objUnidad = application.objUnidad = {};
@@ -56,7 +56,7 @@ qx.Class.define("componente.elpintao.ramon.Rutinas",
 							objUnidad.indice[model.getItem(i).get("descrip")] = model.getItem(i);
 						}
 					});
-					objUnidad.store.setUrl(application.conexion.rpc_elpintao_services + "class/componente/elpintao/ramon/Stores.php?rutina=leer_unidad");
+					objUnidad.store.setUrl("services/class/comp/Stores.php?rutina=leer_unidad");
 					
 				}
 			}

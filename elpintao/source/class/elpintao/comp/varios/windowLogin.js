@@ -30,7 +30,7 @@ qx.Class.define("elpintao.comp.varios.windowLogin",
 	var form = new qx.ui.form.Form();
 	
 	
-	var cboAutoriza = new componente.general.ramon.ui.combobox.ComboBoxAuto("services/", "comp.Remitos", "autocompletarUsuario", null, 1);
+	var cboAutoriza = new componente.general.ramon.ui.combobox.ComboBoxAuto("services/", "comp.Inicial", "autocompletarUsuario", null, 1);
 	cboAutoriza.setWidth(150);
 	cboAutoriza.setRequired(true);
 	form.add(cboAutoriza, "Usuario", null, "cboAutoriza");
@@ -76,7 +76,7 @@ qx.Class.define("elpintao.comp.varios.windowLogin",
 			p.id_usuario = lstAutoriza.getSelection()[0].getUserData("datos").id_usuario;
 			p.password = txtAutorizaClave.getValue();
 			
-			var rpc = new qx.io.remote.Rpc("services/", "comp.Usuarios");
+			var rpc = new componente.general.ramon.io.rpc.Rpc("services/", "comp.Inicial");
 			rpc.addListener("completed", function(e){
 				var data = e.getData();
 				

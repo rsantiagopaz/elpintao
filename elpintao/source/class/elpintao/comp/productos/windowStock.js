@@ -43,7 +43,7 @@ qx.Class.define("elpintao.comp.productos.windowStock",
 			var p = {};
 			p.id_fabrica = id_fabrica;
 			p.descrip = texto;
-			var rpc = new qx.io.remote.Rpc(application.conexion.rpc_elpintao_services, "componente.elpintao.ramon.Productos");
+			var rpc = new componente.general.ramon.io.rpc.Rpc("services/", "comp.Productos");
 			rpc.callAsync(function(resultado, error, id){
 				for (var x in resultado) resultado[x].adicionar = 0;
 				tableModel.setDataAsMapArray(resultado, true);
@@ -82,7 +82,7 @@ qx.Class.define("elpintao.comp.productos.windowStock",
 			if (texto!="") {
 				var p = {};
 				p.cod_barra = texto;
-				var rpc = new qx.io.remote.Rpc(application.conexion.rpc_elpintao_services, "componente.elpintao.ramon.Productos");
+				var rpc = new componente.general.ramon.io.rpc.Rpc("services/", "comp.Productos");
 				rpc.callAsync(function(resultado, error, id){
 					for (var x in resultado) resultado[x].adicionar = 0;
 					tableModel.setDataAsMapArray(resultado, true);
@@ -222,7 +222,7 @@ qx.Class.define("elpintao.comp.productos.windowStock",
 					tableModel.setValueById("adicionar", data.row, 0);
 					tableModel.setValueById("stock", data.row, rowData.stock);
 				}
-				var rpc = new qx.io.remote.Rpc(application.conexion.rpc_elpintao_services, "componente.elpintao.ramon.Productos");
+				var rpc = new componente.general.ramon.io.rpc.Rpc("services/", "comp.Productos");
 				rpc.callAsync(function(resultado, error, id){
 					txtBuscar.focus();
 					txtBuscar.selectAllText();

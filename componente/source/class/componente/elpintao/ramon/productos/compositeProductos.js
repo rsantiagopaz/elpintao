@@ -43,15 +43,10 @@ qx.Class.define("componente.elpintao.ramon.productos.compositeProductos",
 	
 
 	var functionLeer_producto = function(p) {
-		var bounds = application.getRoot().getBounds();
-		var imageLoading = new qx.ui.basic.Image("elpintao/loading66.gif");
-		imageLoading.setBackgroundColor("#FFFFFF");
-		imageLoading.setDecorator("main");
-		application.getRoot().add(imageLoading, {left: parseInt(bounds.width / 2 - 33), top: parseInt(bounds.height / 2 - 33)});
 		
 		p.id_usuario = usuario.id_usuario;
 		
-		var rpc = new qx.io.remote.Rpc(application.conexion.rpc_elpintao_services, "componente.elpintao.ramon.Productos");
+		var rpc = new componente.general.ramon.io.rpc.Rpc("services/", "comp.Productos");
 		rpc.setTimeout(1000 * 60);
 		rpc.callAsync(function(resultado, error, id){
 			for (var x in resultado.producto_item) {
@@ -80,8 +75,7 @@ qx.Class.define("componente.elpintao.ramon.productos.compositeProductos",
 				if (tgbSoloProducto.getValue()) tbl2.focus(); else tbl.focus();
 			}
 			bandera_id_producto="0";
-		
-			imageLoading.destroy();
+
 		}, "leer_producto", p);
 	}
 	
@@ -149,7 +143,7 @@ qx.Class.define("componente.elpintao.ramon.productos.compositeProductos",
 		
 		var p = {};
 		p.id_padre = id_padre;
-		var rpc = new qx.io.remote.Rpc(application.conexion.rpc_elpintao_services, "componente.elpintao.ramon.Productos");
+		var rpc = new componente.general.ramon.io.rpc.Rpc("services/", "comp.Productos");
 		try {
 			var resultado = rpc.callSync("agregar_nodo", p);
 		} catch (ex) {
@@ -207,7 +201,7 @@ qx.Class.define("componente.elpintao.ramon.productos.compositeProductos",
 					p.id_arbol = nodoActual.get("id_arbol");
 					p.descrip = descrip;
 					p.clasificacion = clasificacion;
-					var rpc = new qx.io.remote.Rpc(application.conexion.rpc_elpintao_services, "componente.elpintao.ramon.Productos");
+					var rpc = new componente.general.ramon.io.rpc.Rpc("services/", "comp.Productos");
 					try {
 						var resultado = rpc.callSync("modificar_nodo", p);
 					} catch (ex) {
@@ -237,7 +231,7 @@ qx.Class.define("componente.elpintao.ramon.productos.compositeProductos",
 		
 		var p = {};
 		p.id_padre = id_padre;
-		var rpc = new qx.io.remote.Rpc(application.conexion.rpc_elpintao_services, "componente.elpintao.ramon.Productos");
+		var rpc = new componente.general.ramon.io.rpc.Rpc("services/", "comp.Productos");
 		try {
 			var resultado = rpc.callSync("agregar_nodo", p);
 		} catch (ex) {
@@ -268,7 +262,7 @@ qx.Class.define("componente.elpintao.ramon.productos.compositeProductos",
 				var p = {};
 				p.id_arbol = nodoActual.get("id_arbol");
 				p.id_padre = nodoActual.get("id_padre");
-				var rpc = new qx.io.remote.Rpc(application.conexion.rpc_elpintao_services, "componente.elpintao.ramon.Productos");
+				var rpc = new componente.general.ramon.io.rpc.Rpc("services/", "comp.Productos");
 				try {
 					var resultado = rpc.callSync("eliminar_nodo", p);
 				} catch (ex) {
@@ -335,7 +329,7 @@ qx.Class.define("componente.elpintao.ramon.productos.compositeProductos",
 				p.id_padre_original = parentNode.get("id_arbol");
 				p.clasificacion = clasificacion;
 				
-				var rpc = new qx.io.remote.Rpc(application.conexion.rpc_elpintao_services, "componente.elpintao.ramon.Productos");
+				var rpc = new componente.general.ramon.io.rpc.Rpc("services/", "comp.Productos");
 				try {
 					var resultado = rpc.callSync("mover_nodo", p);
 				} catch (ex) {
@@ -358,7 +352,7 @@ qx.Class.define("componente.elpintao.ramon.productos.compositeProductos",
 				
 				//alert(qx.lang.Json.stringify(p, null, 2));
 				
-				var rpc = new qx.io.remote.Rpc(application.conexion.rpc_elpintao_services, "componente.elpintao.ramon.Productos");
+				var rpc = new componente.general.ramon.io.rpc.Rpc("services/", "comp.Productos");
 				try {
 					var resultado = rpc.callSync("mover_productos", p);
 				} catch (ex) {
@@ -682,7 +676,7 @@ qx.Class.define("componente.elpintao.ramon.productos.compositeProductos",
 				p.id_producto = id_producto;
 				p.id_arbol = nodoActual.get("id_arbol");
 				
-				var rpc = new qx.io.remote.Rpc(application.conexion.rpc_elpintao_services, "componente.elpintao.ramon.Productos");
+				var rpc = new componente.general.ramon.io.rpc.Rpc("services/", "comp.Productos");
 				try {
 					var resultado = rpc.callSync("eliminar_producto", p);
 				} catch (ex) {
@@ -907,7 +901,7 @@ qx.Class.define("componente.elpintao.ramon.productos.compositeProductos",
 	var p = {};
 	p.id_arbol = usuario.id_arbol;
 	
-	var rpc = new qx.io.remote.Rpc(application.conexion.rpc_elpintao_services, "componente.elpintao.ramon.Productos");
+	var rpc = new componente.general.ramon.io.rpc.Rpc("services/", "comp.Productos");
 	try {
 		var resultado = rpc.callSync("leer_arbol", p);
 	} catch (ex) {
@@ -921,7 +915,7 @@ qx.Class.define("componente.elpintao.ramon.productos.compositeProductos",
 	var p = {};
 	p.id_arbol = nodes.get("id_arbol");
 	
-	var rpc = new qx.io.remote.Rpc(application.conexion.rpc_elpintao_services, "componente.elpintao.ramon.Productos");
+	var rpc = new componente.general.ramon.io.rpc.Rpc("services/", "comp.Productos");
 	try {
 		var resultado = rpc.callSync("leer_clasificacion", p);
 	} catch (ex) {
