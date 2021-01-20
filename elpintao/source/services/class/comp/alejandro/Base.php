@@ -7,7 +7,7 @@ class class_Base
 	protected $arraySucursal;
 
 	function __construct() {
-		require('../conexion.php');
+		require('./class/comp/Conexion.php');
 
 		/*
 		$this->link1 = mysql_connect("$conexion->servidor", "$conexion->usuario", "$conexion->password");
@@ -29,7 +29,7 @@ class class_Base
 	}
 
 	public static function getConfiguraciones () {
-		require('conexion.php');
+		require('./class/comp/Conexion.php');
 		$db = new mysqli($conexion->servidor, $conexion->usuario, $conexion->password, $conexion->database);
 		$db->query("SET NAMES 'utf8'");
 
@@ -56,7 +56,7 @@ class class_Base
 
 
   public function method_leer_paramet($params, $error) {
-  	require('conexion.php');
+  	require('./class/comp/Conexion.php');
   	$db = new mysqli($conexion->servidor, $conexion->usuario, $conexion->password, $conexion->database);
   	$db->query("SET NAMES 'utf8'");
 

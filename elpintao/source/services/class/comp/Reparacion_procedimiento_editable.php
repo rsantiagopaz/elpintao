@@ -6,7 +6,7 @@ $reparacion = new class_Reparacion;
 $params = array();
 $error = new stdClass;
 
-$resultado = $reparacion->method_arreglar_stock(null, null);
+$resultado = $reparacion->method_arreglar_cuentas($params, $error);
 
 echo "<br/>";
 echo count($resultado) . "<br/>";
