@@ -18,18 +18,20 @@ qx.Class.define("elpintao.comp.pedidos.pagePedidosInt",
 		var rowDataAsMapTotales, rowDataTotales;
 		var bandera;
 		
-		tableModelTotales.setDataAsMapArray([{descrip: "P.lis.", total: 0}, {descrip: "P.lis.+IVA", total: 0}], true);
+		tableModelTotales.setDataAsMapArray([], true);
 		
 		for (var i = 0; i < tableModelDetalle.getRowCount(); i++) {
 			rowDataAsMapDetalle = tableModelDetalle.getRowDataAsMap(i);
 			rowDataDetalle = tableModelDetalle.getRowData(i);
 			
+			/*
 			rowDataAsMapTotales = tableModelTotales.getRowDataAsMap(0);
 			tableModelTotales.setValueById("total", 0, rowDataAsMapTotales.total + rowDataAsMapDetalle.precio_lista);
 			rowDataAsMapTotales = tableModelTotales.getRowDataAsMap(1);
 			tableModelTotales.setValueById("total", 1, rowDataAsMapTotales.total + rowDataAsMapDetalle.plmasiva);
+			*/
 			bandera = true;
-			for (var x = 2; x < tableModelTotales.getRowCount(); x++) {
+			for (var x = 0; x < tableModelTotales.getRowCount(); x++) {
 				rowDataAsMapTotales = tableModelTotales.getRowDataAsMap(x);
 				rowDataTotales = tableModelTotales.getRowData(x);
 				if (rowDataDetalle.id_unidad == rowDataTotales.id_unidad) {
@@ -189,7 +191,8 @@ qx.Class.define("elpintao.comp.pedidos.pagePedidosInt",
 	tblDetalle.setAdditionalStatusBarText(" ");
 	
 	var tableColumnModelDetalle = tblDetalle.getTableColumnModel();
-	//tableColumnModelDetalle.setColumnVisible(7, false);
+	tableColumnModelDetalle.setColumnVisible(5, false);
+	tableColumnModelDetalle.setColumnVisible(6, false);
 	
 
 	

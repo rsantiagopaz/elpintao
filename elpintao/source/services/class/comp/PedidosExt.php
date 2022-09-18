@@ -51,13 +51,15 @@ class class_PedidosExt extends class_Base
   public function method_recibir_pedido($params, $error) {
   	$p = $params[0];
   	
+  	$login = $_SESSION[$this->id_login];
+  	
   	$this->mysqli->query("START TRANSACTION");
   	
 	$sql="INSERT remito_rec SET nro_remito='" . $p->nro_remito . "', tipo=0, id_sucursal_de=0, id_fabrica=" . $p->id_fabrica . ", fecha=NOW(), id_usuario_transporta=0, estado='R'";
 	$this->mysqli->query($sql);
 	$id_remito_rec = $this->mysqli->insert_id;
   	
-	$sql = "UPDATE pedido_ext SET id_remito_rec=" . $id_remito_rec . ", recibido=TRUE, fecha_recibido=NOW() WHERE id_pedido_ext='" . $p->id_pedido_ext . "'";
+	$sql = "UPDATE pedido_ext SET id_remito_rec=" . $id_remito_rec . ", recibido=TRUE, fecha_recibido=NOW(), id_usuario_recibido=" . $login->id_usuario . " WHERE id_pedido_ext='" . $p->id_pedido_ext . "'";
 	$this->mysqli->query($sql);
 	
 	//$sql = "INSERT stock_log SET descrip='PedidosExt.method_recibir_pedido', sql_texto='" . $this->mysqli->real_escape_string($sql) . "', fecha=NOW()";
@@ -83,12 +85,14 @@ class class_PedidosExt extends class_Base
 
   public function method_alta_pedido_ext($params, $error) {
   	$p = $params[0];
+  	
+  	$login = $_SESSION[$this->id_login];
 
   	$set = $this->prepararCampos($p->model);
   	
   	$this->mysqli->query("START TRANSACTION");
   	
-	$sql = "INSERT pedido_ext SET " . $set . ", id_fabrica='" . $p->id_fabrica . "', fecha = '" . $p->fecha . "', recibido = FALSE";
+	$sql = "INSERT pedido_ext SET " . $set . ", id_fabrica='" . $p->id_fabrica . "', fecha = '" . $p->fecha . "', recibido = FALSE, fecha_pedido=NOW(), id_usuario_pedido=" . $login->id_usuario;
 	$this->mysqli->query($sql);
 	$insert_id = $this->mysqli->insert_id;
 	
@@ -363,6 +367,22 @@ class class_PedidosExt extends class_Base
   			$rowPedido_ext->costo+= $rowDetalle->costo;
   			$rowPedido_ext->plmasiva+= $rowDetalle->plmasiva;
 		}
+		
+		$rowPedido_ext->usuario_pedido = '';
+		$rowPedido_ext->usuario_recibido = '';
+		
+		if ($rowPedido_ext->id_usuario_pedido) {
+  			$sql = "SELECT nick FROM usuario WHERE id_usuario = " . $rowPedido_ext->id_usuario_pedido;
+  			$rsAux = $this->mysqli->query($sql);
+  			$rowAux = $rsAux->fetch_object();
+  			$rowPedido_ext->usuario_pedido = $rowAux->nick;
+		}
+		if ($rowPedido_ext->id_usuario_recibido) {
+  			$sql = "SELECT nick FROM usuario WHERE id_usuario = " . $rowPedido_ext->id_usuario_recibido;
+  			$rsAux = $this->mysqli->query($sql);
+  			$rowAux = $rsAux->fetch_object();
+  			$rowPedido_ext->usuario_recibido = $rowAux->nick;
+		}
 
 		$resultado[] = $rowPedido_ext;
 	}
@@ -462,6 +482,8 @@ class class_PedidosExt extends class_Base
 		
 		$row->cantidad = (float) $row->cantidad;
 		$row->capacidad = (float) $row->capacidad;
+		
+		$row->costo_total = $row->costo * $row->cantidad;
 		
 		
 		

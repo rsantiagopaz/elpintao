@@ -1,7 +1,7 @@
 qx.Class.define("elpintao.comp.pedidos.windowProducto",
 {
 	extend : componente.general.ramon.ui.window.Window,
-	construct : function (caption, controlar_stock)
+	construct : function (caption, no_mostrar_precios)
 	{
 		this.base(arguments);
 		
@@ -119,6 +119,11 @@ qx.Class.define("elpintao.comp.pedidos.windowProducto",
 
 		
 		var tableColumnModel = tbl.getTableColumnModel();
+		if (no_mostrar_precios) {
+			tableColumnModel.setColumnVisible(5, false);
+			tableColumnModel.setColumnVisible(6, false);
+		}
+		
 		var resizeBehavior = tableColumnModel.getBehavior();
 		resizeBehavior.set(1, {width:"10%", minWidth:100});
 		resizeBehavior.set(1, {width:"36.7%", minWidth:100});

@@ -32,16 +32,18 @@ qx.Class.define("elpintao.comp.pedidos.windowPedInt",
 		var rowDataAsMapTotales, rowDataTotales;
 		var bandera;
 		
-		tableModelTotales.setDataAsMapArray([{descrip: "P.lis.", total: 0}, {descrip: "P.lis.+IVA", total: 0}], true);
+		tableModelTotales.setDataAsMapArray([], true);
 		
 		for (var i = 0; i < tableModelDetalle.getRowCount(); i++) {
 			rowDataAsMapDetalle = tableModelDetalle.getRowDataAsMap(i);
 			rowDataDetalle = tableModelDetalle.getRowData(i);
 			
+			/*
 			rowDataAsMapTotales = tableModelTotales.getRowDataAsMap(0);
 			tableModelTotales.setValueById("total", 0, rowDataAsMapTotales.total + rowDataAsMapDetalle.precio_lista);
 			rowDataAsMapTotales = tableModelTotales.getRowDataAsMap(1);
 			tableModelTotales.setValueById("total", 1, rowDataAsMapTotales.total + rowDataAsMapDetalle.plmasiva);
+			*/
 			bandera = true;
 			for (var x = 2; x < tableModelTotales.getRowCount(); x++) {
 				rowDataAsMapTotales = tableModelTotales.getRowDataAsMap(x);
@@ -154,7 +156,8 @@ qx.Class.define("elpintao.comp.pedidos.windowPedInt",
 	tblDetalle.setAdditionalStatusBarText(" ");
 	
 	var tableColumnModelDetalle = tblDetalle.getTableColumnModel();
-	//tableColumnModelDetalle.setColumnVisible(7, false);
+	tableColumnModelDetalle.setColumnVisible(5, false);
+	tableColumnModelDetalle.setColumnVisible(6, false);
 	
 
 	
@@ -165,8 +168,8 @@ qx.Class.define("elpintao.comp.pedidos.windowPedInt",
 		var resizeBehavior = tableColumnModelDetalle.getBehavior();
 		resizeBehavior.set(0, {width:"7%", minWidth:100});
 		resizeBehavior.set(1, {width:"47%", minWidth:100});
-		resizeBehavior.set(2, {width:"7%", minWidth:100});
-		resizeBehavior.set(3, {width:"3%", minWidth:100});
+		resizeBehavior.set(2, {width:"9%", minWidth:100});
+		resizeBehavior.set(3, {width:"5%", minWidth:100});
 		resizeBehavior.set(4, {width:"11%", minWidth:100});
 		resizeBehavior.set(5, {width:"7%", minWidth:100});
 		resizeBehavior.set(6, {width:"8%", minWidth:100});
@@ -174,12 +177,12 @@ qx.Class.define("elpintao.comp.pedidos.windowPedInt",
 		
 		resizeBehavior.set(1, {width:"10%", minWidth:100});
 		resizeBehavior.set(1, {width:"36.7%", minWidth:100});
-		resizeBehavior.set(2, {width:"6.7%", minWidth:100});
-		resizeBehavior.set(3, {width:"2.7%", minWidth:100});
+		resizeBehavior.set(2, {width:"8%", minWidth:100});
+		resizeBehavior.set(3, {width:"4%", minWidth:100});
 		resizeBehavior.set(4, {width:"15.7%", minWidth:100});
 		resizeBehavior.set(5, {width:"7.7%", minWidth:100});
 		resizeBehavior.set(6, {width:"7.7%", minWidth:100});
-		resizeBehavior.set(7, {width:"5.3%", minWidth:100});
+		resizeBehavior.set(7, {width:"7", minWidth:100});
 
 		
 	tblDetalle.setContextMenu(menutblDetalle);
@@ -218,7 +221,7 @@ qx.Class.define("elpintao.comp.pedidos.windowPedInt",
 	this.add(tblTotales, {left: "85%", top: 30, right: 0, bottom: 30});
 
 	
-	var windowProducto = new elpintao.comp.pedidos.windowProducto("Alta de items detalle");
+	var windowProducto = new elpintao.comp.pedidos.windowProducto("Alta de items detalle", true);
 	
 	windowProducto.addListener("aceptado", function(e){
 		var tableModel = e.getData();

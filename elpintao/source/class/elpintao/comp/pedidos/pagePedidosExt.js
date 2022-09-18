@@ -45,6 +45,8 @@ qx.Class.define("elpintao.comp.pedidos.pagePedidosExt",
 		tableModelDetalleRec.setDataAsMapArray([], true);
 		functionCalcularTotales(tableModelDetalleExt, tableModelTotalesExt);
 		
+		controllerFormInfoEntsal.resetModel();
+		
 		menutblDetalleExt.memorizarEnabled([btnAgregarDetalleExt, btnEliminarDetalleExt], false);
 		
 		var aux = slbEstado.getModelSelection().getItem(0);
@@ -108,7 +110,7 @@ qx.Class.define("elpintao.comp.pedidos.pagePedidosExt",
 		var rowDataAsMapTotales, rowDataTotales;
 		var bandera;
 		
-		tableModelT.setDataAsMapArray([{descrip: "Costo", total: 0}, {descrip: "P.lis.+IVA", total: 0}], true);
+		tableModelT.setDataAsMapArray([{descrip: "Costo", total: 0}], true);
 		
 		for (var i = 0; i < tableModelD.getRowCount(); i++) {
 			rowDataAsMapDetalle = tableModelD.getRowDataAsMap(i);
@@ -118,10 +120,8 @@ qx.Class.define("elpintao.comp.pedidos.pagePedidosExt",
 				rowDataAsMapTotales = tableModelT.getRowDataAsMap(0);
 				
 				tableModelT.setValueById("total", 0, rowDataAsMapTotales.total + (rowDataAsMapDetalle.cantidad * rowDataAsMapDetalle.costo));
-				rowDataAsMapTotales = tableModelT.getRowDataAsMap(1);
-				tableModelT.setValueById("total", 1, rowDataAsMapTotales.total + (rowDataAsMapDetalle.cantidad * rowDataAsMapDetalle.plmasiva));
 				bandera = true;
-				for (var x = 2; x < tableModelT.getRowCount(); x++) {
+				for (var x = 1; x < tableModelT.getRowCount(); x++) {
 					rowDataAsMapTotales = tableModelT.getRowDataAsMap(x);
 					rowDataTotales = tableModelT.getRowData(x);
 					if (rowDataDetalle.id_unidad == rowDataTotales.id_unidad) {
@@ -745,7 +745,7 @@ qx.Class.define("elpintao.comp.pedidos.pagePedidosExt",
 	//Tabla
 
 	var tableModelPedidoExt = new qx.ui.table.model.Simple();
-	tableModelPedidoExt.setColumns(["Fecha", "Fábrica", "Teléfono", "E-mail", "Transporte", "Domic.entrega", "Recibido", "Nro.remito", "Ped.faltante"], ["fecha", "fabrica", "telefono", "email", "transporte", "domicilio", "fecha_recibido", "nro_remito", "faltante"]);
+	tableModelPedidoExt.setColumns(["Fecha", "Fábrica", "Teléfono", "E-mail", "Transporte", "Domic.entrega", "Nro.remito", "Ped.faltante"], ["fecha", "fabrica", "telefono", "email", "transporte", "domicilio", "nro_remito", "faltante"]);
 	tableModelPedidoExt.setColumnSortable(0, false);
 	tableModelPedidoExt.setColumnSortable(1, false);
 	tableModelPedidoExt.setColumnSortable(2, false);
@@ -800,7 +800,7 @@ qx.Class.define("elpintao.comp.pedidos.pagePedidosExt",
 	
 	var celleditorDate2 = new qx.ui.table.cellrenderer.Date();
 	celleditorDate2.setDateFormat(new qx.util.format.DateFormat("yyyy-MM-dd HH:mm:ss"));
-	tableColumnModelPedidoExt.setDataCellRenderer(6, celleditorDate2);
+	//tableColumnModelPedidoExt.setDataCellRenderer(6, celleditorDate2);
 	
 
 	var selectionModelPedidoExt = tblPedidoExt.getSelectionModel();
@@ -819,6 +819,13 @@ qx.Class.define("elpintao.comp.pedidos.pagePedidosExt",
 			tableModelTotalesExt.setDataAsMapArray([], true);
 			
 			rowDataPedidoExt = tableModelPedidoExt.getRowData(tblPedidoExt.getFocusedRow());
+			var aux = {
+				usuario_pedido: rowDataPedidoExt.usuario_pedido,
+				fecha_pedido: rowDataPedidoExt.fecha_pedido ? componente.general.Rutinas.dateToString(rowDataPedidoExt.fecha_pedido) : '',
+				usuario_recibido: rowDataPedidoExt.usuario_recibido,
+				fecha_recibido: rowDataPedidoExt.fecha_recibido ? componente.general.Rutinas.dateToString(rowDataPedidoExt.fecha_recibido) : ''
+			};
+			controllerFormInfoEntsal.setModel(qx.data.marshal.Json.createModel(aux));
 			
 			btnImprimir.setEnabled(true);
 			btnExportarDetalle.setEnabled(true);
@@ -868,6 +875,45 @@ qx.Class.define("elpintao.comp.pedidos.pagePedidosExt",
 	
 	
 
+	
+	var formInfoEntsal = new qx.ui.form.Form();
+	
+	aux = new qx.ui.form.TextField();
+	aux.setReadOnly(true);
+	aux.setDecorator("main");
+	aux.setBackgroundColor("#ffffc0");
+	aux.setMinWidth(120);
+	formInfoEntsal.add(aux, "Usuario ped.", null, "usuario_pedido");
+	
+	aux = new qx.ui.form.TextField();
+	aux.setReadOnly(true);
+	aux.setDecorator("main");
+	aux.setBackgroundColor("#ffffc0");
+	formInfoEntsal.add(aux, "Fecha ped.", null, "fecha_pedido");
+	
+	aux = new qx.ui.form.TextField();
+	aux.setReadOnly(true);
+	aux.setDecorator("main");
+	aux.setBackgroundColor("#ffffc0");
+	formInfoEntsal.add(aux, "Usuario rec.", null, "usuario_recibido");
+	
+	aux = new qx.ui.form.TextField();
+	aux.setReadOnly(true);
+	aux.setDecorator("main");
+	aux.setBackgroundColor("#ffffc0");
+	formInfoEntsal.add(aux, "Fecha rec.", null, "fecha_recibido");
+	
+	var controllerFormInfoEntsal = new qx.data.controller.Form(null, formInfoEntsal);
+	
+	var formViewEntsal = new qx.ui.form.renderer.Single(formInfoEntsal);
+	
+	
+	var gbxInfoEntsal = new qx.ui.groupbox.GroupBox();
+	gbxInfoEntsal.setLayout(new qx.ui.layout.Grow());
+	aux = new qx.ui.container.Scroll(formViewEntsal);
+	aux.setScrollbarX("off");
+	gbxInfoEntsal.add(aux);
+	composite1.add(gbxInfoEntsal, {left: "85%", top: 31, right: 0, bottom: "66.66%"});
 	
 	
 	
@@ -953,7 +999,7 @@ qx.Class.define("elpintao.comp.pedidos.pagePedidosExt",
 	//Tabla
 	
 	var tableModelDetalleExt = new qx.ui.table.model.Simple();
-	tableModelDetalleExt.setColumns(["Producto", "Color", "Capacidad", "U", "P.lis.", "P.lis.+IVA", "Cantidad", "estado_condicion"], ["producto", "color", "capacidad", "unidad", "precio_lista", "plmasiva", "cantidad", "estado_condicion"]);
+	tableModelDetalleExt.setColumns(["Producto", "Color", "Capacidad", "U", "P.lis.", "P.lis.+IVA", "Costo", "Cos.x Cant.", "Cantidad", "estado_condicion"], ["producto", "color", "capacidad", "unidad", "precio_lista", "plmasiva", "costo", "costo_total", "cantidad", "estado_condicion"]);
 	tableModelDetalleExt.setColumnSortable(0, false);
 	tableModelDetalleExt.setColumnSortable(1, false);
 	tableModelDetalleExt.setColumnSortable(2, false);
@@ -961,6 +1007,8 @@ qx.Class.define("elpintao.comp.pedidos.pagePedidosExt",
 	tableModelDetalleExt.setColumnSortable(4, false);
 	tableModelDetalleExt.setColumnSortable(5, false);
 	tableModelDetalleExt.setColumnSortable(6, false);
+	tableModelDetalleExt.setColumnSortable(7, false);
+	tableModelDetalleExt.setColumnSortable(8, false);
 	tableModelDetalleExt.addListener("dataChanged", function(e){
 		var rowCount = tableModelDetalleExt.getRowCount();
 		
@@ -988,13 +1036,15 @@ qx.Class.define("elpintao.comp.pedidos.pagePedidosExt",
       // Obtain the behavior object to manipulate
 
 		var resizeBehavior = tableColumnModelDetalleExt.getBehavior();
-		resizeBehavior.set(0, {width:"47%", minWidth:100});
-		resizeBehavior.set(1, {width:"18%", minWidth:100});
-		resizeBehavior.set(2, {width:"7%", minWidth:100});
+		resizeBehavior.set(0, {width:"46%", minWidth:100});
+		resizeBehavior.set(1, {width:"17%", minWidth:100});
+		resizeBehavior.set(2, {width:"6%", minWidth:100});
 		resizeBehavior.set(3, {width:"3%", minWidth:100});
-		resizeBehavior.set(4, {width:"7%", minWidth:100});
-		resizeBehavior.set(5, {width:"8%", minWidth:100});
-		resizeBehavior.set(6, {width:"10%", minWidth:100});
+		resizeBehavior.set(4, {width:"6%", minWidth:100});
+		resizeBehavior.set(5, {width:"6%", minWidth:100});
+		resizeBehavior.set(6, {width:"5%", minWidth:100});
+		resizeBehavior.set(7, {width:"5%", minWidth:100});
+		resizeBehavior.set(8, {width:"6%", minWidth:100});
 		
 		
 	var cellrendererString = new qx.ui.table.cellrenderer.String();

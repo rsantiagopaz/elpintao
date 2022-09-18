@@ -183,6 +183,11 @@
 	
 
 
+	var txtObserva = new qx.ui.form.TextArea();
+	txtObserva.setHeight(68)
+	this.add(txtObserva, {left: 740, top: 0, right: 0});
+	this.add(new qx.ui.basic.Label("Observaciones: "), {left: 660, top: 0});
+	
 	
 	
 	var commandHorizontal = new qx.ui.command.Command("Ctrl+Right");
@@ -732,6 +737,7 @@
 		p.id_producto = id_producto;
 		p.desc_producto = txtDesc_producto.getValue();
 		p.iva = txtIva.getValue();
+		p.observa = txtObserva.getValue();
 		
 		p.id_fabrica = model.producto.id_fabrica;
 		p.desc_fabrica = (original.desc_fabrica == txtDesc_fabrica.getValue()) ? null : txtDesc_fabrica.getValue();
@@ -846,6 +852,7 @@
 	txtDesc_fabrica.setValue(model.producto.desc_fabrica);
 	txtDesc_producto.setValue(model.producto.desc_producto);
 	txtIva.setValue(model.producto.iva);
+	txtObserva.setValue(model.producto.observa);
 
 	this.add(new qx.ui.basic.Label("Descripción: "), {left: 0, top: 50});
 	this.add(new qx.ui.basic.Label(model.producto.descrip), {left: 70, top: 50});
@@ -860,9 +867,10 @@
 	txtDesc_fabrica.setTabIndex(1);
 	txtDesc_producto.setTabIndex(2);
 	txtIva.setTabIndex(3);
-	tblDatos.setTabIndex(4);
-	tblCalculo.setTabIndex(5);
-	cgb.setTabIndex(6);
+	txtObserva.setTabIndex(4);
+	tblDatos.setTabIndex(5);
+	tblCalculo.setTabIndex(6);
+	cgb.setTabIndex(7);
 		
 		
 	},

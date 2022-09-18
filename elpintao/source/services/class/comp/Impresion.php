@@ -157,9 +157,14 @@ $rowS = $rsS->fetch_object();
 	$total['costo'] = new stdClass;
 	$total['costo']->descrip = "Costo";
 	$total['costo']->total = 0;
-	
 
-	foreach ($_SESSION["pi_gral"] as $rowD) {
+	
+	$data = $_SESSION["pi_gral"];
+	$fabrica  = array_column($data, 'fabrica');
+	$producto = array_column($data, 'producto');
+	array_multisort($fabrica, SORT_ASC, $producto, SORT_ASC, $data);
+
+	foreach ($data as $rowD) {
 		
 		$sql = "SELECT producto_item.*, producto.iva, producto.desc_producto, fabrica.desc_fabrica FROM producto_item INNER JOIN producto USING(id_producto) INNER JOIN fabrica USING(id_fabrica) WHERE producto_item.id_producto_item=" . $rowD->id_producto_item;
 		$rsProducto_item = $mysqli->query($sql);

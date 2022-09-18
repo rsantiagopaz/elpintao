@@ -1,5 +1,7 @@
 <?php
 
+session_start();
+
 require_once("Reparacion.php");
 
 $reparacion = new class_Reparacion;

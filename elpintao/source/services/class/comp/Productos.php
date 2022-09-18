@@ -287,7 +287,7 @@ class class_Productos extends class_Base_elpintao
   	
     $this->mysqli->query("START TRANSACTION");
     
-	$sql = "UPDATE producto SET desc_producto='" . $p->desc_producto . "', iva='" . $p->iva . "', serializer='" . $p->serializer . "' WHERE id_producto='" . $p->id_producto . "'";
+	$sql = "UPDATE producto SET desc_producto='" . $p->desc_producto . "', iva='" . $p->iva . "', observa='" . $p->observa . "', serializer='" . $p->serializer . "' WHERE id_producto='" . $p->id_producto . "'";
 	$this->mysqli->query($sql);
 	$this->transmitir($sql);
 	
